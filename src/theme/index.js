@@ -1,5 +1,5 @@
 import Color from 'color';
-import {Dimensions, Platform, StatusBar} from 'react-native';
+import {Dimensions, Platform, StatusBar,} from 'react-native';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
@@ -46,6 +46,7 @@ const theme={
   statusBarHeight: StatusBar.currentHeight,
   fontScale: Dimensions.get('window').fontScale,
   scale: Dimensions.get('window').scale,
+  
   paddingHorizontal: 25,
   wp: v => {
     return wp(v) * zoomScale;

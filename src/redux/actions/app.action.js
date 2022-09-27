@@ -2,7 +2,7 @@ import {createSlice} from '@reduxjs/toolkit';
 
 const initialState = {
   inProgress: false,
-  progressMessage: 'Loading',
+  progressMessage: 'Please wait',
 };
 
 const {actions, reducer} = createSlice({
@@ -14,23 +14,16 @@ const {actions, reducer} = createSlice({
     },
     showProgress: (state, action) => {
       state.inProgress = true;
-      state.progressMessage = action.payload || 'Loading';
+      state.progressMessage = action.payload || 'Please wait';
     },
     hideProgress: (state, action) => {
       state.inProgress = false;
-      state.progressMessage = 'Loading';
+      state.progressMessage = 'Please wait';
     },
   },
 });
 export const appReducer = reducer;
 export default {
   ...actions,
-  // setAsync(payload) {
-  //   return dispatch => {
-  //     return sleep(1000).then(data => {
-  //       dispatch(actions.set(payload));
-  //       return data;
-  //     });
-  //   };
-  // },
+  
 };

@@ -1,8 +1,10 @@
-import { combineReducers } from '@reduxjs/toolkit'
-import {appReducer} from './app.action'
- 
- const rootReducer = combineReducers({
-    app:appReducer
-  })
-  
-  export default rootReducer
+import {combineReducers} from '@reduxjs/toolkit';
+import {appReducer as app} from './app.action';
+import {userReducer as user} from './user.action';
+
+const rootReducer = combineReducers({
+  app,
+  user,
+});
+
+export default rootReducer;

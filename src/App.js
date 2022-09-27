@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import AppProgess from './components/AppProgess';
 import RequestPermissions from './components/RequestPermissions';
+import ToastContainer from './components/ToastContainer';
 import Navigator from './Navigator';
 import theme from './theme';
 
@@ -27,12 +28,13 @@ const App = () => {
 
           <AppProgess />
 
-          <RequestPermissions/>
+          <RequestPermissions />
 
           {/* <NoInternet /> */}
           {/* <AlertBox /> */}
         </SafeAreaView>
       </KeyboardAvoidingView>
+      <ToastContainer />
     </>
   );
 };

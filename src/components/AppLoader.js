@@ -1,7 +1,7 @@
 import React from 'react';
 import {ActivityIndicator, View} from 'react-native';
 import theme from '../theme';
-import {Text} from './Text';
+import Text from './Text';
 function AppLoader({message}) {
   return (
     <>

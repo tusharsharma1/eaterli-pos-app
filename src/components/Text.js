@@ -40,5 +40,5 @@ function TextUI({
     </TextReact>
   );
 }
-
-export const Text = memo(TextUI);
+const Text = memo(TextUI);
+export default Text
