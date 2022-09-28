@@ -2,9 +2,10 @@ import React, {useEffect, useState} from 'react';
 import {ActivityIndicator, BackHandler, Linking, View} from 'react-native';
 // import {Camera} from 'react-native-vision-camera';
 import {useSelector} from 'react-redux';
+import {requestLocationPermission} from '../helpers/location.helper';
 import theme from '../theme';
-import {Button} from './Button';
-import {Text} from './Text';
+import Button from './Button';
+import Text from './Text';
 
 function RequestPermissions() {
   const [message, setMessage] = useState('');
@@ -12,14 +13,10 @@ function RequestPermissions() {
     getPermission();
   }, []);
   const getPermission = async () => {
-    // const cameraPermission = await Camera.getCameraPermissionStatus();
-    // const microphonePermission = await Camera.getMicrophonePermissionStatus();
-   // const newCameraPermission = await Camera.requestCameraPermission();
-    // const newMicrophonePermission = await Camera.requestMicrophonePermission();
-    // console.log(newCameraPermission == 'authorized');
-    // if (newCameraPermission != 'authorized') {
-    //   setMessage('This App need Camera permission.');
-    // }
+    let granted = await requestLocationPermission().catch(console.log);
+    if (!granted) {
+      setMessage('This App need Location permission.');
+    }
   };
 
   if (!message) {
