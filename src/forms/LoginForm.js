@@ -26,7 +26,7 @@ const _initialValues = {
   password: '',
 };
 
-const LoginForm = ({email, password}) => {
+const LoginForm = ({email, password,onSubmitSuccess}) => {
   const [initialValues, setInitialValues] = useState(_initialValues);
   const dispatch = useDispatch();
   useEffect(() => {
@@ -57,6 +57,7 @@ const LoginForm = ({email, password}) => {
       console.log('password', password);
       // Store the credentials
       await Keychain.setGenericPassword(values.email, password);
+      onSubmitSuccess && onSubmitSuccess(values)
       // this.props.dispatch(UserActions.setProperty('userData', data));
       // this.props.dispatch(UserActions.setFavLocation(data.location_id));
 

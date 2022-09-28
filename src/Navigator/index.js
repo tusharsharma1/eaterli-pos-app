@@ -1,6 +1,9 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import React from 'react';
+import React, {useEffect} from 'react';
+import SplashView from '../components/SplashView';
+import {loginFromKeyChain} from '../helpers/user.helper';
+import useState from '../hooks/useState';
 import theme from '../theme';
 // import {fcmService} from '../firebase/FCMService';
 // import {loginFromKeyChain} from '../helpers/user.helper';
@@ -23,6 +26,32 @@ import theme from '../theme';
 const Stack = createNativeStackNavigator();
 
 function Navigator() {
+  const loaded = useState(false);
+  const initialRouteName = useState('Login');
+
+  useEffect(() => {
+    checkLogin();
+  }, []);
+
+  const checkLogin = async () => {
+    let r = await loginFromKeyChain();
+    console.log('loginFromKeyChain', r);
+    if (r && r.status) { 
+       initialRouteName.set('Home');
+      loaded.set(true);
+    
+
+      return;
+    }
+    initialRouteName.set('Login');
+    loaded.set(true);
+    
+  };
+
+  if (!loaded.value) {
+    return <SplashView loading />;
+  }
+// console.log('[initialRouteName]',initialRouteName)
   return (
     <NavigationContainer
       theme={{
@@ -34,23 +63,17 @@ function Navigator() {
       <Stack.Navigator
         // headerMode="screen"
         screenOptions={{headerShown: false}}
-        initialRouteName={'Home'}>
+        initialRouteName={initialRouteName.value}>
+        <Stack.Screen
+          name="Login"
+          getComponent={() => require('../Screens/Login/Login').default}
+        />
+
+        {/* /////////////////PRIVATE SCREENS///////////////////////// */}
         <Stack.Screen
           name="Home"
           getComponent={() => require('../Screens/Home/Home').default}
         />
-        {/* <Stack.Screen
-          name="ScanQR"
-          getComponent={() => require('../Screens/ScanQR/ScanQR').default}
-        /> */}
-
-        {/* /////////////////PRIVATE SCREENS///////////////////////// */}
-        {/* <Stack.Screen
-      name="Home"
-      getComponent={() => require('./HomeNavigator').default}
-    
-    />
-   */}
       </Stack.Navigator>
     </NavigationContainer>
   );

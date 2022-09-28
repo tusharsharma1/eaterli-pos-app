@@ -9,7 +9,9 @@ import TextInput from '../../components/Controls/TextInput';
 import Container from '../../components/Container';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
 import LoginForm from '../../forms/LoginForm';
-
+import useState from '../../hooks/useState';
+import * as Keychain from 'react-native-keychain';
+import userAction from '../../redux/actions/user.action';
 // import Carousel, {Pagination} from 'react-native-snap-carousel';
 // import {connect} from 'react-redux';
 // import {checkVersion} from 'react-native-check-version';
@@ -28,11 +30,22 @@ import LoginForm from '../../forms/LoginForm';
 // import theme from '../../theme';
 
 export default function Home(props) {
-  const value = useSelector(s => s.app.value);
   const dispatch = useDispatch();
-  // const {height, width, isPortrait} = useWindowDimensions();
-  const scanPress = () => {
-    //  props.navigation.navigate('ScanQR');
+  const logoutPress = async () => {
+    // await this.props.dispatch(userAction.logoutFromServer());
+
+    await Keychain.resetGenericPassword();
+
+    props.navigation.reset({
+      index: 0,
+      routes: [{name: 'Login'}],
+    });
+    // dispatch(userAction.logout());
+    // console.log(this.props.navigation.reset, this.props.dispatch,Keychain.resetGenericPassword);
+
+    // setTimeout(() => {
+
+    // }, 100);
   };
 
   return (
@@ -46,68 +59,8 @@ export default function Home(props) {
             paddingVertical: 25,
             paddingHorizontal: 25,
           }}>
-          <Image
-            style={{
-              width: 300,
-              height: 82,
-              resizeMode: 'contain',
-              // backgroundColor:'red'
-              marginBottom: 21,
-            }}
-            source={require('../../assets/images/logo.png')}
-          />
-          <View
-            style={{
-              backgroundColor: theme.colors.primaryColor,
-              width: 500,
-              height: 500,
-              borderRadius: 300,
-              // alignItems: 'center',
-
-              justifyContent: 'center',
-              paddingHorizontal: 80,
-            }}>
-            <Text
-              style={{alignSelf: 'center'}}
-              mb={35}
-              size={20}
-              bold
-              color="#ffffffaa">
-              USER LOGIN
-            </Text>
-
-            <LoginForm />
-
-            {/* <TextInput
-              textInputProps={{
-                // onChangeText: props.handleChange('card_number'),
-                //onBlur: props.handleBlur('card_number'),
-                //  value: props.values.card_number,
-                //keyboardType: 'numeric',
-                // returnKeyType: 'next',
-                placeholder: 'Email',
-                // onSubmitEditing: () => this.name_on_cardInput.focus(),
-              }}
-            />
-            <TextInput
-              textInputProps={{
-                // onChangeText: props.handleChange('card_number'),
-                //onBlur: props.handleBlur('card_number'),
-                //  value: props.values.card_number,
-                //keyboardType: 'numeric',
-                // returnKeyType: 'next',
-                placeholder: 'Password',
-                // onSubmitEditing: () => this.name_on_cardInput.focus(),
-              }}
-            />
-            <Button width={200} style={{alignSelf: 'center'}}>
-              LOGIN
-            </Button> */}
-          </View>
-
-          {/* <Text size={24} medium>
-         Eaterli
-        </Text> */}
+          <Text>Home</Text>
+          <Button onPress={logoutPress}>Logout</Button>
         </View>
       </Container>
     </>
