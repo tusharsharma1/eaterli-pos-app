@@ -5,59 +5,57 @@ import styles from '../../styles';
 import theme from '../../theme';
 import Text from '../Text';
 import ControlContainer from './ControlContainer';
-const TextInput = memo(
-  ({
-    textInputProps,
+function TextInputUI({
+  textInputProps = {},
 
-    error,
-    rightComponent,
-    text,
-    containerStyle = {},
-    textStyle = {},
-  }) => {
-    return (
-      <ControlContainer containerStyle={containerStyle}>
-        {error && error != '' ? (
-          <Text size={12} ml={4} align='center' color={theme.colors.errorColor}>
-            {error}
-          </Text>
-        ) : (
-          <></>
-        )}
+  error,
+  rightComponent,
+  text,
+  containerStyle = {},
+  textStyle = {},
+}) {
+  return (
+    <ControlContainer containerStyle={containerStyle}>
+      {error && error != '' ? (
+        <Text size={12} ml={4} align="center" color={theme.colors.errorColor}>
+          {error}
+        </Text>
+      ) : (
+        <></>
+      )}
 
-        {textInputProps.type ? (
-          <TextInputMask
-            style={[
-              styles.inputText,
-              {
-                textAlignVertical: 'center',
-                ...textStyle,
-              },
-            ]}
-            type={'custom'}
-            options={{
-              mask: '',
-            }}
-            placeholderTextColor="#BDBDBD"
-            {...textInputProps}
-          />
-        ) : (
-          <_TextInput
-            style={[
-              styles.inputText,
-              {
-                textAlignVertical: 'center',
-                ...textStyle,
-                // backgroundColor:'yellow'
-              },
-            ]}
-            placeholderTextColor="#BDBDBD"
-            {...textInputProps}
-          />
-        )}
-      </ControlContainer>
-    );
-  },
-);
-
+      {textInputProps.type ? (
+        <TextInputMask
+          style={[
+            styles.inputText,
+            {
+              textAlignVertical: 'center',
+              ...textStyle,
+            },
+          ]}
+          type={'custom'}
+          options={{
+            mask: '',
+          }}
+          placeholderTextColor="#BDBDBD"
+          {...textInputProps}
+        />
+      ) : (
+        <_TextInput
+          style={[
+            styles.inputText,
+            {
+              textAlignVertical: 'center',
+              ...textStyle,
+              // backgroundColor:'yellow'
+            },
+          ]}
+          placeholderTextColor="#BDBDBD"
+          {...textInputProps}
+        />
+      )}
+    </ControlContainer>
+  );
+}
+const TextInput = memo(TextInputUI);
 export default TextInput;

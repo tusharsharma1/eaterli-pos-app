@@ -1,8 +1,12 @@
 import React from 'react';
 import {ActivityIndicator, View} from 'react-native';
+import useWindowDimensions from '../hooks/useWindowDimensions';
 import theme from '../theme';
 import Text from './Text';
 function AppLoader({message}) {
+
+const {width,height}= useWindowDimensions()
+
   return (
     <>
       <View
@@ -10,10 +14,10 @@ function AppLoader({message}) {
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: 'rgba(0,0,0,0.6)',
+          backgroundColor: 'rgba(0,0,0,0.4)',
           position: 'absolute',
-          width: '100%',
-          height: theme.screenHeight,
+          width: width,
+          height: height,
           top: 0,
           bottom: 0,
         }}>
