@@ -3,12 +3,14 @@ import {ActivityIndicator, BackHandler, Linking, View} from 'react-native';
 // import {Camera} from 'react-native-vision-camera';
 import {useSelector} from 'react-redux';
 import {requestLocationPermission} from '../helpers/location.helper';
+import useWindowDimensions from '../hooks/useWindowDimensions';
 import theme from '../theme';
 import Button from './Button';
 import Text from './Text';
 
 function RequestPermissions() {
   const [message, setMessage] = useState('');
+  const {width, height} = useWindowDimensions();
   useEffect(() => {
     getPermission();
   }, []);
@@ -31,8 +33,8 @@ function RequestPermissions() {
         alignItems: 'center',
         backgroundColor: 'rgba(0,0,0,0.6)',
         position: 'absolute',
-        width: '100%',
-        height: theme.screenHeight,
+        width: width,
+        height: height,
         top: 0,
         bottom: 0,
       }}>
