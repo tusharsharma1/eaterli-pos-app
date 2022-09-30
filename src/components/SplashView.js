@@ -3,7 +3,7 @@ import {ActivityIndicator, Image, View} from 'react-native';
 // import BottomDots from '../components/BottomDots';
 import theme from '../theme';
 
-export default function SplashView({loading = false}) {
+export default function SplashView({loading = true}) {
   return (
     <>
       <View

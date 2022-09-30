@@ -1,4 +1,4 @@
-import React, {PureComponent} from 'react';
+import React, {PureComponent, useEffect, useState} from 'react';
 import {TouchableOpacity, Image, PixelRatio, View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import Text from '../../components/Text';
@@ -9,34 +9,109 @@ import TextInput from '../../components/Controls/TextInput';
 import Container from '../../components/Container';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
 import LoginForm from '../../forms/LoginForm';
-
-// import Carousel, {Pagination} from 'react-native-snap-carousel';
-// import {connect} from 'react-redux';
-// import {checkVersion} from 'react-native-check-version';
-// import BottomDots from '../../components/BottomDots';
-// import Container from '../../components/Container';
-// import Text from '../../components/Text';
-// import AppLoader from '../components/AppLoader';
-// import {fcmService} from '../firebase/FCMService';
-// import ImageHelper from '../helpers/image.helper';
-// import firebase from '../firebase/config';
-// import FirebaseService from '../firebase/user.firebase.service';
-// import {loginFromKeyChain} from '../helpers/user.helper';
-// import UserActions from '../redux/actions/user.action';
-// import Screens from '../screens';
-// import StorageService from '../services/storage.service';
-// import theme from '../../theme';
-
+import PinKeyBoard from '../../components/PinKeyBoard';
+import * as Keychain from 'react-native-keychain';
+import storageHelper from '../../helpers/storage.helper';
+import SplashView from '../../components/SplashView';
+import {showToast} from '../../helpers/app.helpers';
+import userAction from '../../redux/actions/user.action';
 export default function Login(props) {
   // const value = useSelector(s => s.app.value);
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   // const {height, width, isPortrait} = useWindowDimensions();
-  const onSubmit = () => {
-      props.navigation.replace('Home');
+  const [loaded, setLoaded] = useState(false);
+  const [loginTab, setLoginTab] = useState(1);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    let email = await storageHelper.getData('email');
+    console.log('email', email);
+    if (email) {
+      setLoginTab(2);
+    }
+    setLoaded(true);
   };
 
+  const onSubmit = () => {
+    props.navigation.replace('Home');
+  };
 
+  const onCompleted = async pin => {
+    let email = await storageHelper.getData('email');
+    console.log('email', email);
+    if (email) {
+      let r = await dispatch(
+        userAction.loginWithPin({
+          email: email,
+          passcode: pin,
+        }),
+      );
+      if (r && r.status) {
+        // let {onSubmit} = this.props;
+        //  helpers.resetForm();
+        // showSnackbar('Sign successfully.');
+        showToast(r.message, 'success');
+        props.navigation.replace('Home');
+        //let data = r.data;
+        // console.log('srsss', data);
+        // let password = await stringHelper.encrypt(values.password);
+        // console.log('password', password);
 
+        //  await storageHelper.storeData('email',values.email);
+
+        // Store the credentials
+        // await Keychain.setGenericPassword(values.email, password);
+        // onSubmitSuccess && onSubmitSuccess(values)
+        // this.props.dispatch(UserActions.setProperty('userData', data));
+        // this.props.dispatch(UserActions.setFavLocation(data.location_id));
+
+        // StorageService.storeData(AppConfig.STORAGE_USER_KEY, data).then((_) => {
+
+        // });
+
+        // onSubmit && onSubmit(values);
+
+        // this.props.dispatch(
+        //   AlertActions.showAlert(
+        //     AlertActions.type.ALERT,
+        //     's',
+        //     r.message,
+        //     'Success',
+        //     {
+        //       text: 'OK',
+        //       onPress: () => {
+        //         onSubmit && onSubmit(values, helpers);
+        //       },
+        //     },
+        //   ),
+        // );
+      }
+    } else {
+      showToast(
+        'Account not found! Please login with email and password',
+        'error',
+      );
+    }
+
+    //  let epassword = await stringHelper.encrypt(credentials.password);
+    // console.log('wwwwwww d',store)
+    // let r = await store.dispatch(
+    //   userAction.login(
+    //     {
+    //       email: credentials.username,
+    //       password: password,
+    //     },
+    //     false,
+    //     false,
+    //   ),
+    // );
+  };
+  if (!loaded) {
+    return <SplashView />;
+  }
   return (
     <>
       <Container scroll style={{flex: 1}}>
@@ -69,47 +144,59 @@ export default function Login(props) {
               justifyContent: 'center',
               paddingHorizontal: 80,
             }}>
-            <Text
-              style={{alignSelf: 'center'}}
-              mb={35}
-              size={20}
-              bold
-              color="#ffffffaa">
-              USER LOGIN
-            </Text>
+            {loginTab == 1 ? (
+              <>
+                <Text
+                  style={{alignSelf: 'center'}}
+                  mb={35}
+                  size={20}
+                  bold
+                  color="#ffffffaa">
+                  USER LOGIN
+                </Text>
 
-            <LoginForm onSubmitSuccess={onSubmit}/>
-
-            {/* <TextInput
-              textInputProps={{
-                // onChangeText: props.handleChange('card_number'),
-                //onBlur: props.handleBlur('card_number'),
-                //  value: props.values.card_number,
-                //keyboardType: 'numeric',
-                // returnKeyType: 'next',
-                placeholder: 'Email',
-                // onSubmitEditing: () => this.name_on_cardInput.focus(),
-              }}
-            />
-            <TextInput
-              textInputProps={{
-                // onChangeText: props.handleChange('card_number'),
-                //onBlur: props.handleBlur('card_number'),
-                //  value: props.values.card_number,
-                //keyboardType: 'numeric',
-                // returnKeyType: 'next',
-                placeholder: 'Password',
-                // onSubmitEditing: () => this.name_on_cardInput.focus(),
-              }}
-            />
-            <Button width={200} style={{alignSelf: 'center'}}>
-              LOGIN
-            </Button> */}
+                <LoginForm onSubmitSuccess={onSubmit} />
+              </>
+            ) : (
+              <>
+                <PinKeyBoard onCompleted={onCompleted} />
+              </>
+            )}
           </View>
-
-          {/* <Text size={24} medium>
-         Eaterli
-        </Text> */}
+          <View
+            style={{
+              flexDirection: 'row',
+              marginTop: 25,
+            }}>
+            <Button
+              onPress={() => {
+                setLoginTab(1);
+              }}
+              noShadow
+              backgroundColor={loginTab == 1 ? '#828282' : '#D9D9D9'}
+              color={loginTab == 1 ? '#FFFFFF' : '#8F8F8F'}
+              style={{
+                borderRadius: 0,
+                borderTopLeftRadius: 30,
+                borderBottomLeftRadius: 30,
+              }}>
+              USER LOGIN
+            </Button>
+            <Button
+              onPress={() => {
+                setLoginTab(2);
+              }}
+              noShadow
+              backgroundColor={loginTab == 2 ? '#828282' : '#D9D9D9'}
+              color={loginTab == 2 ? '#FFFFFF' : '#8F8F8F'}
+              style={{
+                borderRadius: 0,
+                borderTopRightRadius: 30,
+                borderBottomRightRadius: 30,
+              }}>
+              PIN LOGIN
+            </Button>
+          </View>
         </View>
       </Container>
     </>

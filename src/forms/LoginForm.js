@@ -10,6 +10,7 @@ import * as yup from 'yup';
 import Button from '../components/Button';
 import TextInput from '../components/Controls/TextInput';
 import {showToast} from '../helpers/app.helpers';
+import storageHelper from '../helpers/storage.helper';
 import stringHelper from '../helpers/string.helper';
 import userAction from '../redux/actions/user.action';
 // import {showToast} from '../helpers/app.helpers';
@@ -35,7 +36,7 @@ const LoginForm = ({email, password,onSubmitSuccess}) => {
 
   const loadData = () => {
     setInitialValues({
-      email: email || 'rajesh@gmail.com',
+      email: email || 'john@gmail.com',
       password: password || '12345678',
     });
   };
@@ -55,8 +56,11 @@ const LoginForm = ({email, password,onSubmitSuccess}) => {
       console.log('srsss', data);
       let password = await stringHelper.encrypt(values.password);
       console.log('password', password);
+
+      await storageHelper.storeData('email',values.email);
+
       // Store the credentials
-      await Keychain.setGenericPassword(values.email, password);
+      // await Keychain.setGenericPassword(values.email, password);
       onSubmitSuccess && onSubmitSuccess(values)
       // this.props.dispatch(UserActions.setProperty('userData', data));
       // this.props.dispatch(UserActions.setFavLocation(data.location_id));

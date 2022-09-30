@@ -46,12 +46,28 @@ export default {
     };
   },
 
-  // setAsync(payload) {
-  //   return dispatch => {
-  //     return sleep(1000).then(data => {
-  //       dispatch(actions.set(payload));
-  //       return data;
-  //     });
-  //   };
-  // },
+  loginWithPin(data, showProgress = true, showAlert = true) {
+    return (dispatch, getState) => {
+      showProgress && dispatch(appAction.showProgress());
+      return userService
+        .loginWithPin({
+          ...data,
+          device_token: getState().user.deviceToken,
+        })
+        .then(res => {
+          let returnResult = res;
+          if (res && !res.status) {
+            showAlert && apiMessageHandler(res);
+            returnResult = false;
+          }
+          if (returnResult) {
+            let data = res.data;
+            dispatch(actions.set({userData: data}));
+          }
+          showProgress && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
 };

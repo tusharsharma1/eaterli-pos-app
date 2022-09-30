@@ -1,9 +1,9 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import SplashView from '../components/SplashView';
 import {loginFromKeyChain} from '../helpers/user.helper';
-import useState from '../hooks/useState';
+
 import theme from '../theme';
 // import {fcmService} from '../firebase/FCMService';
 // import {loginFromKeyChain} from '../helpers/user.helper';
@@ -26,8 +26,8 @@ import theme from '../theme';
 const Stack = createNativeStackNavigator();
 
 function Navigator() {
-  const loaded = useState(false);
-  const initialRouteName = useState('Login');
+  const [loaded, setLoaded] = useState(false);
+  const [initialRouteName, setInitialRouteName] = useState('Login');
 
   useEffect(() => {
     checkLogin();
@@ -36,22 +36,20 @@ function Navigator() {
   const checkLogin = async () => {
     let r = await loginFromKeyChain();
     console.log('loginFromKeyChain', r);
-    if (r && r.status) { 
-       initialRouteName.set('Home');
-      loaded.set(true);
-    
+    if (r && r.status) {
+      setInitialRouteName('Home');
+      setLoaded(true);
 
       return;
     }
-    initialRouteName.set('Login');
-    loaded.set(true);
-    
+    setInitialRouteName('Login');
+    setLoaded(true);
   };
 
-  if (!loaded.value) {
-    return <SplashView loading />;
+  if (!loaded) {
+    return <SplashView />;
   }
-// console.log('[initialRouteName]',initialRouteName)
+  // console.log('[initialRouteName]',initialRouteName)
   return (
     <NavigationContainer
       theme={{
@@ -63,7 +61,7 @@ function Navigator() {
       <Stack.Navigator
         // headerMode="screen"
         screenOptions={{headerShown: false}}
-        initialRouteName={initialRouteName.value}>
+        initialRouteName={initialRouteName}>
         <Stack.Screen
           name="Login"
           getComponent={() => require('../Screens/Login/Login').default}

@@ -18,3 +18,5 @@
 -keep class com.facebook.crypto.** {
    *;
 }
+
+-keep public class com.horcrux.svg.** {*;}

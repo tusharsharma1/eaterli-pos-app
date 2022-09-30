@@ -1,4 +1,4 @@
-import React, {PureComponent, useEffect} from 'react';
+import React, {PureComponent, useEffect, useState} from 'react';
 import {TouchableOpacity, Image, PixelRatio, View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import Text from '../../components/Text';
@@ -9,7 +9,6 @@ import TextInput from '../../components/Controls/TextInput';
 import Container from '../../components/Container';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
 import LoginForm from '../../forms/LoginForm';
-import useState from '../../hooks/useState';
 import * as Keychain from 'react-native-keychain';
 import userAction from '../../redux/actions/user.action';
 import AppLoader from '../../components/AppLoader';
@@ -17,8 +16,8 @@ import {convertDistance, getPreciseDistance} from 'geolib';
 import {getCurrentPosition} from '../../helpers/location.helper';
 
 export default function Home(props) {
-  const loaded = useState(false);
-  const nearByLocation = useState(null);
+  const [loaded, setLoaded] = useState(false);
+  const [nearByLocation, setNearByLocation] = useState(null);
   const dispatch = useDispatch();
   const userData = useSelector(s => s.user.userData);
 
@@ -51,17 +50,17 @@ export default function Home(props) {
       });
       console.log(start, distL);
       distL = distL.sort((a, b) => a.dist - b.dist)[0];
-      nearByLocation.set(distL);
+      setNearByLocation(distL);
       // console.log(distL);
     }
 
-    loaded.set(true);
+    setLoaded(true);
   };
 
   const logoutPress = async () => {
     // await this.props.dispatch(userAction.logoutFromServer());
 
-    await Keychain.resetGenericPassword();
+    // await Keychain.resetGenericPassword();
 
     props.navigation.reset({
       index: 0,
@@ -75,13 +74,13 @@ export default function Home(props) {
     // }, 100);
   };
   let nearByAddress =
-    nearByLocation.value &&
+    nearByLocation &&
     [
-      nearByLocation.value.street,
-      nearByLocation.value.zip_code,
-      nearByLocation.value.city,
-      nearByLocation.value.state,
-      nearByLocation.value.country,
+      nearByLocation.street,
+      nearByLocation.zip_code,
+      nearByLocation.city,
+      nearByLocation.state,
+      nearByLocation.country,
     ]
       .filter(Boolean)
       .join(', ');
@@ -99,11 +98,11 @@ export default function Home(props) {
           <Text align="center" size={30} bold mb={20}>
             Welcome To Eaterli
           </Text>
-          {loaded.value ? (
+          {loaded ? (
             <>
-              {!!nearByLocation.value && (
+              {!!nearByLocation && (
                 <Text align="center" size={20} medium>
-                  It looks like you're at {nearByLocation.value.name}{' '}
+                  It looks like you're at {nearByLocation.name}{' '}
                   {nearByAddress ? <>({nearByAddress})</> : ''}
                 </Text>
               )}
@@ -126,7 +125,7 @@ export default function Home(props) {
                 >
                   Change Location
                 </Button>
-                {!!nearByLocation.value && (
+                {!!nearByLocation && (
                   <Button
                     // style={{}}
                     backgroundColor={theme.colors.primaryColor}
@@ -135,7 +134,7 @@ export default function Home(props) {
                     // color="#212121"
                     // onPress={logoutPress}
                   >
-                    Proceed with {nearByLocation.value.name}
+                    Proceed with {nearByLocation.name}
                   </Button>
                 )}
               </View>
