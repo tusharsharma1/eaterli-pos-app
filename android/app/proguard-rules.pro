@@ -20,3 +20,5 @@
 }
 
 -keep public class com.horcrux.svg.** {*;}
+
+# -optimizations !code/*/*,!method/*/*

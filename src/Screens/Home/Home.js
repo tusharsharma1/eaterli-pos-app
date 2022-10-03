@@ -14,7 +14,7 @@ import userAction from '../../redux/actions/user.action';
 import AppLoader from '../../components/AppLoader';
 import {convertDistance, getPreciseDistance} from 'geolib';
 import {getCurrentPosition} from '../../helpers/location.helper';
-
+import ProgressImage from '../../components/react-native-image-progress';
 export default function Home(props) {
   const [loaded, setLoaded] = useState(false);
   const [nearByLocation, setNearByLocation] = useState(null);
@@ -84,6 +84,9 @@ export default function Home(props) {
     ]
       .filter(Boolean)
       .join(', ');
+
+  let name = userData.restaurant_theme?.name ?? userData.restaurant?.name ?? '';
+  let logo = userData.restaurant_theme?.logo ?? '';
   return (
     <>
       <Container style={{flex: 1}}>
@@ -91,7 +94,7 @@ export default function Home(props) {
           style={{
             flex: 1,
             // backgroundColor: 'red',
-            // alignItems: 'center',
+            alignItems: 'center',
             paddingVertical: 25,
             paddingHorizontal: 25,
           }}>
@@ -106,6 +109,77 @@ export default function Home(props) {
                   {nearByAddress ? <>({nearByAddress})</> : ''}
                 </Text>
               )}
+              <Text
+                align="center"
+                color={theme.colors.secondaryColor}
+                size={38}
+                mb={18}
+                mt={35}
+                bold>
+                {name}
+              </Text>
+              {!!logo && (
+                <ProgressImage
+                  source={{uri: logo}}
+                  resizeMode="contain"
+                  style={{
+                    width: 350,
+                    height: 260,
+                    // borderRadius: theme.wp(26) / 2,
+                    // borderWidth: 1,
+                    //borderColor: theme.colors.borderColor,
+
+                    //  backgroundColor:'red'
+                  }}
+                  imageStyle={{
+                    width: '100%',
+                    height: '100%',
+                    // width: 60,
+                    resizeMode: 'contain',
+                    // height: theme.screenWidth / numColumns - 100,
+                    // height:
+                    //   theme.screenWidth / numColumns -
+                    //   2 * theme.wp(2) * numColumns -
+                    //   theme.hp(5),
+                    // backgroundColor: 'red',
+                    // - (vheight * (10 / 100)), // theme.hp(10),
+                    flex: 1,
+                  }}
+                  // renderIndicator={(progress, inde) => {
+                  //   console.log(progress, inde);
+                  //   return (
+                  //     <>
+                  //       <Text
+                  //         style={{
+                  //           fontSize: 8,
+                  //           fontFamily: theme.fonts.regular,
+                  //           width: '100%',
+                  //           height: '100%',
+                  //        }}>
+                  //         Loading...{progress}
+                  //       </Text>
+                  //     </>
+                  //   );
+                  // }}
+                />
+              )}
+              {/* &&<Image
+                style={{
+                  width: 350,
+                  // height: 260,
+                  resizeMode: 'contain',
+                  // backgroundColor: 'red',
+                  marginBottom: 21,
+                  marginTop: 21,
+                }}
+                source={{
+                  uri: logo,
+                  width: 350,
+                  height: 260,
+                }}
+              />
+} */}
+
               <View
                 style={{
                   flexDirection: 'row',
