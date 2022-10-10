@@ -1,4 +1,4 @@
-import AppConfig from 'react-native-config';
+import AppConfig from '../config';
 import store from '../redux/store';
 const css = {color: 'yellow', background: 'red'};
 function getStyle(conf = css) {

@@ -6465,11 +6465,6 @@
     "jscodeshift" "^0.13.1"
     "nullthrows" "^1.1.1"
 
-"react-native-config@^1.4.6":
-  "integrity" "sha512-cSLdOfva2IPCxh6HjHN1IDVW9ratAvNnnAUx6ar2Byvr8KQU7++ysdFYPaoNVuJURuYoAKgvjab8ZcnwGZIO6Q=="
-  "resolved" "https://registry.npmmirror.com/react-native-config/-/react-native-config-1.4.6.tgz"
-  "version" "1.4.6"
-
 "react-native-des-cbc@^1.0.9":
   "integrity" "sha512-U/Zb0MgHup4jlzQ7EjwpyNdsvw0BPJ2zGUKlINBTiMJEfsIfkdgzJDsXpz9zpLQYviwz29CIegGV+RqcoU+TxA=="
   "resolved" "https://registry.npmmirror.com/react-native-des-cbc/-/react-native-des-cbc-1.0.9.tgz"

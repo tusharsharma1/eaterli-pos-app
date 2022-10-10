@@ -21,7 +21,6 @@
     "geolib": "^3.3.3",
     "react": "18.1.0",
     "react-native": "0.70.1",
-    "react-native-config": "^1.4.6",
     "react-native-des-cbc": "^1.0.9",
     "react-native-extra-dimensions-android": "^1.2.5",
     "react-native-geolocation-service": "^5.3.1",
