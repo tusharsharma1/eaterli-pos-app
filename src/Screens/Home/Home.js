@@ -15,6 +15,9 @@ import AppLoader from '../../components/AppLoader';
 import {convertDistance, getPreciseDistance} from 'geolib';
 import {getCurrentPosition} from '../../helpers/location.helper';
 import ProgressImage from '../../components/react-native-image-progress';
+import {PRODUCT_MENU_TYPE} from '../../constants/order.constant';
+import {resetReduxState} from '../../redux/reducers';
+import orderAction from '../../redux/actions/order.action';
 export default function Home(props) {
   const [loaded, setLoaded] = useState(false);
   const [nearByLocation, setNearByLocation] = useState(null);
@@ -50,8 +53,17 @@ export default function Home(props) {
       });
       console.log(start, distL);
       distL = distL.sort((a, b) => a.dist - b.dist)[0];
+      dispatch(
+        userAction.set({
+          selectedLocation: 9, //distL.id
+        }),
+      );
       setNearByLocation(distL);
       // console.log(distL);
+
+      await dispatch(
+        userAction.getMobileBuilder(userData.restaurant.id, false),
+      );
     }
 
     setLoaded(true);
@@ -66,6 +78,8 @@ export default function Home(props) {
       index: 0,
       routes: [{name: 'Login'}],
     });
+
+    dispatch(resetReduxState());
     // dispatch(userAction.logout());
     // console.log(this.props.navigation.reset, this.props.dispatch,Keychain.resetGenericPassword);
 
@@ -163,22 +177,50 @@ export default function Home(props) {
                   // }}
                 />
               )}
-              {/* &&<Image
+
+              <View
                 style={{
-                  width: 350,
-                  // height: 260,
-                  resizeMode: 'contain',
-                  // backgroundColor: 'red',
-                  marginBottom: 21,
-                  marginTop: 21,
-                }}
-                source={{
-                  uri: logo,
-                  width: 350,
-                  height: 260,
-                }}
-              />
-} */}
+                  // width:150,
+                  // height:100,
+                  // backgroundColor:'red',
+                  marginTop: 20,
+                  flexDirection: 'row',
+                }}>
+                <Button
+                  // style={{}}
+                  // backgroundColor="#00000000"
+                  noShadow
+                  // bold
+                  // color="#212121"
+                  mr={10}
+                  onPress={() => {
+                    dispatch(
+                      orderAction.set({
+                        productMenuType: PRODUCT_MENU_TYPE.catering.id,
+                      }),
+                    );
+                    props.navigation.navigate('ProductMenu');
+                  }}>
+                  Catering Menu
+                </Button>
+                <Button
+                  // style={{}}
+                  // backgroundColor="#00000000"
+                  noShadow
+                  // bold
+                  // color="#212121"
+                  // mr={10}
+                  onPress={() => {
+                    dispatch(
+                      orderAction.set({
+                        productMenuType: PRODUCT_MENU_TYPE.restuarant.id,
+                      }),
+                    );
+                    props.navigation.navigate('ProductMenu');
+                  }}>
+                  Restaurant Menu
+                </Button>
+              </View>
 
               <View
                 style={{

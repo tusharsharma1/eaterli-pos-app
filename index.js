@@ -5,7 +5,7 @@ import {Provider} from 'react-redux';
 import {name as appName} from './app.json';
 import App from './src/App';
 import store from './src/redux/store';
-
+React.store = store;
 function MainApp() {
   return (
     <Provider store={store}>

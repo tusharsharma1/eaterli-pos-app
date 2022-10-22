@@ -36,8 +36,8 @@ const LoginForm = ({email, password,onSubmitSuccess}) => {
 
   const loadData = () => {
     setInitialValues({
-      email: email || 'john@gmail.com',
-      password: password || '12345678',
+      email: email || '',
+      password: password || '',
     });
   };
 
