@@ -3,7 +3,6 @@ import React, {memo} from 'react';
 import {TouchableOpacity, View} from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useSelector} from 'react-redux';
-import {PRODUCT_MENU_TYPE} from '../constants/order.constant';
 
 // import BackIcon from '../assets/BackIcon';
 import Text from './Text';
@@ -14,7 +13,7 @@ function _Header({
   back = false,
   absolute = false,
   size = 18,
-  hideCart = false,
+  // hideCart = false,
   // color = '#212121',
   // backgroundColor = '#fff',
 }) {

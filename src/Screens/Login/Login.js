@@ -1,20 +1,16 @@
-import React, {PureComponent, useEffect, useState} from 'react';
-import {TouchableOpacity, Image, PixelRatio, View} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import Text from '../../components/Text';
+import React, {useEffect, useState} from 'react';
+import {Image, View} from 'react-native';
+import {useDispatch} from 'react-redux';
 import Button from '../../components/Button';
-import appAction from '../../redux/actions/app.action';
-import theme from '../../theme';
-import TextInput from '../../components/Controls/TextInput';
 import Container from '../../components/Container';
-import useWindowDimensions from '../../hooks/useWindowDimensions';
-import LoginForm from '../../forms/LoginForm';
 import PinKeyBoard from '../../components/PinKeyBoard';
-import * as Keychain from 'react-native-keychain';
-import storageHelper from '../../helpers/storage.helper';
 import SplashView from '../../components/SplashView';
+import Text from '../../components/Text';
+import LoginForm from '../../forms/LoginForm';
 import {showToast} from '../../helpers/app.helpers';
+import storageHelper from '../../helpers/storage.helper';
 import userAction from '../../redux/actions/user.action';
+import theme from '../../theme';
 export default function Login(props) {
   // const value = useSelector(s => s.app.value);
   const dispatch = useDispatch();

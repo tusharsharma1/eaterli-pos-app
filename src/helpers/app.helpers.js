@@ -1,6 +1,4 @@
 //import Snackbar from 'react-native-snackbar';
-import React from 'react';
-import {Text} from 'react-native';
 import Toast from 'react-native-toast-message';
 import appAction from '../redux/actions/app.action';
 // import {ToastAndroid } from 'react-native'

@@ -41,4 +41,4 @@ function TextUI({
   );
 }
 const Text = memo(TextUI);
-export default Text
+export default Text;

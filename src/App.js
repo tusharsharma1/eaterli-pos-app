@@ -24,7 +24,6 @@ const App = () => {
         behavior={Platform.OS == 'ios' ? 'padding' : null}
         style={{flex: 1}}>
         <SafeAreaView style={{flex: 1}}>
-          
           <Navigator />
 
           <AppProgess />

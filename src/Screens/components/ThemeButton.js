@@ -1,5 +1,5 @@
-import React, { memo } from 'react';
-import { useSelector } from 'react-redux';
+import React, {memo} from 'react';
+import {useSelector} from 'react-redux';
 import Button from '../../components/Button';
 
 // import BackIcon from '../assets/BackIcon';

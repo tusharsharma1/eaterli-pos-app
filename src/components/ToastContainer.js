@@ -1,8 +1,6 @@
-import React, {memo, useRef} from 'react';
-import {Text as TextReact, TouchableOpacity} from 'react-native';
-import theme, {getFont} from '../theme';
-import Text from './Text';
+import React, {memo} from 'react';
 import Toast, {BaseToast} from 'react-native-toast-message';
+import theme from '../theme';
 
 const ToastContainer = memo(({}) => {
   return <Toast config={toastConfig} />;

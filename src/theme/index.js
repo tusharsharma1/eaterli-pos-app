@@ -1,5 +1,5 @@
 import Color from 'color';
-import {Dimensions, Platform, StatusBar,} from 'react-native';
+import {Dimensions, Platform, StatusBar} from 'react-native';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
@@ -14,15 +14,13 @@ const themeMainColor = '#00ABA5'; //#1630c7
 
 const themeSecondaryColor = '#A92A40';
 const zoomScale = 1;
-const theme={
+const theme = {
   fonts: {
-   
     light: Platform.OS === 'ios' ? 'Inter-Light' : 'Inter-Light',
     regular: Platform.OS === 'ios' ? 'Inter-Regular' : 'Inter-Regular',
     medium: Platform.OS === 'ios' ? 'Inter-Medium' : 'Inter-Medium',
     semibold: Platform.OS === 'ios' ? 'Inter-SemiBold' : 'Inter-SemiBold',
     bold: Platform.OS === 'ios' ? 'Inter-Bold' : 'Inter-Bold',
-   
   },
   colors: {
     primaryColor: themeMainColor,
@@ -39,14 +37,13 @@ const theme={
     errorColor: '#e01d1d',
     rowColor: '#fcfcfc',
     borderColor: '#BDBDBD',
-    
   },
   screenWidth: Dimensions.get('window').width,
   screenHeight: deviceHeight,
   statusBarHeight: StatusBar.currentHeight,
   fontScale: Dimensions.get('window').fontScale,
   scale: Dimensions.get('window').scale,
-  
+
   paddingHorizontal: 25,
   wp: v => {
     return wp(v) * zoomScale;
@@ -54,10 +51,10 @@ const theme={
   hp: v => {
     return hp(v) * zoomScale;
   },
-}
+};
 export default theme;
 
-export function  getFont  (data)  {
+export function getFont(data) {
   let font = '';
   for (const key in data) {
     if (data[key]) {
@@ -67,4 +64,4 @@ export function  getFont  (data)  {
   }
 
   return font ? font : theme.fonts.regular;
-};
+}

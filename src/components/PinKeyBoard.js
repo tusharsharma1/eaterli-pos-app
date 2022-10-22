@@ -4,13 +4,13 @@ import theme, {getFont} from '../theme';
 import Text from './Text';
 import CloseIcon from '../assets/close-icon.svg';
 import BSIcon from '../assets/backspace.svg';
-function _PinKeyBoard({length = 4,onCompleted}) {
+function _PinKeyBoard({length = 4, onCompleted}) {
   const [pin, setPin] = useState([]);
 
   useEffect(() => {
     if (pin.length >= length) {
       console.log(pin);
-      onCompleted && onCompleted(pin.join(''))
+      onCompleted && onCompleted(pin.join(''));
     }
   }, [pin]);
 

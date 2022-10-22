@@ -20,7 +20,7 @@ export default StyleSheet.create({
     paddingVertical: 0,
     // paddingHorizontal: 10,
     // backgroundColor: "red",
-    textAlign: "center",
+    textAlign: 'center',
     // height:50,
     // borderRadius:50,
   },

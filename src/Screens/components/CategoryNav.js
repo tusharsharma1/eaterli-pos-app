@@ -54,7 +54,7 @@ function _CategoryNav() {
                   //   : `rgba(${c.red()},${c.green()},${c.blue()},${0.6})`,
                 }}
                 onPress={() => {
-                  if (PRODUCT_MENU_TYPE.restuarant.id==productMenuType) {
+                  if (PRODUCT_MENU_TYPE.restuarant.id == productMenuType) {
                     dispatch(userAction.set({selectedCategory: id}));
                   } else {
                     dispatch(userAction.set({selectedCategory1: id}));

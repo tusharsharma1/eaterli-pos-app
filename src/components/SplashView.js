@@ -1,4 +1,4 @@
-import React, {PureComponent} from 'react';
+import React from 'react';
 import {ActivityIndicator, Image, View} from 'react-native';
 // import BottomDots from '../components/BottomDots';
 import theme from '../theme';

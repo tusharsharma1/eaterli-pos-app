@@ -26,18 +26,18 @@ function useProducts() {
     productMenuType == PRODUCT_MENU_TYPE.restuarant.id
       ? categoriesSortable
       : categoriesSortable1;
-      let _selectedCategory =
-      productMenuType == PRODUCT_MENU_TYPE.restuarant.id
-        ? selectedCategory
-        : selectedCategory1;
+  let _selectedCategory =
+    productMenuType == PRODUCT_MENU_TYPE.restuarant.id
+      ? selectedCategory
+      : selectedCategory1;
 
   return {
     categories: _categories,
     subCategories: _subCategories,
     categoriesSortable: _categoriesSortable,
     isCatering,
-    selectedCategory:_selectedCategory,
-    productMenuType
+    selectedCategory: _selectedCategory,
+    productMenuType,
   };
 }
 

@@ -3,7 +3,6 @@ import React, {memo} from 'react';
 import {View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {dummyImage} from '../../assets';
-import Button from '../../components/Button';
 import ProgressImage from '../../components/react-native-image-progress';
 import Text from '../../components/Text';
 import {OUT_OF_STOCK_MESSAGE} from '../../constants/order.constant';
@@ -11,15 +10,13 @@ import {showToast} from '../../helpers/app.helpers';
 import {addToCart, getPrice} from '../../helpers/order.helper';
 import useProducts from '../../hooks/useProducts';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
-import ThemeButton from './ThemeButton';
 
 // import BackIcon from '../assets/BackIcon';
 
 function _MenuItem({}) {
   const dispatch = useDispatch();
   let {width} = useWindowDimensions();
-  let {categories, subCategories, isCatering,selectedCategory} = useProducts();
-
+  let {categories, subCategories, isCatering, selectedCategory} = useProducts();
 
   const mobileBuilder = useSelector(s => s.user.mobileBuilder);
 
@@ -52,11 +49,11 @@ function _MenuItem({}) {
   } = mobileBuilder.layout;
   let text_color = Color(product_text);
   const BoxItem = ({data, price, cutPrice}) => {
-    let boxwidth=width >= 768 ? width / 4 - 10 - 5 : width / 2 - 10 - 10 
+    let boxwidth = width >= 768 ? width / 4 - 10 - 5 : width / 2 - 10 - 10;
     return (
       <View
         style={{
-          width:boxwidth , 
+          width: boxwidth,
           backgroundColor: product_bg,
           marginBottom: 10,
           marginHorizontal: 5,
@@ -87,8 +84,8 @@ function _MenuItem({}) {
           }
           style={{
             // width: '100%',
-            height: boxwidth-30,
-          
+            height: boxwidth - 30,
+
             backgroundColor: Color(product_bg).darken(0.2).toString(),
 
             // borderRadius: theme.wp(26) / 2,
@@ -175,7 +172,7 @@ function _MenuItem({}) {
     return (
       <View
         style={{
-          width: width >= 768 ? width / 2 - 10 - 10 : width - 10 - 10 - 10 ,
+          width: width >= 768 ? width / 2 - 10 - 10 : width - 10 - 10 - 10,
           backgroundColor: product_bg,
           marginBottom: 10,
           marginHorizontal: 5,
@@ -202,7 +199,7 @@ function _MenuItem({}) {
           source={
             data.item_image
               ? {
-                  uri: data.item_image
+                  uri: data.item_image,
                   // + '?t=' + new Date().getTime()
                 }
               : dummyImage

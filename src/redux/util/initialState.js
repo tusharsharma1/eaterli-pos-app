@@ -18,9 +18,9 @@ const initialState = {
     subCategories1: {},
 
     selectedCategory: '',
-    selectedCategory1:'',
+    selectedCategory1: '',
 
-    selectedLocation:'',
+    selectedLocation: '',
 
     mobileBuilder: {
       layout: {
@@ -47,7 +47,7 @@ const initialState = {
   order: {
     cart: {},
     productMenuType: PRODUCT_MENU_TYPE.restuarant.id,
-    orderType:'pickup'
+    orderType: 'pickup',
   },
 };
 export default initialState;

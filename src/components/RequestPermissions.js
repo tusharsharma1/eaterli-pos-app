@@ -1,10 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, BackHandler, Linking, View} from 'react-native';
+import {BackHandler, Linking, View} from 'react-native';
 // import {Camera} from 'react-native-vision-camera';
-import {useSelector} from 'react-redux';
 import {requestLocationPermission} from '../helpers/location.helper';
 import useWindowDimensions from '../hooks/useWindowDimensions';
-import theme from '../theme';
 import Button from './Button';
 import Text from './Text';
 

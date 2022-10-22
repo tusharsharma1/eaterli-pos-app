@@ -12,7 +12,7 @@ export default {
       applyToken: false,
     });
   },
- 
+
   getMenus(location_id) {
     return callApi('GET', `/api/restaurants/locations/${location_id}`);
   },

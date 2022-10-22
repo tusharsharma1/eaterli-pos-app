@@ -15,8 +15,8 @@ const useWindowDimensions = () => {
 
   return {
     ...info,
-    isPortrait:info.width<info.height
-  }
+    isPortrait: info.width < info.height,
+  };
 };
 
-export default useWindowDimensions
+export default useWindowDimensions;

@@ -4,8 +4,7 @@ import useWindowDimensions from '../hooks/useWindowDimensions';
 import theme from '../theme';
 import Text from './Text';
 function AppLoader({message}) {
-
-const {width,height}= useWindowDimensions()
+  const {width, height} = useWindowDimensions();
 
   return (
     <>

@@ -30,7 +30,6 @@ export const createImageProgress = ImageComponent =>
       style: PropTypes.any,
       imageStyle: PropTypes.object,
       threshold: PropTypes.number,
-      
     };
 
     static defaultProps = {
@@ -206,7 +205,7 @@ export const createImageProgress = ImageComponent =>
               progress={progress}
               indeterminateAnimationDuration={10000}
               indeterminate={!loading || !progress}
-              color={ color?color:theme.colors.secondaryColor}
+              color={color ? color : theme.colors.secondaryColor}
               {...indicatorProps}
             />
           );
