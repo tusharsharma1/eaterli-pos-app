@@ -50,7 +50,7 @@ export default function Home(props) {
       distL = distL.sort((a, b) => a.dist - b.dist)[0];
       dispatch(
         userAction.set({
-          selectedLocation: 9, //distL.id
+          selectedLocation: distL.id
         }),
       );
       setNearByLocation(distL);

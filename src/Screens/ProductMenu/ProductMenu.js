@@ -39,7 +39,7 @@ export default function Home({navigation, route}) {
 
     // let r = await dispatch(userAction.getMenus(values));
 
-    setLoaded(true);
+    // setLoaded(true);
   };
   //  console.log(route.params)
   let {menu_bg} = mobileBuilder.layout;
