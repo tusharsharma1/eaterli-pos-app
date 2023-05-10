@@ -4,11 +4,22 @@ import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
 import android.os.Bundle;
+//import android.os.PersistableBundle;
+
+//import androidx.annotation.Nullable;
+
+//import com.hcd.hcdpos.cashbox.Cashbox;
 public class MainActivity extends ReactActivity {
 @Override
 protected void onCreate(Bundle savedInstanceState) {
   super.onCreate(null);
 }
+
+//  @Override
+//  public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
+//    super.onCreate(savedInstanceState, persistentState);
+//    Cashbox.doOpenCashBox();
+//  }
 
   /**
    * Returns the name of the main component registered from JavaScript. This is used to schedule

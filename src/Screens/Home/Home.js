@@ -1,6 +1,6 @@
 import {convertDistance, getPreciseDistance} from 'geolib';
 import React, {useEffect, useState} from 'react';
-import {View} from 'react-native';
+import {NativeModules, View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import AppLoader from '../../components/AppLoader';
 import Button from '../../components/Button';
@@ -13,8 +13,9 @@ import orderAction from '../../redux/actions/order.action';
 import userAction from '../../redux/actions/user.action';
 import {resetReduxState} from '../../redux/reducers';
 import theme from '../../theme';
+import POSModule from '../../helpers/pos.helper';
 export default function Home(props) {
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(true);
   const [nearByLocation, setNearByLocation] = useState(null);
   const dispatch = useDispatch();
   const userData = useSelector(s => s.user.userData);
@@ -28,7 +29,7 @@ export default function Home(props) {
       let {locations} = userData;
       let start = {latitude: 0, longitude: 0};
       let l = await getCurrentPosition();
-
+      console.log('distL l',l);
       if (l && l.position) {
         start = {
           latitude: l.position.coords.latitude,
@@ -46,8 +47,9 @@ export default function Home(props) {
         // console.log(end, dist, miDist);
         return {dist: miDist, ...r};
       });
-      console.log(start, distL);
+     
       distL = distL.sort((a, b) => a.dist - b.dist)[0];
+      console.log('distL',start, distL);
       dispatch(
         userAction.set({
           selectedLocation: distL.id
@@ -61,7 +63,7 @@ export default function Home(props) {
       );
     }
 
-    setLoaded(true);
+    // setLoaded(true);
   };
 
   const logoutPress = async () => {
@@ -216,6 +218,44 @@ export default function Home(props) {
                   Restaurant Menu
                 </Button>
               </View>
+              <View
+                style={{
+                  // width:150,
+                  // height:100,
+                  // backgroundColor:'red',
+                  marginTop: 10,
+                  flexDirection: 'row',
+                }}>
+                <Button
+                  // style={{}}
+                  // backgroundColor="#00000000"
+                  noShadow
+                  // bold
+                  // color="#212121"
+                  mr={10}
+                  onPress={() => {
+                   POSModule.doOpenCashBox();
+                  }}>
+                  Open Cashbox
+                </Button>
+                <Button
+                  // style={{}}
+                  // backgroundColor="#00000000"
+                  noShadow
+                  // bold
+                  // color="#212121"
+                  // mr={10}
+                  onPress={() => {
+                    POSModule.testPrint({id:22,name:"aakash",active:true},(res)=>{
+                      console.log('[testPrint]',res)
+                      alert(JSON.stringify(res))
+                    });
+                    
+                  }}>
+                 Test Print
+                </Button>
+              </View>
+
 
               <View
                 style={{
