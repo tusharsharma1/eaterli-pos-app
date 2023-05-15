@@ -1,4 +1,4 @@
-import React, {memo} from 'react';
+import React, {memo, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import Button from '../../components/Button';
 import {TouchableOpacity, View} from 'react-native';
@@ -7,6 +7,7 @@ import theme from '../../theme';
 import {
   getAddonsTotal,
   getCartItem,
+  getCartProducts,
   getGrandTotal,
   getPrice,
 } from '../../helpers/order.helper';
@@ -15,6 +16,9 @@ import orderAction from '../../redux/actions/order.action';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import alertAction from '../../redux/actions/alert.action';
 import {ALERT_ICON_TYPE, ALERT_TYPE} from '../../constants/alert.constant';
+import ModalContainer from '../../components/ModalContainer';
+import {PAYMENT_METHOD} from '../../constants/order.constant';
+import CashPaymentForm from '../../forms/CashPaymentForm';
 
 // import BackIcon from '../assets/BackIcon';
 
@@ -306,7 +310,24 @@ function CartRow({id}) {
 
 function Footer({}) {
   const dispatch = useDispatch();
+
+  const [showModal, setShowModal] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('');
   const cart = useSelector(s => s.order.cart);
+  const selectedLocation = useSelector(s => s.user.selectedLocation);
+  const userData = useSelector(s => s.user.userData);
+  useEffect(() => {
+    if (!showModal) {
+      setPaymentMethod('');
+    }
+  }, [showModal]);
+  const toggleModal = () => {
+    setShowModal(!showModal);
+  };
+  const onPayPress = () => {
+    toggleModal();
+  };
+
   const onDeletePress = () => {
     dispatch(
       alertAction.showAlert({
@@ -322,30 +343,140 @@ function Footer({}) {
     );
   };
   let total = getGrandTotal();
-  return (
-    <View
-      style={{
-        // backgroundColor: theme.colors.primaryColor,
-        // height: 50,
-        paddingHorizontal: 10,
-        justifyContent: 'center',
-        paddingVertical: 10,
-      }}>
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
-        <Button
-          onPress={onDeletePress}
-          noShadow
-          backgroundColor={theme.colors.dangerColor}
-          mr={5}>
-          Delete
-        </Button>
-        <Button
-          backgroundColor={theme.colors.primaryColor}
-          noShadow
-          style={{flex: 1}}>
-          Pay - ${parseFloat(total).toFixed(2)}
-        </Button>
+  const onCashSubmitSuccess = values => {
+    let products = getCartProducts();
+    let body = {
+      products: products,
+      restaurant_location_id: selectedLocation,
+      restaurant_id: userData.restaurant.id,
+      total,
+      received_amount:values.received_amount
+    };
+    
+     console.log(body);
+  };
+  const renderView = () => {
+    if (paymentMethod == PAYMENT_METHOD.cash.id) {
+      return (
+        <View
+          style={{
+            width: '80%',
+            alignSelf: 'center',
+            paddingVertical: 25,
+            // backgroundColor: 'red',
+          }}>
+          <CashPaymentForm
+            total={total}
+            onSubmitSuccess={onCashSubmitSuccess}
+          />
+        </View>
+      );
+    }
+
+    return (
+      <View
+        style={{
+          width: '60%',
+          alignSelf: 'center',
+          paddingVertical: 40,
+          // backgroundColor: 'red',
+        }}>
+        <Text mb={10} bold size={22}>
+          Select Payment Method
+        </Text>
+        <View
+          style={{
+            flexDirection: 'row',
+          }}>
+          <PayMethodButton
+            text="Cash"
+            onPress={() => {
+              setPaymentMethod(PAYMENT_METHOD.cash.id);
+            }}
+          />
+          <PayMethodButton
+            text="Card"
+            onPress={() => {
+              setPaymentMethod(PAYMENT_METHOD.card.id);
+            }}
+          />
+        </View>
       </View>
-    </View>
+    );
+  };
+
+  return (
+    <>
+      <View
+        style={{
+          // backgroundColor: theme.colors.primaryColor,
+          // height: 50,
+          paddingHorizontal: 10,
+          justifyContent: 'center',
+          paddingVertical: 10,
+        }}>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <Button
+            onPress={onDeletePress}
+            noShadow
+            backgroundColor={theme.colors.dangerColor}
+            mr={5}>
+            Delete
+          </Button>
+          <Button
+            onPress={onPayPress}
+            backgroundColor={theme.colors.primaryColor}
+            noShadow
+            style={{flex: 1}}>
+            Pay - ${parseFloat(total).toFixed(2)}
+          </Button>
+        </View>
+      </View>
+      <ModalContainer
+        // hideTitle
+        center
+        // noscroll
+        onRequestClose={toggleModal}
+        visible={showModal}
+        title={'Pay'}
+        width={720}
+        // height={theme.hp(60)}
+        // borderRadius={25}
+        // renderFooter={() => {
+        //   return (
+        //     <View
+        //       style={{
+        //         alignItems: 'flex-end',
+        //       }}>
+        //       <Button ph={30} size={14} onPress={addToCartPress}>
+        //         Add To Cart $ {parseFloat(totalPrice || 0).toFixed(2)}
+        //       </Button>
+        //     </View>
+        //   );
+        // }}
+      >
+        {renderView()}
+      </ModalContainer>
+    </>
+  );
+}
+
+function PayMethodButton({text, onPress}) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      style={{
+        flex: 1,
+        height: 100,
+        backgroundColor: '#eee',
+        margin: 3,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 10,
+      }}>
+      <Text semibold size={18}>
+        {text}
+      </Text>
+    </TouchableOpacity>
   );
 }

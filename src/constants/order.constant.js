@@ -4,3 +4,8 @@ export const PRODUCT_MENU_TYPE = {
   catering: {id: 'catering'},
   restuarant: {id: 'restuarant'},
 };
+
+export const PAYMENT_METHOD = {
+  card: {id: 'card'},
+  cash: {id: 'cash'},
+};

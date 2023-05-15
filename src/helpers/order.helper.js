@@ -66,33 +66,7 @@ export function getPrice(itemId, sizeIds = {}) {
   // console.log("[variants]", sizeIds, sizeData);
   return {price, cutPrice, sizeIds, sizeData};
 }
-// export function getPrice(itemId, sizeId, isCatering = false) {
-//   let {store} = React;
-//   let {subCategories, subCategories1} = store.getState().user;
-//   let data = isCatering ? subCategories1[itemId] : subCategories[itemId];
-//   if (!data) {
-//     return {};
-//   }
-//   if (data.out_of_stock == '1') return {};
-//   let price = data.item_price || 0;
-//   let cutPrice = '';
-//   let discount = data.discount;
-//   let sizeData = null;
-//   sizeId = sizeId || data.set_default_price;
 
-//   if (data.menu_item_variations && data.menu_item_variations.length) {
-//     let defaultp = data.menu_item_variations.find(m => m.id == sizeId);
-//     if (defaultp) {
-//       price = defaultp.pivot.price;
-//       sizeData = defaultp;
-//     }
-//   }
-//   if (discount) {
-//     cutPrice = price;
-//     price = price - price * (discount / 100);
-//   }
-//   return {price, cutPrice, sizeId, sizeData};
-// }
 
 export function addToCart(
   itemid,
@@ -194,7 +168,48 @@ export function getGrandTotal() {
 
   return total;
 }
+export function getCartProducts() {
+  let state = React.store.getState();
 
+  let { subCategories } = state.user;
+  let { cart } = state.order;
+
+  let products = Object.keys(cart)
+    .map((id, i) => {
+      let cartItem = cart[id];
+
+      let [itemId, sizeId, addon, productMenuType] = id.split("-");
+      let itemData = subCategories[itemId];
+
+      if (!itemData) {
+        return false;
+      }
+
+      if (itemData.out_of_stock == "1") return false;
+
+      let { price, sizeData } = getPrice(
+        itemId,
+        JSON.parse(sizeId),
+        productMenuType == PRODUCT_MENU_TYPE.catering.id
+      );
+
+      // console.log(id,cartItem,itemData,price,sizeData)
+      return {
+        id: itemData.id,
+        qty: cartItem.qty,
+        price,
+        name: `${itemData.item_name}`,
+        // vid: sizeData ? sizeData.id : "",
+        variants: sizeData,
+        add_ons: cartItem.add_ons,
+        special_ins: cartItem.special_ins,
+      };
+      //return {...r,[i+1]:{id:itemData.id,qty:cartItem.qty,price,name:`${itemData.item_name}${sizeData?` - ${sizeData.variation_option_name}`:''}`}}
+    }, {})
+    .filter(Boolean);
+
+  return products;
+}
 export function getVariants(data) {
   let variants = [];
   try {
