@@ -194,7 +194,107 @@ export default {
         .catch(apiErrorHandler);
     };
   },
+  getVariations(restaurant_id, showLoader = true) {
+    return (dispatch, getState) => {
+      showLoader && dispatch(appAction.showProgress());
+      return userService
+        .getVariations(restaurant_id)
+        .then(res => {
+          let returnResult = res;
 
+          if (res && !res.status) {
+            // apiMessageHandler(res.message);
+            returnResult = false;
+          }
+          if (returnResult) {
+            let {variations} = res;
+            dispatch(
+              actions.set({
+                options: variations,
+              }),
+            );
+          }
+          showLoader && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+  getBusinessData(restaurant_id, showLoader = true) {
+    return (dispatch, getState) => {
+      showLoader && dispatch(appAction.showProgress());
+      return userService
+        .getBusinessData(restaurant_id)
+        .then(res => {
+          let returnResult = res;
+
+          if (res && !res.status) {
+            // apiMessageHandler(res.message);
+            returnResult = false;
+          }
+          if (returnResult) {
+            let {
+              locations,
+              variations,
+              payment_setup,
+              pos_type,
+              pos_access,
+              identity_id,
+              merchant_information,
+              payment_information,
+              onboarding_state,
+              verification,
+              name,
+              delivery_type,
+
+              step,
+              domain,
+              custom_domain,
+              offer_delivery,
+              offer_pickup,
+              closed,
+            } = res.data;
+            dispatch(
+              actions.set({
+                options: variations,
+              }),
+            );
+          }
+          showLoader && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+  getAddons(location_id, category_id, showLoader = true) {
+    return (dispatch, getState) => {
+      showLoader && dispatch(appAction.showProgress());
+      return userService
+        .getAddons(location_id, category_id)
+        .then(res => {
+          let returnResult = res;
+
+          if (res && !res.status) {
+            // apiMessageHandler(res.message);
+            returnResult = false;
+          }
+          if (returnResult) {
+            let data = res.data;
+            dispatch(
+              actions.set({
+                addonProducts: data,
+                addonProductsById: data.reduce((r, d) => {
+                  return {...r, [d.id]: d};
+                }, {}),
+              }),
+            );
+          }
+          showLoader && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
   getMobileBuilder(res_id, showProgress = true) {
     return (dispatch, getState) => {
       showProgress && dispatch(appAction.showProgress());

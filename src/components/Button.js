@@ -12,7 +12,7 @@ function ButtonUI({
   size = 16,
   align = 'left',
 
-  lineHeight = null,
+  lineHeight = undefined,
   backgroundColor = theme.colors.secondaryColor,
   noShadow = false,
   style = {},
@@ -24,6 +24,7 @@ function ButtonUI({
   ml = 0,
   mr = 0,
   width = null,
+  height,
   borderRadius = 25,
   ...props
 }) {
@@ -41,6 +42,7 @@ function ButtonUI({
         marginLeft: ml,
         marginRight: mr,
         width: width,
+        height:height,
         justifyContent: 'center',
         alignItems: 'center',
         ...(!noShadow
@@ -61,6 +63,7 @@ function ButtonUI({
       }}
       {...props}>
       <Text
+      // backgroundColor={'red'}
         regular={regular}
         medium={medium}
         bold={bold}

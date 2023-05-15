@@ -11,12 +11,16 @@ import {showToast} from '../../helpers/app.helpers';
 import storageHelper from '../../helpers/storage.helper';
 import userAction from '../../redux/actions/user.action';
 import theme from '../../theme';
+import useWindowDimensions from '../../hooks/useWindowDimensions';
+let contentH = 725;
+let initH = false;
 export default function Login(props) {
   // const value = useSelector(s => s.app.value);
   const dispatch = useDispatch();
-  // const {height, width, isPortrait} = useWindowDimensions();
+  const {height, width, isPortrait} = useWindowDimensions();
   const [loaded, setLoaded] = useState(false);
   const [loginTab, setLoginTab] = useState(1);
+  const [bH, setBH] = useState(height);
 
   useEffect(() => {
     loadData();
@@ -32,7 +36,7 @@ export default function Login(props) {
   };
 
   const onSubmit = () => {
-    props.navigation.replace('Home');
+    props.navigation.replace('HomeNav');
   };
 
   const onCompleted = async pin => {
@@ -50,7 +54,7 @@ export default function Login(props) {
         //  helpers.resetForm();
         // showSnackbar('Sign successfully.');
         showToast(r.message, 'success');
-        props.navigation.replace('Home');
+        props.navigation.replace('HomeNav');
         //let data = r.data;
         // console.log('srsss', data);
         // let password = await stringHelper.encrypt(values.password);
@@ -110,14 +114,42 @@ export default function Login(props) {
   }
   return (
     <>
-      <Container scroll style={{flex: 1}}>
+      <Container
+        onLayout={e => {
+          if(!isPortrait){
+            setBH(e.nativeEvent.layout.height);
+            console.log('isPortrait')
+          }
+          if (!initH) {
+            setBH(e.nativeEvent.layout.height);
+            initH = true;
+            console.log('init')
+          }
+          // console.log('body',
+          //   e.nativeEvent.layout,
+          //   theme.screenHeight,
+          //   theme.screenHeight / 725,
+          // );
+        }}
+        style={{flex: 1}}>
         <View
+          // onLayout={e => {
+          //   console.log(
+          //     e.nativeEvent.layout,
+          //     theme.screenHeight,
+          //     theme.screenHeight / 725,
+          //   );
+          // }}
           style={{
             flex: 1,
             // backgroundColor: 'red',
             alignItems: 'center',
             paddingVertical: 25,
             paddingHorizontal: 25,
+            transform: [
+              {scale: bH / contentH},
+              {translateY: (bH - contentH) / 2},
+            ],
           }}>
           <Image
             style={{

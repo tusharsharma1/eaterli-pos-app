@@ -11,6 +11,7 @@ import RequestPermissions from './components/RequestPermissions';
 import ToastContainer from './components/ToastContainer';
 import Navigator from './Navigator';
 import theme from './theme';
+import AlertBox from './components/AlertBox';
 
 const App = () => {
   return (
@@ -26,14 +27,14 @@ const App = () => {
         <SafeAreaView style={{flex: 1}}>
           <Navigator />
 
-          <AppProgess />
-
           <RequestPermissions />
 
           {/* <NoInternet /> */}
-          {/* <AlertBox /> */}
         </SafeAreaView>
       </KeyboardAvoidingView>
+      <AlertBox />
+      <AppProgess />
+
       <ToastContainer />
     </>
   );

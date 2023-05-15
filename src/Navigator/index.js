@@ -37,7 +37,7 @@ function Navigator() {
     let r = await loginFromKeyChain();
     console.log('loginFromKeyChain', r);
     if (r && r.status) {
-      setInitialRouteName('Home');
+      setInitialRouteName('HomeNav');
       setLoaded(true);
 
       return;
@@ -69,8 +69,8 @@ function Navigator() {
 
         {/* /////////////////PRIVATE SCREENS///////////////////////// */}
         <Stack.Screen
-          name="Home"
-          getComponent={() => require('../Screens/Home/Home').default}
+          name="HomeNav"
+          getComponent={() => require('./HomeNavigator').default}
         />
 
         <Stack.Screen

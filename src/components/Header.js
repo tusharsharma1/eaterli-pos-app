@@ -6,6 +6,7 @@ import {useSelector} from 'react-redux';
 
 // import BackIcon from '../assets/BackIcon';
 import Text from './Text';
+import theme from '../theme';
 
 export const HeaderHeight = 50;
 function _Header({
@@ -14,11 +15,11 @@ function _Header({
   absolute = false,
   size = 18,
   // hideCart = false,
-  // color = '#212121',
-  // backgroundColor = '#fff',
+  color = '#ffffff',
+  backgroundColor = theme.colors.secondaryColor,
 }) {
   const navigation = useNavigation();
-  const mobileBuilder = useSelector(s => s.user.mobileBuilder);
+  // const mobileBuilder = useSelector(s => s.user.mobileBuilder);
 
   const backPress = () => {
     navigation.goBack();
@@ -26,9 +27,9 @@ function _Header({
   const menuPress = () => {
     navigation.dispatch(DrawerActions.toggleDrawer());
   };
-  let {header_bg, header_text} = mobileBuilder.layout;
-  let backgroundColor = header_bg;
-  let color = header_text;
+  // let {header_bg, header_text} = mobileBuilder.layout;
+  // let backgroundColor = header_bg;
+  // let color = header_text;
   return (
     <>
       <View

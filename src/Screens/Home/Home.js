@@ -1,6 +1,6 @@
 import {convertDistance, getPreciseDistance} from 'geolib';
-import React, {useEffect, useState} from 'react';
-import {NativeModules, View} from 'react-native';
+import React, {memo, useEffect, useState} from 'react';
+import {FlatList, NativeModules, TouchableOpacity, View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import AppLoader from '../../components/AppLoader';
 import Button from '../../components/Button';
@@ -14,22 +14,29 @@ import userAction from '../../redux/actions/user.action';
 import {resetReduxState} from '../../redux/reducers';
 import theme from '../../theme';
 import POSModule from '../../helpers/pos.helper';
+import Header from '../../components/Header';
+import useProducts from '../../hooks/useProducts';
+import _ from 'lodash';
+import CategoryGrid from '../components/CategoryGrid';
+import MenuItemGrid from '../components/MenuItemGrid';
+import {getPercentValue} from '../../helpers/app.helpers';
+import useWindowDimensions from '../../hooks/useWindowDimensions';
+import CartView from '../components/CartView';
 export default function Home(props) {
-  const [loaded, setLoaded] = useState(true);
-  const [nearByLocation, setNearByLocation] = useState(null);
   const dispatch = useDispatch();
+  const [loaded, setLoaded] = useState(false);
   const userData = useSelector(s => s.user.userData);
-
+  let {width} = useWindowDimensions();
   useEffect(() => {
     loadData();
   }, []);
 
   const loadData = async () => {
     if (userData) {
-      let {locations} = userData;
+      let {locations, restaurant} = userData;
       let start = {latitude: 0, longitude: 0};
       let l = await getCurrentPosition();
-      console.log('distL l',l);
+      console.log('distL l', l);
       if (l && l.position) {
         start = {
           latitude: l.position.coords.latitude,
@@ -47,268 +54,67 @@ export default function Home(props) {
         // console.log(end, dist, miDist);
         return {dist: miDist, ...r};
       });
-     
+
       distL = distL.sort((a, b) => a.dist - b.dist)[0];
-      console.log('distL',start, distL);
+      console.log('distL', start, distL);
       dispatch(
         userAction.set({
-          selectedLocation: distL.id
+          selectedLocation: distL.id,
         }),
       );
-      setNearByLocation(distL);
-      // console.log(distL);
+      // setNearByLocation(distL);
+      // console.log('Promise',Promise.allSettled);
 
-      await dispatch(
-        userAction.getMobileBuilder(userData.restaurant.id, false),
-      );
+      // await dispatch(
+      //   userAction.getMobileBuilder(userData.restaurant.id, false),
+      // );
+      // console.time('prom');
+     
+      // await dispatch(userAction.getVariations(restaurant.id, false));
+      // console.timeLog('prom', 2);
+    
+      if (distL) {
+        // dispatch(userAction.set({selectedLocation: location.id}));
+        await Promise.all([
+          dispatch(userAction.getVariations(restaurant.id, false)),
+          dispatch(userAction.getMenus(distL.id, false)),
+          dispatch(userAction.getAddons(distL.id, '', false)),
+        ]);
+
+        // await dispatch(userAction.getMenus(distL.id, false));
+
+        // console.timeLog('prom', 3);
+        // await dispatch(userAction.getAddons(distL.id, '', false));
+      }
+      // console.timeEnd('prom');
+      
     }
 
-    // setLoaded(true);
+    setLoaded(true);
   };
+  //
 
-  const logoutPress = async () => {
-    // await this.props.dispatch(userAction.logoutFromServer());
-
-    // await Keychain.resetGenericPassword();
-
-    props.navigation.reset({
-      index: 0,
-      routes: [{name: 'Login'}],
-    });
-
-    dispatch(resetReduxState());
-    // dispatch(userAction.logout());
-    // console.log(this.props.navigation.reset, this.props.dispatch,Keychain.resetGenericPassword);
-
-    // setTimeout(() => {
-
-    // }, 100);
-  };
-  let nearByAddress =
-    nearByLocation &&
-    [
-      nearByLocation.street,
-      nearByLocation.zip_code,
-      nearByLocation.city,
-      nearByLocation.state,
-      nearByLocation.country,
-    ]
-      .filter(Boolean)
-      .join(', ');
-
-  let name = userData.restaurant_theme?.name ?? userData.restaurant?.name ?? '';
-  let logo = userData.restaurant_theme?.logo ?? '';
   return (
     <>
-      <Container style={{flex: 1}}>
+      <View style={{flex: 1, flexDirection: 'row'}}>
+        <View style={{flex: 1}}>
+          <Header title={'Eaterli POS'} />
+          {loaded && (
+            <Container style={{flex: 1}}>
+              <CategoryGrid />
+              <MenuItemGrid />
+            </Container>
+          )}
+        </View>
         <View
           style={{
-            flex: 1,
-            // backgroundColor: 'red',
-            alignItems: 'center',
-            paddingVertical: 25,
-            paddingHorizontal: 25,
+            width: getPercentValue(width, 30),
+            backgroundColor: '#ddd',
           }}>
-          <Text align="center" size={30} bold mb={20}>
-            Welcome To Eaterli
-          </Text>
-          {loaded ? (
-            <>
-              {!!nearByLocation && (
-                <Text align="center" size={20} medium>
-                  It looks like you're at {nearByLocation.name}{' '}
-                  {nearByAddress ? <>({nearByAddress})</> : ''}
-                </Text>
-              )}
-              <Text
-                align="center"
-                color={theme.colors.secondaryColor}
-                size={38}
-                mb={18}
-                mt={35}
-                bold>
-                {name}
-              </Text>
-              {!!logo && (
-                <ProgressImage
-                  source={{uri: logo}}
-                  resizeMode="contain"
-                  style={{
-                    width: 350,
-                    height: 260,
-                    // borderRadius: theme.wp(26) / 2,
-                    // borderWidth: 1,
-                    //borderColor: theme.colors.borderColor,
-
-                    //  backgroundColor:'red'
-                  }}
-                  imageStyle={{
-                    width: '100%',
-                    height: '100%',
-                    // width: 60,
-                    resizeMode: 'contain',
-                    // height: theme.screenWidth / numColumns - 100,
-                    // height:
-                    //   theme.screenWidth / numColumns -
-                    //   2 * theme.wp(2) * numColumns -
-                    //   theme.hp(5),
-                    // backgroundColor: 'red',
-                    // - (vheight * (10 / 100)), // theme.hp(10),
-                    flex: 1,
-                  }}
-                  // renderIndicator={(progress, inde) => {
-                  //   console.log(progress, inde);
-                  //   return (
-                  //     <>
-                  //       <Text
-                  //         style={{
-                  //           fontSize: 8,
-                  //           fontFamily: theme.fonts.regular,
-                  //           width: '100%',
-                  //           height: '100%',
-                  //        }}>
-                  //         Loading...{progress}
-                  //       </Text>
-                  //     </>
-                  //   );
-                  // }}
-                />
-              )}
-
-              <View
-                style={{
-                  // width:150,
-                  // height:100,
-                  // backgroundColor:'red',
-                  marginTop: 20,
-                  flexDirection: 'row',
-                }}>
-                <Button
-                  // style={{}}
-                  // backgroundColor="#00000000"
-                  noShadow
-                  // bold
-                  // color="#212121"
-                  mr={10}
-                  onPress={() => {
-                    dispatch(
-                      orderAction.set({
-                        productMenuType: PRODUCT_MENU_TYPE.catering.id,
-                      }),
-                    );
-                    props.navigation.navigate('ProductMenu');
-                  }}>
-                  Catering Menu
-                </Button>
-                <Button
-                  // style={{}}
-                  // backgroundColor="#00000000"
-                  noShadow
-                  // bold
-                  // color="#212121"
-                  // mr={10}
-                  onPress={() => {
-                    dispatch(
-                      orderAction.set({
-                        productMenuType: PRODUCT_MENU_TYPE.restuarant.id,
-                      }),
-                    );
-                    props.navigation.navigate('ProductMenu');
-                  }}>
-                  Restaurant Menu
-                </Button>
-              </View>
-              <View
-                style={{
-                  // width:150,
-                  // height:100,
-                  // backgroundColor:'red',
-                  marginTop: 10,
-                  flexDirection: 'row',
-                }}>
-                <Button
-                  // style={{}}
-                  // backgroundColor="#00000000"
-                  noShadow
-                  // bold
-                  // color="#212121"
-                  mr={10}
-                  onPress={() => {
-                   POSModule.doOpenCashBox();
-                  }}>
-                  Open Cashbox
-                </Button>
-                <Button
-                  // style={{}}
-                  // backgroundColor="#00000000"
-                  noShadow
-                  // bold
-                  // color="#212121"
-                  // mr={10}
-                  onPress={() => {
-                    POSModule.testPrint({id:22,name:"aakash",active:true},(res)=>{
-                      console.log('[testPrint]',res)
-                      alert(JSON.stringify(res))
-                    });
-                    
-                  }}>
-                 Test Print
-                </Button>
-              </View>
-
-
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'flex-end',
-                  position: 'absolute',
-                  bottom: 20,
-                  right: 20,
-                }}>
-                <Button
-                  // style={{}}
-                  // backgroundColor="#00000000"
-                  noShadow
-                  // bold
-                  // color="#212121"
-                  mr={10}
-                  // onPress={logoutPress}
-                >
-                  Change Location
-                </Button>
-                {!!nearByLocation && (
-                  <Button
-                    // style={{}}
-                    backgroundColor={theme.colors.primaryColor}
-                    // noShadow
-                    // bold
-                    // color="#212121"
-                    // onPress={logoutPress}
-                  >
-                    Proceed with {nearByLocation.name}
-                  </Button>
-                )}
-              </View>
-            </>
-          ) : (
-            <AppLoader message={'Loading'} />
-          )}
-
-          <Button
-            style={{
-              position: 'absolute',
-              top: 10,
-              right: 20,
-            }}
-            backgroundColor="#00000000"
-            noShadow
-            bold
-            color="#212121"
-            onPress={logoutPress}>
-            Logout
-          </Button>
+          <CartView />
         </View>
-      </Container>
+        {!loaded && <AppLoader message={'Loading'} />}
+      </View>
     </>
   );
 }

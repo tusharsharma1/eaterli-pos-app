@@ -5,6 +5,10 @@ import appAction from '../redux/actions/app.action';
 // import AlertActions from '../redux/actions/alert.action';
 // import AppActions from '../redux/actions/app.action';
 import store from '../redux/store';
+import SimpleToast from 'react-native-simple-toast';
+export function simpleToast(text, duration = SimpleToast.SHORT) {
+  SimpleToast.show(text, duration);
+}
 export function showToast(text, type = 'success', text1 = '', duration = 2000) {
   // setTimeout(() => {
   //     Snackbar.show({
@@ -89,4 +93,27 @@ export function sleep(delay = 1000) {
 
 export function formatPrice(price) {
   return `$${price}`;
+}
+export function formatGridData(_data, numColumns) {
+  let data = [..._data];
+  const numberOfFullRows = Math.floor(data.length / numColumns);
+
+  let numberOfElementsLastRow = data.length - numberOfFullRows * numColumns;
+  while (
+    numberOfElementsLastRow !== numColumns &&
+    numberOfElementsLastRow !== 0
+  ) {
+    data.push({empty: true});
+    numberOfElementsLastRow++;
+  }
+
+  return data;
+}
+
+export function getNewHeight(newWidth, oriWidth, oriHeight) {
+  return (newWidth * oriHeight) / oriWidth;
+}
+
+export function getPercentValue(value, per) {
+  return (value * per) / 100;
 }

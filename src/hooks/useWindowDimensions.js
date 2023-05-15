@@ -12,10 +12,12 @@ const useWindowDimensions = () => {
       listener.remove();
     };
   });
-
+let   isPortrait= info.width < info.height;
   return {
     ...info,
-    isPortrait: info.width < info.height,
+    isPortrait,
+    pWidth:isPortrait?info.width:info.height,
+    isTablet: info.width >= 768,
   };
 };
 

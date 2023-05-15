@@ -22,6 +22,7 @@ function TextUI({
 }) {
   return (
     <TextReact
+   
       style={{
         textAlign: align,
         fontFamily: getFont({regular, medium, bold, semibold, light}),

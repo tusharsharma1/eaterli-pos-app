@@ -1,0 +1,235 @@
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import React, { useEffect, useState } from 'react';
+import { Linking, TouchableOpacity, View } from 'react-native';
+import * as Keychain from 'react-native-keychain';
+import { useDispatch, useSelector } from 'react-redux';
+// import Dropoff from '../screens/Pickup/Dropoff';
+// import Pickup from '../screens/Pickup/Pickup';
+// import LookingDriver from '../screens/Pickup/LookingDriver';
+import Color from 'color';
+import Text from '../components/Text';
+import AppConfig from '../config';
+import { localNotificationService } from '../firebase/LocalNotificationService';
+import {
+  registerPushNotification,
+  unRegisterPushNotification
+} from '../helpers/firebase-notification.helper';
+import { resetReduxState, userResetReduxState } from '../redux/actions';
+const Drawer = createDrawerNavigator();
+
+function HomeNavigator() {
+  // const [loaded, setLoaded] = useState(false);
+  const [initialRouteName, setInitialRouteName] = useState('Home');
+  // const mobileBuilder = useSelector(s => s.user.mobileBuilder);
+
+  // useEffect(() => {
+  //   registerPushNotification(onRegister, onNotification, onOpenNotification);
+  //   return () => {
+  //     unRegisterPushNotification();
+  //   };
+  // }, []);
+  // const onRegister = token => {
+  //   console.log('[App] onRegister: ', token);
+  // };
+
+  // const onNotification = notify => {
+  //   console.log('[App] onNotification HOme: ', notify);
+  //   if (notify) {
+  //     const options = {
+  //       soundName: 'default',
+  //       playSound: true, //,
+  //       tag: notify.messageId, // (optional) add tag to message
+  //       // group: "group", // (optional) add group to message
+  //       // largeIcon: 'ic_launcher', // add icon large for Android (Link: app/src/main/mipmap)
+  //       // smallIcon: 'ic_launcher' // add icon small for Android (Link: app/src/main/mipmap)
+  //     };
+
+  //     localNotificationService.showNotification(
+  //       0,
+  //       notify.notification.title,
+  //       notify.notification.body,
+  //       notify,
+  //       options,
+  //     );
+  //   }
+  // };
+
+  // const onOpenNotification = notify => {
+  //   console.log('[App] onOpenNotification: ', notify);
+  //   if (notify) {
+  //     let data = notify.data;
+  //     console.log('[App] onOpenNotification: data', data);
+  //     if (data) {
+  //       let url = data.url;
+  //       if (url) {
+  //         Linking.openURL(url);
+  //         return;
+  //       }
+  //       // console.log('[App] onOpenNotification: openURL', notify);
+  //       // let screenName = getScreenName(data && data.screen);
+
+  //       // if (screenName) {
+  //       //   this.props.navigation.navigate(screenName);
+  //       // }
+  //     }
+  //   }
+  // };
+
+  // const loadData = async () => {
+  //   //adminData.restaurant.id
+  //   await dispatch(userAction.getMobileBuilder(adminData.restaurant.id, false));
+  //   setLoaded(true);
+  //   setTimeout(() => {
+  //     dispatch(appAction.set({showWelcomeView: false}));
+  //   }, 2000);
+  // };
+  const renderDrawerContent = props => {
+    // let status = getDrawerStatusFromState(props.state);
+    return <DrawerContent navigation={props.navigation} />;
+  };
+  // if (!loaded) {
+  //   return isDemoApp ? <SplashView /> : <InitialSplashView />;
+  // }
+  // if (showWelcomeView) {
+  //   return <WelcomeSplashView />;
+  // }
+  // return <WelcomeSplashView />;
+  // let {header_bg} = mobileBuilder.layout;
+
+  return (
+    <>
+      <Drawer.Navigator
+        screenOptions={{
+          headerShown: false,
+          // // drawerType: theme.screenWidth >= 768 ? 'permanent' : 'front',
+          // drawerStyle: {
+          //   backgroundColor: '#fff',
+          //   // width: 150,
+          // },
+          unmountOnBlur: true,
+          // gestureEnabled:false,
+          //  swipeEnabled:false
+          drawerType: 'front',
+          // overlayColor:'red'
+          // sceneContainerStyle:{
+          //   backgroundColor: '#ff0',
+          // }
+        }}
+        initialRouteName={initialRouteName}
+        drawerContent={renderDrawerContent}>
+        <Drawer.Screen
+          name="Home"
+          options={{
+            unmountOnBlur: false,
+          }}
+          getComponent={() => require('../Screens/Home/Home').default}
+        />
+      </Drawer.Navigator>
+    </>
+  );
+}
+export default HomeNavigator;
+
+function DrawerContent({navigation}) {
+  const dispatch = useDispatch();
+  const mobileBuilder = useSelector(s => s.user.mobileBuilder);
+  const isDemoApp = useSelector(s => s.app.isDemoApp);
+  const drawerItemPress = screenName => {
+    navigation.closeDrawer();
+    navigation.navigate(screenName);
+  };
+  const logoutPress = async () => {
+  
+    navigation.reset({
+      index: 0,
+      routes: [{name: 'Login' }],
+    });
+  
+      dispatch(resetReduxState());
+  
+  };
+
+  let {sidebar_bg, sidebar_text, sidebar_accent} = mobileBuilder.layout;
+  let text_color = Color(sidebar_accent);
+  return (
+    <View
+      style={{
+        backgroundColor: sidebar_bg,
+
+        flex: 1,
+      }}>
+      <View
+        style={{
+          height: 100,
+        }}></View>
+      <View
+        style={{
+          // height: 166,
+          //  backgroundColor:'yellow',
+          borderBottomColor: text_color.alpha(0.15).toString(),
+          borderBottomWidth: 1,
+          paddingHorizontal: 25,
+          paddingTop: 15,
+          paddingBottom: 5,
+        }}>
+        {/* <DrawerItem
+          // icon={WalletIcon}
+          title="Settings"
+          // subTitle="USD 0"
+          onPress={drawerItemPress}
+          screenName="Settings"
+        /> */}
+        {/* <DrawerItem
+          // icon={WalletIcon}
+          title="Product Menu"
+          // subTitle="USD 0"
+          onPress={drawerItemPress}
+          screenName="ProductMenu"
+        /> */}
+        <DrawerItem
+          //  icon={PreviousRideIcon}
+          title="Logout"
+          onPress={logoutPress}
+          // screenName="PreviousRides"
+        />
+      </View>
+    </View>
+  );
+}
+
+function DrawerItem({title, subTitle, onPress, screenName, icon: Icon}) {
+  const mobileBuilder = useSelector(s => s.user.mobileBuilder);
+
+  const _onPress = () => {
+    onPress && onPress(screenName);
+  };
+  let {sidebar_bg, sidebar_text, sidebar_accent} = mobileBuilder.layout;
+  return (
+    <TouchableOpacity
+      onPress={_onPress}
+      activeOpacity={0.6}
+      style={{
+        flexDirection: 'row',
+        marginBottom: 10,
+        paddingVertical: 5,
+        // backgroundColor:'blue'
+        alignItems: subTitle ? 'flex-start' : 'center',
+      }}>
+      {!!Icon && <Icon width={22} height={18} />}
+      <View
+        style={{
+          marginLeft: 15,
+          //backgroundColor:'red'
+        }}>
+        <Text color={sidebar_text} size={16}>
+          {title}
+        </Text>
+        {!!subTitle && (
+          <Text color={sidebar_accent} size={14}>
+            {subTitle}
+          </Text>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+}

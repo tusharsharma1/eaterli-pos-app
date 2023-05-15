@@ -1,9 +1,22 @@
+import { ALERT_TYPE } from '../../constants/alert.constant';
 import {PRODUCT_MENU_TYPE} from '../../constants/order.constant';
 
 const initialState = {
   app: {
     inProgress: false,
     progressMessage: 'Please wait',
+  },
+  alert: {
+    show: false,
+
+    type: ALERT_TYPE.ALERT,
+    icon: 'i',
+    text: '',
+    heading: 'Message',
+    onPositivePress: null,
+    onNegativePress: null,
+    positiveText: 'OK',
+    NegativeText: 'No',
   },
   user: {
     deviceToken: '',
@@ -19,9 +32,12 @@ const initialState = {
 
     selectedCategory: '',
     selectedCategory1: '',
-
+    options: [],
     selectedLocation: '',
 
+    addonProducts: [],
+    addonProductsById: {},
+    
     mobileBuilder: {
       layout: {
         id: 1,
@@ -48,6 +64,7 @@ const initialState = {
     cart: {},
     productMenuType: PRODUCT_MENU_TYPE.restuarant.id,
     orderType: 'pickup',
+    selectedCartItem:null
   },
 };
 export default initialState;
