@@ -350,7 +350,8 @@ function Footer({}) {
       restaurant_location_id: selectedLocation,
       restaurant_id: userData.restaurant.id,
       total,
-      received_amount:values.received_amount
+      received_amount:values.received_amount,
+      paymentMethod
     };
     
      console.log(body);

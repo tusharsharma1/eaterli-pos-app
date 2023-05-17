@@ -49,7 +49,7 @@ export function getCurrentPosition() {
         },
         {
           enableHighAccuracy: true,
-          // timeout: 20000,
+          timeout: 5000,
           // maximumAge: 10000,
         },
       );

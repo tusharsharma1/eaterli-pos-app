@@ -72,6 +72,12 @@ function Navigator() {
           name="HomeNav"
           getComponent={() => require('./HomeNavigator').default}
         />
+         <Stack.Screen
+          name="Orders"
+          getComponent={() =>
+            require('../Screens/Orders/Orders').default
+          }
+        />
 
         <Stack.Screen
           name="ProductMenu"

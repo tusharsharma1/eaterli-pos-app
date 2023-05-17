@@ -67,7 +67,6 @@ export function getPrice(itemId, sizeIds = {}) {
   return {price, cutPrice, sizeIds, sizeData};
 }
 
-
 export function addToCart(
   itemid,
   sizeId,
@@ -139,16 +138,16 @@ export function getTipAmount(total = 0) {
 export function getGrandTotal() {
   let {store} = React;
   let state = store.getState();
-  let { cart } = state.order;
+  let {cart} = state.order;
   let Ids = Object.keys(cart);
 
   let total = Ids.reduce((r, id) => {
-    let [itemId, sizeId, add_on, productMenuType] = id.split("-");
+    let [itemId, sizeId, add_on, productMenuType] = id.split('-');
 
-    let { price } = getPrice(
+    let {price} = getPrice(
       itemId,
       JSON.parse(sizeId),
-      productMenuType == PRODUCT_MENU_TYPE.catering.id
+      productMenuType == PRODUCT_MENU_TYPE.catering.id,
     );
     let add_ons = cart[id].add_ons || [];
     let add_onsTotal = getAddonsTotal(add_ons);
@@ -171,34 +170,41 @@ export function getGrandTotal() {
 export function getCartProducts() {
   let state = React.store.getState();
 
-  let { subCategories } = state.user;
-  let { cart } = state.order;
+  let {subCategories} = state.user;
+  let {cart} = state.order;
 
   let products = Object.keys(cart)
     .map((id, i) => {
       let cartItem = cart[id];
 
-      let [itemId, sizeId, addon, productMenuType] = id.split("-");
+      let [itemId, sizeId, addon, productMenuType] = id.split('-');
       let itemData = subCategories[itemId];
 
       if (!itemData) {
         return false;
       }
 
-      if (itemData.out_of_stock == "1") return false;
+      if (itemData.out_of_stock == '1') return false;
 
-      let { price, sizeData } = getPrice(
+      let {price, sizeData} = getPrice(
         itemId,
         JSON.parse(sizeId),
-        productMenuType == PRODUCT_MENU_TYPE.catering.id
+        productMenuType == PRODUCT_MENU_TYPE.catering.id,
       );
 
+      let add_onsTotal = getAddonsTotal(cartItem.add_ons);
+      let rate = add_onsTotal + price;
+      let totalPrice = rate * cartItem.qty;
       // console.log(id,cartItem,itemData,price,sizeData)
+
       return {
         id: itemData.id,
         qty: cartItem.qty,
         price,
+        rate,
+        totalPrice,
         name: `${itemData.item_name}`,
+        image: itemData.item_image,
         // vid: sizeData ? sizeData.id : "",
         variants: sizeData,
         add_ons: cartItem.add_ons,

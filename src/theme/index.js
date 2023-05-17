@@ -65,3 +65,16 @@ export function getFont(data) {
 
   return font ? font : theme.fonts.regular;
 }
+
+export function textAlignToFlexAlign(align) {
+  switch (align) {
+    case 'left':
+      return 'flex-start';
+    case 'center':
+      return 'center';
+    case 'right':
+      return 'flex-end';
+    default:
+      return 'center';
+  }
+}

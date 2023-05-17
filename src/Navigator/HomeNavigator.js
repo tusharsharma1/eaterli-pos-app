@@ -187,6 +187,13 @@ function DrawerContent({navigation}) {
           screenName="ProductMenu"
         /> */}
         <DrawerItem
+          // icon={WalletIcon}
+          title="Orders"
+          // subTitle="USD 0"
+          onPress={drawerItemPress}
+          screenName="Orders"
+        />
+        <DrawerItem
           //  icon={PreviousRideIcon}
           title="Logout"
           onPress={logoutPress}
