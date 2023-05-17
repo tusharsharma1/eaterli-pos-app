@@ -114,7 +114,7 @@ function _Item({data, onPress, containerWidth}) {
               alignItems: 'center',
               justifyContent: 'center',
               paddingVertical: 10,
-              height: getPercentValue(itemSize, 50),
+              height: getPercentValue(itemSize, 45),
               paddingHorizontal: 10,
               borderRadius: 5,
             }}>

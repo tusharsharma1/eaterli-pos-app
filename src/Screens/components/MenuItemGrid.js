@@ -13,6 +13,8 @@ import useProducts from '../../hooks/useProducts';
 import {resetReduxState} from '../../redux/reducers';
 import theme from '../../theme';
 import userAction from '../../redux/actions/user.action';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 import {
   addToCart,
   getAddons,
@@ -23,10 +25,11 @@ import {
 import ModalContainer from '../../components/ModalContainer';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import Button from '../../components/Button';
+import Container from '../../components/Container';
 let col = 4;
 
 let hPadding = 2;
-let modalContainerW = 720;
+
 let modalCol = 3;
 export default function MenuItemGrid(props) {
   const [leftContainerWidth, setLeftContainerWidth] = useState(theme.wp(70));
@@ -34,6 +37,9 @@ export default function MenuItemGrid(props) {
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   let {selectedCategory, categories} = useProducts();
+  useEffect(() => {
+    setShowModal(false);
+  }, [selectedCategory]);
   useEffect(() => {
     if (!showModal) {
       setSelectedItem(null);
@@ -97,26 +103,30 @@ export default function MenuItemGrid(props) {
         flex: 1,
         // height: catListH,
       }}>
-      <FlatList
-        // horizontal
-        numColumns={col}
-        contentContainerStyle={{
-          paddingVertical: 2,
-          paddingHorizontal: hPadding,
-        }}
-        data={formatGridData(data, col)}
-        keyExtractor={keyExtractor}
-        renderItem={renderItem}
-        // refreshing={!loaded}
-        // onRefresh={loadData}
-        progressViewOffset={0}
-        ListEmptyComponent={ListEmptyComponent}
-      />
-      <ItemModal
-        toggleModal={toggleModal}
-        showModal={showModal}
-        data={selectedItem}
-      />
+      {showModal ? (
+        <ItemModal
+          toggleModal={toggleModal}
+          showModal={showModal}
+          data={selectedItem}
+          containerWidth={leftContainerWidth}
+        />
+      ) : (
+        <FlatList
+          // horizontal
+          numColumns={col}
+          contentContainerStyle={{
+            paddingVertical: 2,
+            paddingHorizontal: hPadding,
+          }}
+          data={formatGridData(data, col)}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          // refreshing={!loaded}
+          // onRefresh={loadData}
+          progressViewOffset={0}
+          ListEmptyComponent={ListEmptyComponent}
+        />
+      )}
     </View>
   );
 }
@@ -148,7 +158,7 @@ function _Item({data, onPress, containerWidth}) {
     justifyContent: 'space-between',
     paddingVertical: 10, //theme.hp(5),
     paddingHorizontal: 10,
-    height: getPercentValue(itemSize, 50),
+    height: getPercentValue(itemSize, 45),
     borderRadius: 5,
   };
   if (empty) {
@@ -184,7 +194,7 @@ function _Item({data, onPress, containerWidth}) {
 }
 const Item = memo(_Item);
 
-function ItemModal({toggleModal, showModal, data}) {
+function ItemModal({toggleModal, showModal, data, containerWidth}) {
   const [selectedVar, setSelectedVar] = useState({});
   const [selectedAddons, setSelectedAddons] = useState([]);
   let addonProductsById = useSelector(s => s.user.addonProductsById);
@@ -292,53 +302,102 @@ function ItemModal({toggleModal, showModal, data}) {
   // console.log('[variants] ', data, addons);
   // let price=0;
   return (
-    <ModalContainer
-      // hideTitle
-      center
-      // noscroll
-      onRequestClose={toggleModal}
-      visible={showModal}
-      title={data.item_name}
-      width={modalContainerW}
-      // height={theme.hp(60)}
-      // borderRadius={25}
-      renderFooter={() => {
-        return (
-          <View
-            style={{
-              alignItems: 'flex-end',
-            }}>
-            <Button ph={30} size={14} onPress={addToCartPress}>
-              Add To Cart $ {parseFloat(totalPrice || 0).toFixed(2)}
-            </Button>
-          </View>
-        );
-      }}>
-      {variants.map((m, i) => {
-        return (
-          <Variants
-            key={m.id}
-            selectedItems={selectedVar[m.title_id] || []}
-            data={m}
-            onItemPress={onItemClick}
-          />
-        );
-      })}
+    <>
+      {/* <ModalContainer
+        // hideTitle
+        center
+        // noscroll
+        onRequestClose={toggleModal}
+        visible={showModal}
+        title={data.item_name}
+        width={modalContainerW}
+        // height={theme.hp(60)}
+        // borderRadius={25}
+        renderFooter={() => {
+          return (
+            <View
+              style={{
+                alignItems: 'flex-end',
+              }}>
+              <Button ph={30} size={14} onPress={addToCartPress}>
+                Add To Cart $ {parseFloat(totalPrice || 0).toFixed(2)}
+              </Button>
+            </View>
+          );
+        }}> */}
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: '#fff',
+          // paddingTop: 10,
+        }}>
+        <TouchableOpacity
+          onPress={toggleModal}
+          style={{
+            backgroundColor: '#eee',
+            width: 40,
+            height: 40,
+            borderRadius: 40,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: 5,
+            marginHorizontal: theme.paddingHorizontal,
+            // paddingLeft: 25,
+          }}>
+          {/* <BackIcon /> */}
+          <MaterialIcons name="arrow-back" color={'#222'} size={25} />
+        </TouchableOpacity>
+        <Container
+          scroll
+          style={{
+            flex: 1,
+            // backgroundColor: '#fff',
+          }}
+          contentContainerStyle={{
+            paddingTop: 10,
+            paddingHorizontal: theme.paddingHorizontal,
+          }}>
+          {variants.map((m, i) => {
+            return (
+              <Variants
+                key={m.id}
+                selectedItems={selectedVar[m.title_id] || []}
+                data={m}
+                onItemPress={onItemClick}
+                containerWidth={containerWidth}
+              />
+            );
+          })}
 
-      {addons.map(m => {
-        return (
-          <AddOns
-            key={m.id}
-            data={m}
-            selectedItems={selectedAddons}
-            onItemPress={onAddonsItemClick}
-          />
-        );
-      })}
-    </ModalContainer>
+          {addons.map(m => {
+            return (
+              <AddOns
+                key={m.id}
+                data={m}
+                selectedItems={selectedAddons}
+                onItemPress={onAddonsItemClick}
+                containerWidth={containerWidth}
+              />
+            );
+          })}
+        </Container>
+
+        <View
+          style={{
+            alignItems: 'flex-end',
+            paddingHorizontal: theme.paddingHorizontal,
+            paddingVertical: 5,
+          }}>
+          <Button noShadow ph={30} pv={10} size={14} onPress={addToCartPress}>
+            Add To Cart $ {parseFloat(totalPrice || 0).toFixed(2)}
+          </Button>
+        </View>
+      </View>
+      {/* </ModalContainer> */}
+    </>
   );
 }
-function Variants({data, selectedItems = [], onItemPress}) {
+function Variants({data, selectedItems = [], onItemPress, containerWidth}) {
   const options = useSelector(s => s.user.options);
 
   if (!data.items && !data.items.length) {
@@ -387,7 +446,7 @@ function Variants({data, selectedItems = [], onItemPress}) {
           let opdata = op.variation_options.find(o => o.id == m.id);
           let price = m.price;
           let empty = m.empty === true;
-          let size = (modalContainerW - 20) / modalCol - 2.5;
+          let size = (containerWidth - 52) / modalCol - 2.5;
           let selected = selectedItems.includes(m.id);
           let multiselect = data.multiselect;
           let _style = {
@@ -395,7 +454,7 @@ function Variants({data, selectedItems = [], onItemPress}) {
             width: size,
             height: getPercentValue(size, 25),
             marginBottom: 5,
-            backgroundColor: empty ? 'transparent' : '#ccc00000',
+            backgroundColor: empty ? '#00000000' : '#ccc00000',
 
             borderWidth: 1,
             borderColor: empty ? 'transparent' : '#ccc',
@@ -451,7 +510,7 @@ function Variants({data, selectedItems = [], onItemPress}) {
     </View>
   );
 }
-function AddOns({data, selectedItems = [], onItemPress}) {
+function AddOns({data, selectedItems = [], onItemPress, containerWidth}) {
   let addonProductsById = useSelector(s => s.user.addonProductsById);
   if (!data.items && !data.items.length) {
     return null;
@@ -482,7 +541,7 @@ function AddOns({data, selectedItems = [], onItemPress}) {
           // let opdata = op.variation_options.find(o => o.id == m.id);
           // let price = m.price;
           let empty = m.empty === true;
-          let size = (modalContainerW - 20) / modalCol - 2.5;
+          let size = (containerWidth - 52) / modalCol - 2.5;
           let selected = selectedItems.includes(m);
           // let multiselect = data.multiselect;
           let _style = {
