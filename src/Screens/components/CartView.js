@@ -350,26 +350,35 @@ function Footer({}) {
       restaurant_location_id: selectedLocation,
       restaurant_id: userData.restaurant.id,
       total,
-      received_amount:values.received_amount,
-      paymentMethod
+      received_amount: values.received_amount,
+      paymentMethod,
+      deviceId:'ggh67hvhj',
+      userId:23
     };
-    
-     console.log(body);
+
+    console.log(body);
   };
   const renderView = () => {
     if (paymentMethod == PAYMENT_METHOD.cash.id) {
       return (
         <View
           style={{
-            width: '80%',
+            // width: '80%',
             alignSelf: 'center',
-            paddingVertical: 25,
+            paddingVertical: 10,
+            // backgroundColor: 'red',
+            alignItems: 'center',
+          }}>
+          <View style={{
+            // flex:1
+            // width: '100%',
             // backgroundColor: 'red',
           }}>
-          <CashPaymentForm
-            total={total}
-            onSubmitSuccess={onCashSubmitSuccess}
-          />
+            <CashPaymentForm
+              total={total}
+              onSubmitSuccess={onCashSubmitSuccess}
+            />
+          </View>
         </View>
       );
     }
@@ -441,7 +450,7 @@ function Footer({}) {
         visible={showModal}
         title={'Pay'}
         width={720}
-        // height={theme.hp(60)}
+        height={'98%'}
         // borderRadius={25}
         // renderFooter={() => {
         //   return (

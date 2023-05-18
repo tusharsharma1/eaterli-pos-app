@@ -13,6 +13,7 @@ import storageHelper from '../helpers/storage.helper';
 import stringHelper from '../helpers/string.helper';
 import userAction from '../redux/actions/user.action';
 import Text from '../components/Text';
+import CalculatorPriceInput from '../components/CalculatorPriceInput';
 // import {showToast} from '../helpers/app.helpers';
 // import stringHelper from '../helpers/string.helper';
 // import AlertActions from '../redux/actions/alert.action';
@@ -152,18 +153,19 @@ const CashPaymentForm = ({total = 0, onSubmitSuccess}) => {
         onSubmit={onSubmit}
         validateOnChange={true}>
         {props => {
-          // console.log(props.values, props.errors, props.touched);
+        // console.log(props.values);
 
-          let received_amount=parseFloat(props.values.received_amount)-parseFloat( total);
-          if(!isFinite(received_amount)){
-            received_amount=0
+          let received_amount =
+            parseFloat(props.values.received_amount) - parseFloat(total);
+          if (!isFinite(received_amount)) {
+            received_amount = 0;
           }
           return (
             <>
-             <Row title={'Total amount'}>
-              <Text>${parseFloat(total).toFixed(2)}</Text>
-             </Row>
-              <Row title={'Received amount  ($)'}>
+              <Row title={'Total amount'}>
+                <Text>${parseFloat(total).toFixed(2)}</Text>
+              </Row>
+              {/* <Row title={'Received amount  ($)'}>
                 <TextInput
                   textInputProps={{
                     onChangeText: props.handleChange('received_amount'),
@@ -184,12 +186,22 @@ const CashPaymentForm = ({total = 0, onSubmitSuccess}) => {
                       : ''
                   }
                 />
-              </Row>
+              </Row> */}
               <Row title={'Remaining amount'}>
-              <Text>${received_amount.toFixed(2)}</Text>
-             </Row>
+                <Text>${received_amount.toFixed(2)}</Text>
+              </Row>
+              <View
+                style={{
+                  marginTop: 20,
+                }}>
+                <CalculatorPriceInput
+                  onChange={price => {
+                    props.setFieldValue('received_amount', price);
+                  }}
+                />
+              </View>
               <Button
-              mt={20}
+                mt={20}
                 width={200}
                 style={{alignSelf: 'center'}}
                 // disabled={props.isSubmitting}
@@ -207,18 +219,25 @@ const CashPaymentForm = ({total = 0, onSubmitSuccess}) => {
 export default CashPaymentForm;
 
 function Row({title, children}) {
- return <View style={{
-    flexDirection:'row',
-    alignItems:'center'
-  }}>
-    <View style={{width:'30%'}}>
-      <Text semibold>{title}</Text>
-    </View>
+  return (
     <View
       style={{
-        flex: 1,
+        // width: '100%',
+        // flex: 1,
+        // backgroundColor:'yellow',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent:'space-between'
       }}>
-      {children}
+      <View style={{}}>
+        <Text semibold>{title}</Text>
+      </View>
+      <View
+        style={{
+          // flex: 1,
+        }}>
+        {children}
+      </View>
     </View>
-  </View>;
+  );
 }
