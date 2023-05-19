@@ -19,6 +19,7 @@ const initialState = {
     NegativeText: 'No',
   },
   user: {
+    deviceId:'',
     deviceToken: '',
     userData: null,
 
@@ -38,6 +39,8 @@ const initialState = {
     addonProducts: [],
     addonProductsById: {},
     
+    orders:[],
+
     mobileBuilder: {
       layout: {
         id: 1,

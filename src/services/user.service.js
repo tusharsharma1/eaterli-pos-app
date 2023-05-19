@@ -1,6 +1,13 @@
 import {callApi} from '../helpers/api.helper';
 // import moment from 'moment';
-
+function getQueryString(data) {
+  let q = Object.keys(data)
+    .map(k => {
+      return `${k}=${data[k]}`;
+    })
+    .join('&');
+  return q;
+}
 export default {
   login(data) {
     return callApi('POST', '/api/staff/login', data, {
@@ -21,19 +28,26 @@ export default {
   },
   getAddons(location_id, category_id) {
     return callApi(
-      "GET",
+      'GET',
       `/api/products/addons?location_id=${location_id}${
-        category_id ? `&category_id=${category_id}` : ""
-      }`
+        category_id ? `&category_id=${category_id}` : ''
+      }`,
     );
   },
   getBusinessData(restaurant_id) {
-    return callApi("GET", `/api/restaurants/${restaurant_id}`);
-   
+    return callApi('GET', `/api/restaurants/${restaurant_id}`);
   },
   getVariations(restaurant_id) {
-    return callApi("GET", `/api/restaurants/variations/${restaurant_id}`);
-   
+    return callApi('GET', `/api/restaurants/variations/${restaurant_id}`);
+  },
+  createOrder(data) {
+    return callApi('POST', `/api/pos-order/create`, data, {
+      isformData: false,
+    });
+  },
+  getOrders(restaurant_location_id) {
+    let d = getQueryString({restaurant_location_id});
+    return callApi('GET', `/api/pos-order/list?${d}`);
   },
 };
 

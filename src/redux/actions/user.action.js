@@ -203,7 +203,7 @@ export default {
           let returnResult = res;
 
           if (res && !res.status) {
-           // apiMessageHandler(res.message);
+            // apiMessageHandler(res.message);
             returnResult = false;
           }
           if (returnResult) {
@@ -319,6 +319,51 @@ export default {
             }
           }
           showProgress && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+  createOrder(data, showProgress = true) {
+    return (dispatch, getState) => {
+      showProgress && dispatch(appAction.showProgress());
+      return userService
+        .createOrder(data)
+        .then(res => {
+          let returnResult = res;
+          if (res && !res.status) {
+            showAlert && apiMessageHandler(res);
+            returnResult = false;
+          }
+          if (returnResult) {
+          }
+          showProgress && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+  getOrders(restaurant_location_id, showLoader = true) {
+    return (dispatch, getState) => {
+      showLoader && dispatch(appAction.showProgress());
+      return userService
+        .getOrders(restaurant_location_id)
+        .then(res => {
+          let returnResult = res;
+
+          if (res && !res.status) {
+            // apiMessageHandler(res.message);
+            returnResult = false;
+          }
+          if (returnResult) {
+            let data = res.data;
+            dispatch(
+              actions.set({
+                orders: data,
+              }),
+            );
+          }
+          showLoader && dispatch(appAction.hideProgress());
           return returnResult;
         })
         .catch(apiErrorHandler);

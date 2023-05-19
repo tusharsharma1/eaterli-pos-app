@@ -12,6 +12,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 // import {Grid, Row} from 'react-native-easy-grid';
 import theme from '../theme';
 import Text from './Text';
+import AppProgess from './AppProgess';
 
 function _ModalContainer({
   visible,
@@ -171,6 +172,7 @@ function _ModalContainer({
           )}
           {/* <AppProgess height="100%" /> */}
         </View>
+        <AppProgess />
       </SafeAreaView>
     </Modal>
   );

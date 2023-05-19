@@ -6496,6 +6496,11 @@
   "resolved" "https://registry.npmmirror.com/react-native-des-cbc/-/react-native-des-cbc-1.0.9.tgz"
   "version" "1.0.9"
 
+"react-native-device-info@^10.6.0":
+  "integrity" "sha512-/MmINdojWdw2/9rwYpH/dX+1gFP0o78p8yYPjwxiPhoySSL2rZaNi+Mq9VwC+zFi/yQmJUvHntkKSw2KUc7rFw=="
+  "resolved" "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-10.6.0.tgz"
+  "version" "10.6.0"
+
 "react-native-extra-dimensions-android@^1.2.5":
   "integrity" "sha512-eorFo9X1vEqAWUkgcZ300yKBG1wtgNeE7tdWAH2CE+P50FGTniJg5Sr6l1iPWG8ZskQOuF+KeiSTFlDa4vLfMw=="
   "resolved" "https://registry.npmmirror.com/react-native-extra-dimensions-android/-/react-native-extra-dimensions-android-1.2.5.tgz"

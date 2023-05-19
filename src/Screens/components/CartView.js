@@ -19,6 +19,9 @@ import {ALERT_ICON_TYPE, ALERT_TYPE} from '../../constants/alert.constant';
 import ModalContainer from '../../components/ModalContainer';
 import {PAYMENT_METHOD} from '../../constants/order.constant';
 import CashPaymentForm from '../../forms/CashPaymentForm';
+import userAction from '../../redux/actions/user.action';
+import AppProgess from '../../components/AppProgess';
+import {showToast, simpleToast} from '../../helpers/app.helpers';
 
 // import BackIcon from '../assets/BackIcon';
 
@@ -316,6 +319,7 @@ function Footer({}) {
   const cart = useSelector(s => s.order.cart);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
   const userData = useSelector(s => s.user.userData);
+  const deviceId= useSelector(s => s.user.deviceId);
   useEffect(() => {
     if (!showModal) {
       setPaymentMethod('');
@@ -325,6 +329,11 @@ function Footer({}) {
     setShowModal(!showModal);
   };
   const onPayPress = () => {
+    let products = getCartProducts();
+    if (!products.length) {
+      simpleToast('Add Products first.')
+      return;
+    }
     toggleModal();
   };
 
@@ -343,8 +352,11 @@ function Footer({}) {
     );
   };
   let total = getGrandTotal();
-  const onCashSubmitSuccess = values => {
+  const onCashSubmitSuccess = async values => {
     let products = getCartProducts();
+    if (!products.length) {
+      return;
+    }
     let body = {
       products: products,
       restaurant_location_id: selectedLocation,
@@ -352,11 +364,17 @@ function Footer({}) {
       total,
       received_amount: values.received_amount,
       paymentMethod,
-      deviceId:'ggh67hvhj',
-      userId:23
+      deviceId: deviceId,
+      userId: userData.user_id,
     };
-
     console.log(body);
+    let r = await dispatch(userAction.createOrder(body));
+    console.log(r);
+    if (r && r.status) {
+      simpleToast(r.message);
+      toggleModal();
+      dispatch(orderAction.set({cart: {}}));
+    }
   };
   const renderView = () => {
     if (paymentMethod == PAYMENT_METHOD.cash.id) {
@@ -369,11 +387,14 @@ function Footer({}) {
             // backgroundColor: 'red',
             alignItems: 'center',
           }}>
-          <View style={{
-            // flex:1
-            // width: '100%',
-            // backgroundColor: 'red',
-          }}>
+          <View
+            style={
+              {
+                // flex:1
+                // width: '100%',
+                // backgroundColor: 'red',
+              }
+            }>
             <CashPaymentForm
               total={total}
               onSubmitSuccess={onCashSubmitSuccess}

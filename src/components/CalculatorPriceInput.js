@@ -8,18 +8,24 @@ export default function CalculatorPriceInput({
   size = 240,
   padding = 1,
   itemMargin = 1,
-  onChange
+  onChange,
+  total = 0,
 }) {
   const [value, setValue] = useState('');
   const [decimalPlace, setDecimalPlace] = useState(1);
 
-useEffect(()=>{
-  onChange && onChange(getPrice(),value)
-},[value])
+  useEffect(() => {
+    onChange && onChange(getPrice(), value);
+  }, [value]);
 
   const onNumberPress = data => {
     let _val = `${value}${data}`;
     setValue(_val);
+  };
+  const onAmountPress = data => {
+    if (data) {
+      setValue(data);
+    }
   };
   const onDecimalPress = data => {
     setDecimalPlace(data);
@@ -36,10 +42,66 @@ useEffect(()=>{
     // let d = Math.pow(10, l);
     // return _val / d;
   };
+
+  const getCompleteNo = no => {
+    let l = no + 10;
+    let m = 5;
+    // console.log('nnn l', l);
+    let add = 0;
+    for (let i = m; i <= l; i = i + m) {
+      // console.log('nnn i', i, i - no);
+      add = i - no;
+      if (add >= 0) {
+        break;
+      }
+    }
+    // console.log('nnn add', add);
+    return no + add;
+  };
+  let notes = [100, 50, 20, 10, 5, 1];
+  const countCurrency = amount => {
+    let noteCounter = Array(9).fill(0);
+    let ob = {};
+    // count notes using Greedy approach
+    for (let i = 0; i < 9; i++) {
+      if (amount >= notes[i]) {
+        noteCounter[i] = Math.floor(amount / notes[i]);
+        if (noteCounter[i]) {
+          ob = {...ob, [notes[i]]: noteCounter[i]};
+        }
+        amount = amount % notes[i];
+      }
+    }
+
+    return ob; //noteCounter.map((d, i) => ({[notes[i]]: d})).filter((d, i) => d);
+    // Print notes
+    //  document.write("Currency Count ->" + "<br/>");
+    // for (let i = 0; i < 9; i++) {
+    //     if (noteCounter[i] != 0) {
+    //         document.write(notes[i] + " : "
+    //             + noteCounter[i] + "<br/>");
+    //     }
+    // }
+  };
+
   let itemSize = (size - padding * 2) / 4;
   itemSize = itemSize - itemMargin * 2;
 
-  // console.log(value, getPrice());
+  let getButtons = amt => {
+    let roundAmt = getCompleteNo(amt);
+
+    let nextNotes = notes.filter(d => d > amt);
+    let b = [amt, roundAmt, ...nextNotes];
+    if (amt > 100 && amt % 10 != 0) {
+      b.push(roundAmt + 5);
+    }
+    let btns = Array.from(new Set(b)).sort((a, b) => a - b);
+    return btns;
+  };
+  let btns = getButtons(parseFloat(total));
+
+  // console.log('nnn buttons', ...btns);
+  // let completePrice = getCompleteNo(parseInt(total));
   return (
     <View
       style={{
@@ -113,12 +175,14 @@ useEffect(()=>{
           onPress={onNumberPress}
         />
         <Btn
-          text="$100"
           size={itemSize}
           backgroundColor={theme.colors.primaryColor}
           itemMargin={itemMargin}
-          data={'10000'}
-          onPress={setValue}
+          // text={`$${completePrice + 20}`}
+          // data={(completePrice + 20) * 100}
+          text={btns[0] ? `$${btns[0]}` : ''}
+          data={(btns[0] ?? 0) * 100}
+          onPress={onAmountPress}
         />
         <Btn
           text="4"
@@ -142,12 +206,14 @@ useEffect(()=>{
           onPress={onNumberPress}
         />
         <Btn
-          text="$50"
           size={itemSize}
           backgroundColor={theme.colors.primaryColor}
           itemMargin={itemMargin}
-          data={'5000'}
-          onPress={setValue}
+          // text={`$${completePrice + 15}`}
+          // data={(completePrice + 15) * 100}
+          text={btns[1] ? `$${btns[1]}` : ''}
+          data={(btns[1] ?? 0) * 100}
+          onPress={onAmountPress}
         />
         <Btn
           text="7"
@@ -171,12 +237,14 @@ useEffect(()=>{
           onPress={onNumberPress}
         />
         <Btn
-          text="$20"
           size={itemSize}
           backgroundColor={theme.colors.primaryColor}
           itemMargin={itemMargin}
-          data={'2000'}
-          onPress={setValue}
+          // text={`$${completePrice + 10}`}
+          // data={(completePrice + 10) * 100}
+          text={btns[2] ? `$${btns[2]}` : ''}
+          data={(btns[2] ?? 0) * 100}
+          onPress={onAmountPress}
         />
         <Btn
           text="0"
@@ -197,20 +265,24 @@ useEffect(()=>{
           // onPress={onDecimalPress}
         />
         <Btn
-          text="$5"
           size={itemSize}
           backgroundColor={theme.colors.primaryColor}
           itemMargin={itemMargin}
-          data={'500'}
-          onPress={setValue}
+          // text={`$${completePrice}`}
+          // data={completePrice * 100}
+          text={btns[4] ? `$${btns[4]}` : ''}
+          data={(btns[4] ?? 0) * 100}
+          onPress={onAmountPress}
         />
         <Btn
-          text="$10"
           size={itemSize}
           backgroundColor={theme.colors.primaryColor}
           itemMargin={itemMargin}
-          data={'1000'}
-          onPress={setValue}
+          // text={`$${completePrice + 5}`}
+          // data={(completePrice + 5) * 100}
+          text={btns[3] ? `$${btns[3]}` : ''}
+          data={(btns[3] ?? 0) * 100}
+          onPress={onAmountPress}
         />
       </View>
     </View>

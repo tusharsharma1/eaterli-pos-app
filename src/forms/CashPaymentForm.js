@@ -153,7 +153,7 @@ const CashPaymentForm = ({total = 0, onSubmitSuccess}) => {
         onSubmit={onSubmit}
         validateOnChange={true}>
         {props => {
-        // console.log(props.values);
+          // console.log(props.values);
 
           let received_amount =
             parseFloat(props.values.received_amount) - parseFloat(total);
@@ -195,6 +195,7 @@ const CashPaymentForm = ({total = 0, onSubmitSuccess}) => {
                   marginTop: 20,
                 }}>
                 <CalculatorPriceInput
+                  total={total}
                   onChange={price => {
                     props.setFieldValue('received_amount', price);
                   }}
@@ -227,15 +228,17 @@ function Row({title, children}) {
         // backgroundColor:'yellow',
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent:'space-between'
+        justifyContent: 'space-between',
       }}>
       <View style={{}}>
         <Text semibold>{title}</Text>
       </View>
       <View
-        style={{
-          // flex: 1,
-        }}>
+        style={
+          {
+            // flex: 1,
+          }
+        }>
         {children}
       </View>
     </View>

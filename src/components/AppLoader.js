@@ -3,9 +3,13 @@ import {ActivityIndicator, View} from 'react-native';
 import useWindowDimensions from '../hooks/useWindowDimensions';
 import theme from '../theme';
 import Text from './Text';
-function AppLoader({message}) {
-  const {width, height} = useWindowDimensions();
-
+function AppLoader({message,width,height}) {
+  let  {width:W, height:H} = useWindowDimensions();
+  // width=width??w;
+  // width=height??h;
+  let _width=width??W;
+  let _height=height??H;
+  // console.log('app',_width,_height,W,H,width,height)
   return (
     <>
       <View
@@ -15,8 +19,8 @@ function AppLoader({message}) {
           alignItems: 'center',
           backgroundColor: 'rgba(0,0,0,0.4)',
           position: 'absolute',
-          width: width,
-          height: height,
+          width: _width,
+          height: _height,
           top: 0,
           bottom: 0,
         }}>

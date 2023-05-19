@@ -5,6 +5,9 @@ import SplashView from '../components/SplashView';
 import {loginFromKeyChain} from '../helpers/user.helper';
 
 import theme from '../theme';
+import {getUniqueId} from 'react-native-device-info';
+import {useDispatch} from 'react-redux';
+import userAction from '../redux/actions/user.action';
 // import {fcmService} from '../firebase/FCMService';
 // import {loginFromKeyChain} from '../helpers/user.helper';
 // import userAction from '../redux/actions/user.action';
@@ -26,6 +29,7 @@ import theme from '../theme';
 const Stack = createNativeStackNavigator();
 
 function Navigator() {
+  const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
   const [initialRouteName, setInitialRouteName] = useState('Login');
 
@@ -34,6 +38,9 @@ function Navigator() {
   }, []);
 
   const checkLogin = async () => {
+    let deviceId = await getUniqueId();
+    dispatch(userAction.set({deviceId}));
+
     let r = await loginFromKeyChain();
     console.log('loginFromKeyChain', r);
     if (r && r.status) {
@@ -72,11 +79,9 @@ function Navigator() {
           name="HomeNav"
           getComponent={() => require('./HomeNavigator').default}
         />
-         <Stack.Screen
+        <Stack.Screen
           name="Orders"
-          getComponent={() =>
-            require('../Screens/Orders/Orders').default
-          }
+          getComponent={() => require('../Screens/Orders/Orders').default}
         />
 
         <Stack.Screen
