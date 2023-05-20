@@ -132,9 +132,9 @@ export default function MenuItemGrid(props) {
 }
 function _Item({data, onPress, containerWidth}) {
   const dispatch = useDispatch();
-  let {categories, subCategories, selectedCategory} = useProducts();
+  let {categories, menuItems, selectedCategory} = useProducts();
 
-  let d = subCategories[data];
+  let d = menuItems[data];
   let {price, cutPrice} = getPrice(data, '', false);
   if (!d) {
     return null;

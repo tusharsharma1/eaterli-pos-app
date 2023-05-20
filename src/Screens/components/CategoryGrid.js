@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, {memo, useState} from 'react';
+import React, {memo, useEffect, useState} from 'react';
 import {FlatList, TouchableOpacity, View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import Text from '../../components/Text';
@@ -12,9 +12,15 @@ let col = 4;
 let chunk = 2;
 let hPadding = 2;
 export default function CategoryGrid(props) {
+  const dispatch=useDispatch();
   const [leftContainerWidth, setLeftContainerWidth] = useState(theme.wp(70));
 
   let {categoriesSortable} = useProducts();
+  useEffect(()=>{
+    dispatch(userAction.set({selectedCategory:categoriesSortable.length
+      ? categoriesSortable[0]
+      : '',}))
+  },[])
 
   const ListEmptyComponent = () => {
     // if (!loaded) {

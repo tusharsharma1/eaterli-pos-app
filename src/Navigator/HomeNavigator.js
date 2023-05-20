@@ -186,6 +186,13 @@ function DrawerContent({navigation}) {
           onPress={drawerItemPress}
           screenName="ProductMenu"
         /> */}
+         <DrawerItem
+          // icon={WalletIcon}
+          title="Product Menu"
+          // subTitle="USD 0"
+          onPress={drawerItemPress}
+          screenName="ProductMenu"
+        />
         <DrawerItem
           // icon={WalletIcon}
           title="Orders"

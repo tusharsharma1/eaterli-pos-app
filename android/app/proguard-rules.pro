@@ -24,8 +24,9 @@
 # -optimizations !code/*/*,!method/*/*
 
 #react-native-device-info
+
 -keepclassmembers class com.android.installreferrer.api.** {
   *;
 }
 
-keep class com.google.android.gms.common.** {*;}
+# keep class com.google.android.gms.common.** {*;}

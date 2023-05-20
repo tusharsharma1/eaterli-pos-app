@@ -35,8 +35,12 @@ const LoginForm = ({email, password, onSubmitSuccess}) => {
 
   const loadData = () => {
     setInitialValues({
-      email: email || '', //'keyanna@eaterli.com',
-      password: password || '', //'Al12880aL',
+      email: email || 'keyanna@customwebchoice.com', //'keyanna@eaterli.com',
+      password: password || 'GreatDays12', //'Al12880aL',
+      // keyanna@customwebchoice.com
+      // GreatDays12
+
+
     });
   };
 

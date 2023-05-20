@@ -1,7 +1,9 @@
+import { PRODUCT_MENU_TYPE } from '../../constants/order.constant';
 import {apiErrorHandler, apiMessageHandler} from '../../helpers/app.helpers';
 import userService from '../../services/user.service';
 import {actions} from '../reducers/user.reducer';
 import appAction from './app.action';
+import _ from "lodash";
 export default {
   ...actions,
 
@@ -109,9 +111,11 @@ export default {
               m => !m.deleted_at,
             );
 
-            // console.log('totalMenus',totalMenus)
+            totalMenus = _.uniqBy(totalMenus, 'id');
 
-            let subCategories = {};
+            console.log('totalMenus', totalMenus);
+
+            let menuItems = {};
 
             let categories = totalMenus.reduce((r, c) => {
               let menu_items = c.menu_items.filter(mi => {
@@ -129,7 +133,7 @@ export default {
                 };
               }, {});
 
-              subCategories = {...subCategories, ...mitem_ob};
+              menuItems = {...menuItems, ...mitem_ob};
 
               return {
                 ...r,
@@ -141,48 +145,87 @@ export default {
                 },
               };
             }, {});
+            let titles = totalMenus.reduce((a, b) => {
+              let titles = b.menu_titles || [];
+              // console.log("totalMenus menu_titles", b);
 
-            let categoriesSortable = totalMenus.map(c => {
-              return c.id;
-            });
+              let valid = b.type == PRODUCT_MENU_TYPE.restuarant.id;
+              // if (type == -1) {
+              //   valid = true;
+              // }
+              let title_ids = titles
+                .filter(t => !a.includes(t.id))
+                .map(t => t.id);
+              if (valid) {
+                return [...a, ...title_ids];
+              }
+              // if (valid && title && !a.includes(title.id)) {
+              //   return [...a, title.id];
+              // }
 
-            ///////////////////
+              return a;
+            }, []);
+            console.log("totalMenus title", titles);
+            // console.log("totalMenus", menuItems, categories, titles);
 
-            let {catering_menu_categories} = res.data;
-            let subCategories1 = {};
-            let categories1 = catering_menu_categories.reduce((r, c) => {
-              let menu_items = c.catering_menu_items;
-              let mitem_ob = menu_items.reduce((mr, mi) => {
-                return {...mr, [mi.id]: mi};
-              }, {});
-              subCategories1 = {...subCategories1, ...mitem_ob};
-              return {
-                ...r,
-                [c.id]: {...c, menu_items: menu_items.map(m => m.id)},
-              };
+            let categoriesSortable = titles.reduce((m, t_id) => {
+              let fc = totalMenus
+                .filter(o => {
+                  let valid = o.type == PRODUCT_MENU_TYPE.restuarant.id;
+                  // if (type == -1) {
+                  //   valid = true;
+                  // }
+                  // console.log()
+
+                  let menu_titles = o.menu_titles || [];
+                  // valid &&
+                  //   console.log(
+                  //     "totalMenus - ",
+                  //     t_id,
+                  //     valid,
+                  //     o.id,
+                  //     menu_titles.map((d) => d.id),
+                  //     menu_titles.map((d) => d.id).includes(t_id)
+                  //   );
+                  return valid && menu_titles.map(d => d.id).includes(t_id); //o.menu_titles?.[0]?.id == t_id;
+                })
+                .map(c1 => c1.id);
+              // console.log("totalMenus fc", fc);
+
+              return {...m, [t_id]: fc};
             }, {});
+           // console.log('totalMenus categoriesSortable', categoriesSortable);
+            ///////////////////
+            let titles1 = totalMenus.reduce((a, b) => {
+              let title = b.menu_titles?.[0];
+              let valid = b.type == PRODUCT_MENU_TYPE.catering.id;
 
-            let categoriesSortable1 = catering_menu_categories.map(c => {
-              return c.id;
-            });
+              if (valid && title && !a.includes(title.id)) {
+                return [...a, title.id];
+              }
+              return a;
+            }, []);
+            // console.log("totalMenus", totalMenus, categories, titles);
 
-            // let {productMenuType} = getState().theme;
+            let categoriesSortable1 = titles1.reduce((m, t_id) => {
+              let fc = totalMenus
+                .filter(o => {
+                  let valid = o.type == PRODUCT_MENU_TYPE.catering.id;
 
+                  return valid && o.menu_titles?.[0]?.id == t_id;
+                })
+                .map(c1 => c1.id);
+              // console.log("totalMenus fc", fc);
+
+              return {...m, [t_id]: fc};
+            }, {});
+           
             dispatch(
               actions.set({
                 categories,
                 categoriesSortable,
-                subCategories,
-                selectedCategory: categoriesSortable.length
-                  ? categoriesSortable[0]
-                  : '',
-                selectedCategory1: categoriesSortable1.length
-                  ? categoriesSortable1[0]
-                  : '',
-
-                categories1,
+                menuItems,
                 categoriesSortable1,
-                subCategories1,
               }),
             );
 
@@ -191,7 +234,7 @@ export default {
           showProgress && dispatch(appAction.hideProgress());
           return returnResult;
         })
-        .catch(apiErrorHandler);
+       .catch(apiErrorHandler);
     };
   },
   getVariations(restaurant_id, showLoader = true) {

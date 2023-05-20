@@ -108,7 +108,7 @@ function TableHeader({}) {
 }
 function CartRow({id}) {
   const dispatch = useDispatch();
-  let subCategories = useSelector(s => s.user.subCategories);
+  let menuItems = useSelector(s => s.user.menuItems);
   let selectedCartItem = useSelector(s => s.order.selectedCartItem);
   let data = useSelector(s => s.order.cart[id]);
 
@@ -116,7 +116,7 @@ function CartRow({id}) {
     return null;
   }
   let [itemId, sizeId, addon, productMenuType] = id.split('-');
-  let itemData = subCategories[itemId];
+  let itemData = menuItems[itemId];
   let {price, sizeData} = getPrice(itemId, JSON.parse(sizeId));
   let add_ons = data.add_ons || [];
   let add_onsTotal = getAddonsTotal(add_ons);
@@ -319,7 +319,7 @@ function Footer({}) {
   const cart = useSelector(s => s.order.cart);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
   const userData = useSelector(s => s.user.userData);
-  const deviceId= useSelector(s => s.user.deviceId);
+  const deviceId = useSelector(s => s.user.deviceId);
   useEffect(() => {
     if (!showModal) {
       setPaymentMethod('');
@@ -331,7 +331,7 @@ function Footer({}) {
   const onPayPress = () => {
     let products = getCartProducts();
     if (!products.length) {
-      simpleToast('Add Products first.')
+      simpleToast('Add Products first.');
       return;
     }
     toggleModal();

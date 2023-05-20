@@ -5,8 +5,8 @@ import {simpleToast} from './app.helpers';
 
 export function getPrice(itemId, sizeIds = {}) {
   let {store} = React;
-  let {subCategories, subCategories1} = store.getState().user;
-  let data = subCategories[itemId]; //isCatering ? subCategories1[itemId] : subCategories[itemId];
+  let {menuItems} = store.getState().user;
+  let data = menuItems[itemId];
   if (!data) {
     return {};
   }
@@ -170,7 +170,7 @@ export function getGrandTotal() {
 export function getCartProducts() {
   let state = React.store.getState();
 
-  let {subCategories} = state.user;
+  let {menuItems} = state.user;
   let {cart} = state.order;
 
   let products = Object.keys(cart)
@@ -178,7 +178,7 @@ export function getCartProducts() {
       let cartItem = cart[id];
 
       let [itemId, sizeId, addon, productMenuType] = id.split('-');
-      let itemData = subCategories[itemId];
+      let itemData = menuItems[itemId];
 
       if (!itemData) {
         return false;
@@ -235,13 +235,13 @@ export function getAddons(data) {
 }
 export function getCartItem() {
   let {store} = React;
-  let {subCategories} = store.getState().user;
+  let {menuItems} = store.getState().user;
   let {cart} = store.getState().order;
   let Ids = Object.keys(cart)
     .map((id, i) => {
       let [itemId, sizeId, addon, productMenuType] = id.split('-');
 
-      let itemData = subCategories[itemId];
+      let itemData = menuItems[itemId];
 
       if (!itemData) {
         return false;
@@ -252,4 +252,45 @@ export function getCartItem() {
     .filter(Boolean);
 
   return Ids;
+}
+
+export function getAllCategories(categoriesSortable) {
+  let {store} = React;
+  let {menuTitles, categories, menuItems} = store.getState().user;
+
+  let titlesIds = Object.keys(categoriesSortable);
+  // console.log("[_items]", titlesIds);
+  let itemsList = titlesIds.reduce((data, titleId) => {
+    let titleData = menuTitles.find(d => d.id == titleId);
+
+    let catIds = categoriesSortable[titleId];
+
+    let mitems = catIds.reduce((r, cid) => {
+      let cdata = categories[cid];
+      let itemsIds = cdata.menu_items;
+      let _items = itemsIds.reduce((d, id) => {
+        let itemData = {
+          ...menuItems[id],
+          category: cdata,
+          menuTitle: titleData,
+        };
+        return [...d, itemData];
+      }, []);
+
+      let itemData = {
+        ...cdata,
+        totalProducts: _items.length,
+        menuTitle: titleData,
+      };
+      return [...r, itemData];
+    }, []);
+
+    return [...data, ...mitems];
+  }, []);
+
+  return itemsList;
+}
+
+export function mergeCategorySortable(categoriesSortable) {
+  return Array.from(new Set([].concat(...Object.values(categoriesSortable))));
 }

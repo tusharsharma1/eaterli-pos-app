@@ -5,7 +5,7 @@ import {getPercentValue} from '../helpers/app.helpers';
 import theme from '../theme';
 
 export default function CalculatorPriceInput({
-  size = 240,
+  size = 300,
   padding = 1,
   itemMargin = 1,
   onChange,
@@ -33,6 +33,9 @@ export default function CalculatorPriceInput({
   const resetPress = () => {
     setValue('');
   };
+  function isDecimal(num) {
+    return (num ^ 0) !== num;
+  }
   const getPrice = () => {
     let _val = parseFloat(value || 0) / 100;
     return _val;
@@ -43,9 +46,9 @@ export default function CalculatorPriceInput({
     // return _val / d;
   };
 
-  const getCompleteNo = no => {
+  const getCompleteNo = (no, m = 5) => {
     let l = no + 10;
-    let m = 5;
+
     // console.log('nnn l', l);
     let add = 0;
     for (let i = m; i <= l; i = i + m) {
@@ -89,18 +92,20 @@ export default function CalculatorPriceInput({
 
   let getButtons = amt => {
     let roundAmt = getCompleteNo(amt);
+    let roundAmt10 = getCompleteNo(amt, 10);
 
     let nextNotes = notes.filter(d => d > amt);
-    let b = [amt, roundAmt, ...nextNotes];
+    let b = [amt, roundAmt, roundAmt10, ...nextNotes];
     if (amt > 100 && amt % 10 != 0) {
       b.push(roundAmt + 5);
     }
     let btns = Array.from(new Set(b)).sort((a, b) => a - b);
     return btns;
   };
-  let btns = getButtons(parseFloat(total));
 
-  // console.log('nnn buttons', ...btns);
+  let btns = getButtons(parseFloat(total));
+  let price = getPrice();
+  console.log('nnn buttons', total, ...btns);
   // let completePrice = getCompleteNo(parseInt(total));
   return (
     <View
@@ -135,12 +140,13 @@ export default function CalculatorPriceInput({
             Received amount ($)
           </Text>
           <Text bold align="right" size={getPercentValue(itemSize, 30)}>
-            ${getPrice()}
+            ${isDecimal(price) ? price.toFixed(2) : price}
           </Text>
         </View>
         <Btn
           text="C"
           size={itemSize}
+          heightPerc={100}
           backgroundColor={theme.colors.secondaryColor}
           color={'#fff'}
           itemMargin={itemMargin}
@@ -180,7 +186,11 @@ export default function CalculatorPriceInput({
           itemMargin={itemMargin}
           // text={`$${completePrice + 20}`}
           // data={(completePrice + 20) * 100}
-          text={btns[0] ? `$${btns[0]}` : ''}
+          text={
+            btns[0]
+              ? `$${isDecimal(btns[0]) ? btns[0].toFixed(2) : btns[0]}`
+              : ''
+          }
           data={(btns[0] ?? 0) * 100}
           onPress={onAmountPress}
         />
@@ -291,6 +301,7 @@ export default function CalculatorPriceInput({
 function Btn({
   text = '',
   size = 80,
+  heightPerc = 75,
   backgroundColor = '#fff',
   color = '#212121',
   itemMargin,
@@ -305,7 +316,7 @@ function Btn({
       style={{
         backgroundColor: backgroundColor,
         width: size,
-        height: size,
+        height: getPercentValue(size, heightPerc),
         margin: itemMargin,
         alignItems: 'center',
         justifyContent: 'center',
@@ -314,7 +325,12 @@ function Btn({
         borderRadius: 5,
         // flex: 1,
       }}>
-      <Text bold color={color} size={getPercentValue(size, 28)}>
+      <Text
+        bold
+        color={color}
+        size={Math.min(24, getPercentValue(size, 24))}
+        // size={24}
+      >
         {text}
       </Text>
     </TouchableOpacity>

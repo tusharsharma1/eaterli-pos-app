@@ -23,13 +23,13 @@ const initialState = {
     deviceToken: '',
     userData: null,
 
-    categoriesSortable: [],
+    categoriesSortable: {},
     categories: {},
-    subCategories: {},
+    menuItems: {},
 
-    categoriesSortable1: [],
-    categories1: {},
-    subCategories1: {},
+    categoriesSortable1: {},
+
+
 
     selectedCategory: '',
     selectedCategory1: '',

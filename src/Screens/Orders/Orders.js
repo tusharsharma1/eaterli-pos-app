@@ -27,7 +27,7 @@ export default function Orders({navigation, route}) {
     loadData();
   }, []);
   const loadData = async () => {
-    let r = await dispatch(userAction.getOrders(selectedLocation));
+    let r = await dispatch(userAction.getOrders(selectedLocation,!orders.length));
   };
 
   const columns = useMemo(() => {
@@ -85,11 +85,11 @@ export default function Orders({navigation, route}) {
       },
     ];
   }, []);
-  let received_amount =
+  let remaining_amount =
     parseFloat(selectedOrder?.received_amount) -
-    parseFloat(selectedOrder?.total);
-  if (!isFinite(received_amount)) {
-    received_amount = 0;
+    parseFloat(selectedOrder?.order_total);
+  if (!isFinite(remaining_amount)) {
+    remaining_amount = 0;
   }
   return (
     <>
@@ -502,7 +502,7 @@ export default function Orders({navigation, route}) {
                             }}
                           />
                           <View>
-                            <Text>{data.name}</Text>
+                            <Text>{data.item_name}</Text>
                             {!!variants.length && (
                               <Text color="#666" size={12}>
                                 {variants.map(r => r.title).join(', ')}
@@ -547,9 +547,9 @@ export default function Orders({navigation, route}) {
               }}>
               <InfoRow
                 title={'Grand Total:'}
-                value={`$ ${parseFloat(selectedOrder.total).toFixed(2)}`}
+                value={`$ ${parseFloat(selectedOrder.order_total).toFixed(2)}`}
               />
-              {selectedOrder.paymentMethod == PAYMENT_METHOD.cash.id && (
+              {selectedOrder.payment_method == PAYMENT_METHOD.cash.id && (
                 <>
                   <InfoRow
                     title={'Received Amount:'}
@@ -559,7 +559,7 @@ export default function Orders({navigation, route}) {
                   />
                   <InfoRow
                     title={'Remaining Amount:'}
-                    value={`$ ${parseFloat(received_amount).toFixed(2)}`}
+                    value={`$ ${parseFloat(remaining_amount).toFixed(2)}`}
                   />
                 </>
               )}

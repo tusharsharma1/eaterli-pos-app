@@ -16,7 +16,7 @@ import useWindowDimensions from '../../hooks/useWindowDimensions';
 function _MenuItem({}) {
   const dispatch = useDispatch();
   let {width} = useWindowDimensions();
-  let {categories, subCategories, isCatering, selectedCategory} = useProducts();
+  let {categories, menuItems, isCatering, selectedCategory} = useProducts();
 
   const mobileBuilder = useSelector(s => s.user.mobileBuilder);
 
@@ -303,7 +303,7 @@ function _MenuItem({}) {
         paddingHorizontal: 10,
       }}>
       {cat.menu_items.map(id => {
-        let data = subCategories[id];
+        let data = menuItems[id];
         let {price, cutPrice} = getPrice(id, '', false);
         if (!data) {
           return null;
