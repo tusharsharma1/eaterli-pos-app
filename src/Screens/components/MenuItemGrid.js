@@ -139,7 +139,9 @@ function _Item({data, onPress, containerWidth}) {
   if (!d) {
     return null;
   }
-
+  if (d.pos_status == 0) {
+    return null;
+  }
   let empty = data.empty === true;
 
   let marginOffset = 2;
@@ -399,10 +401,15 @@ function ItemModal({toggleModal, showModal, data, containerWidth}) {
 }
 function Variants({data, selectedItems = [], onItemPress, containerWidth}) {
   const options = useSelector(s => s.user.options);
-
-  if (!data.items && !data.items.length) {
+  let items = (data.items ?? []).filter(m => {
+    let pos_status = m.pos_status ?? true;
+    return pos_status;
+  });
+  // console.log('pppp', items);
+  if (!items.length) {
     return null;
   }
+ 
   let op = options.find(s => s.id == data.title_id);
   if (!op) {
     return null;
@@ -442,7 +449,7 @@ function Variants({data, selectedItems = [], onItemPress, containerWidth}) {
           flexWrap: 'wrap',
           justifyContent: 'space-between',
         }}>
-        {formatGridData(data.items, modalCol).map((m, i) => {
+        {formatGridData(items, modalCol).map((m, i) => {
           let opdata = op.variation_options.find(o => o.id == m.id);
           let price = m.price;
           let empty = m.empty === true;
@@ -464,6 +471,11 @@ function Variants({data, selectedItems = [], onItemPress, containerWidth}) {
             borderRadius: 4,
             alignItems: 'center',
           };
+
+          let pos_status = m.pos_status ?? true;
+          if (!pos_status) {
+            return null;
+          }
           if (empty) {
             // console.log('[m.id] m.id',data.id, m.id,`empty-${i}`);
             return <View key={`empty-${i}`} style={_style}></View>;
@@ -512,7 +524,13 @@ function Variants({data, selectedItems = [], onItemPress, containerWidth}) {
 }
 function AddOns({data, selectedItems = [], onItemPress, containerWidth}) {
   let addonProductsById = useSelector(s => s.user.addonProductsById);
-  if (!data.items && !data.items.length) {
+
+  let items = (data.items ?? []).filter(m => {
+    let pos_status = data.conf?.[m]?.pos_status ?? true;
+    return pos_status;
+  });
+  // console.log('pppp', items);
+  if (!items.length) {
     return null;
   }
   return (
@@ -536,7 +554,7 @@ function AddOns({data, selectedItems = [], onItemPress, containerWidth}) {
           flexWrap: 'wrap',
           justifyContent: 'space-between',
         }}>
-        {formatGridData(data.items, modalCol).map((m, i) => {
+        {formatGridData(items, modalCol).map((m, i) => {
           let item = addonProductsById[m];
           // let opdata = op.variation_options.find(o => o.id == m.id);
           // let price = m.price;
@@ -560,7 +578,10 @@ function AddOns({data, selectedItems = [], onItemPress, containerWidth}) {
             alignItems: 'center',
           };
           // console.log('[m.id] m.id', i, item);
-
+          let pos_status = data.conf?.[m]?.pos_status ?? true;
+          if (!pos_status) {
+            return null;
+          }
           if (empty) {
             // console.log('[m.id] m.id',data.id, m.id,`empty-${i}`);
             return <View key={`empty-${i}`} style={_style}></View>;

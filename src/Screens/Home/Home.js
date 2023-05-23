@@ -1,19 +1,19 @@
-import { convertDistance, getPreciseDistance } from 'geolib';
-import React, { useEffect, useState } from 'react';
-import {
-  View
-} from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import {convertDistance, getPreciseDistance} from 'geolib';
+import React, {useEffect, useState} from 'react';
+import {ScrollView, View} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
 import AppLoader from '../../components/AppLoader';
 import Container from '../../components/Container';
 import Header from '../../components/Header';
-import { getPercentValue } from '../../helpers/app.helpers';
-import { getCurrentPosition } from '../../helpers/location.helper';
+import {getPercentValue} from '../../helpers/app.helpers';
+import {getCurrentPosition} from '../../helpers/location.helper';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
 import userAction from '../../redux/actions/user.action';
 import CartView from '../components/CartView';
 import CategoryGrid from '../components/CategoryGrid';
 import MenuItemGrid from '../components/MenuItemGrid';
+import Button from '../../components/Button';
+import Text from '../../components/Text';
 export default function Home(props) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
@@ -80,6 +80,7 @@ export default function Home(props) {
 
         // dispatch(userAction.set({selectedLocation: location.id}));
         await Promise.all([
+          dispatch(userAction.getMenuTitle(restaurant.id, false)),
           dispatch(userAction.getVariations(restaurant.id, false)),
           dispatch(userAction.getMenus(distL.id, false)),
           dispatch(userAction.getAddons(distL.id, '', false)),
@@ -117,6 +118,7 @@ export default function Home(props) {
           <CartView />
         </View>
         {!loaded && <AppLoader message={'Loading'} />}
+
         {/* <ScrollView
           style={{
             position: 'absolute',
@@ -128,6 +130,12 @@ export default function Home(props) {
             borderWidth: 2,
             borderColor: 'red',
           }}>
+          <Button
+            onPress={() => {
+              props.navigation.navigate('ProductMenu');
+            }}>
+            s
+          </Button>
           <Text>{logs.join('\n')}</Text>
         </ScrollView> */}
       </View>

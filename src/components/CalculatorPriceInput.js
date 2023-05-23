@@ -87,25 +87,45 @@ export default function CalculatorPriceInput({
     // }
   };
 
+  const notesCountAmount = (amount, note = 10) => {
+    let totalNotes = parseInt(amount / note);
+    let r = amount % note;
+    if (r > 0) {
+      totalNotes = totalNotes + 1;
+    }
+    console.log('nnn notesCountAmount',amount, note,totalNotes,totalNotes * note);
+    return  totalNotes * note;
+  };
+ 
   let itemSize = (size - padding * 2) / 4;
   itemSize = itemSize - itemMargin * 2;
 
   let getButtons = amt => {
-    let roundAmt = getCompleteNo(amt);
-    let roundAmt10 = getCompleteNo(amt, 10);
+    // let roundAmt = getCompleteNo(amt);
+    // let roundAmt10 = getCompleteNo(amt, 10);
 
-    let nextNotes = notes.filter(d => d > amt);
-    let b = [amt, roundAmt, roundAmt10, ...nextNotes];
-    if (amt > 100 && amt % 10 != 0) {
-      b.push(roundAmt + 5);
-    }
+    // let nextNotes = notes.filter(d => d > amt);
+    // let b = [amt, roundAmt, roundAmt10, ...nextNotes];
+    // if (amt > 100 && amt % 10 != 0) {
+    //   b.push(roundAmt + 5);
+    // }
+
+    let b = [
+      amt,
+      notesCountAmount(total, 5),
+      notesCountAmount(total, 10),
+      notesCountAmount(total, 20),
+      notesCountAmount(total, 50),
+      notesCountAmount(total, 100),
+    ];
+    // console.log('nnn buttons', b);
     let btns = Array.from(new Set(b)).sort((a, b) => a - b);
     return btns;
   };
 
   let btns = getButtons(parseFloat(total));
   let price = getPrice();
-  console.log('nnn buttons', total, ...btns);
+  console.log('nnn buttons final', total, btns);
   // let completePrice = getCompleteNo(parseInt(total));
   return (
     <View
@@ -328,8 +348,8 @@ function Btn({
       <Text
         bold
         color={color}
-        size={Math.min(24, getPercentValue(size, 24))}
-        // size={24}
+       size={Math.min(15, getPercentValue(size, 20))}
+        // size={14}
       >
         {text}
       </Text>

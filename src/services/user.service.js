@@ -40,6 +40,9 @@ export default {
   getVariations(restaurant_id) {
     return callApi('GET', `/api/restaurants/variations/${restaurant_id}`);
   },
+  getMenuTitle(restaurant_id) {
+    return callApi('GET', `/api/list/menu/title/${restaurant_id}`);
+  },
   createOrder(data) {
     return callApi('POST', `/api/pos-order/create`, data, {
       isformData: false,
@@ -48,6 +51,11 @@ export default {
   getOrders(restaurant_location_id) {
     let d = getQueryString({restaurant_location_id});
     return callApi('GET', `/api/pos-order/list?${d}`);
+  },
+  updateSubCategory(data, id, config) {
+    return callApi(config.method, `/api/menu-items/${id}`, data, {
+      isformData: config.isformData,
+    });
   },
 };
 

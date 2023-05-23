@@ -90,6 +90,20 @@ function Navigator() {
             require('../Screens/ProductMenu/ProductMenu').default
           }
         />
+          <Stack.Screen
+          name="MenuCategories"
+          getComponent={() =>
+            require('../Screens/ProductMenu/MenuCategories').default
+          }
+        />
+          <Stack.Screen
+          name="MenuItems"
+          getComponent={() =>
+            require('../Screens/ProductMenu/MenuItems').default
+          }
+        />
+
+
       </Stack.Navigator>
     </NavigationContainer>
   );

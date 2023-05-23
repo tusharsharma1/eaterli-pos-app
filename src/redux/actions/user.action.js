@@ -1,9 +1,9 @@
-import { PRODUCT_MENU_TYPE } from '../../constants/order.constant';
+import {PRODUCT_MENU_TYPE} from '../../constants/order.constant';
 import {apiErrorHandler, apiMessageHandler} from '../../helpers/app.helpers';
 import userService from '../../services/user.service';
 import {actions} from '../reducers/user.reducer';
 import appAction from './app.action';
-import _ from "lodash";
+import _ from 'lodash';
 export default {
   ...actions,
 
@@ -165,7 +165,7 @@ export default {
 
               return a;
             }, []);
-            console.log("totalMenus title", titles);
+            console.log('totalMenus title', titles);
             // console.log("totalMenus", menuItems, categories, titles);
 
             let categoriesSortable = titles.reduce((m, t_id) => {
@@ -194,7 +194,7 @@ export default {
 
               return {...m, [t_id]: fc};
             }, {});
-           // console.log('totalMenus categoriesSortable', categoriesSortable);
+            // console.log('totalMenus categoriesSortable', categoriesSortable);
             ///////////////////
             let titles1 = totalMenus.reduce((a, b) => {
               let title = b.menu_titles?.[0];
@@ -219,7 +219,7 @@ export default {
 
               return {...m, [t_id]: fc};
             }, {});
-           
+
             dispatch(
               actions.set({
                 categories,
@@ -234,7 +234,33 @@ export default {
           showProgress && dispatch(appAction.hideProgress());
           return returnResult;
         })
-       .catch(apiErrorHandler);
+        .catch(apiErrorHandler);
+    };
+  },
+
+  getMenuTitle(restaurant_id, showLoader = true) {
+    return (dispatch, getState) => {
+      showLoader && dispatch(appAction.showProgress());
+      return userService
+        .getMenuTitle(restaurant_id)
+        .then(res => {
+          let returnResult = res;
+
+          if (res && !res.status) {
+            // apiMessageHandler(res.message);
+            returnResult = false;
+          }
+          if (returnResult) {
+            dispatch(
+              actions.set({
+                menuTitles: res.data,
+              }),
+            );
+          }
+          showLoader && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
     };
   },
   getVariations(restaurant_id, showLoader = true) {
@@ -405,6 +431,32 @@ export default {
                 orders: data,
               }),
             );
+          }
+          showLoader && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+
+  updateSubCategory(
+    data,
+    id,
+    config = { isformData: false, method: "PATCH", showLoader: false }
+  ) {
+    let { showLoader = false, isformData = false, method = "PATCH" } = config;
+ 
+    return (dispatch, getState) => {
+      showLoader && dispatch(appAction.showProgress());
+      return userService
+      .updateSubCategory(data, id, { isformData, method })
+        .then(res => {
+          let returnResult = res;
+          if (res && !res.status) {
+            showAlert && apiMessageHandler(res);
+            returnResult = false;
+          }
+          if (returnResult) {
           }
           showLoader && dispatch(appAction.hideProgress());
           return returnResult;

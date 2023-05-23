@@ -14,9 +14,9 @@ import theme from '../../theme';
 let col = 4;
 let hPadding = 2;
 
-export default function ProductMenu({navigation, route}) {
+export default function MenuCategories({navigation, route}) {
   const dispatch = useDispatch();
-  let {menuTitlesIds} = useProducts();
+  let {selectedMenuTitleCategories} = useProducts();
   useEffect(() => {
     loadData();
   }, []);
@@ -44,12 +44,7 @@ export default function ProductMenu({navigation, route}) {
     return index; //item.id;
   };
   const onItemPress = data => {
-    dispatch(
-      userAction.set({
-        selectedMenuTitle: data.id,
-      }),
-    );
-    navigation.navigate('MenuCategories');
+    navigation.navigate('MenuItems', {id: data.id});
   };
   const renderItem = ({item, index}) => {
     return (
@@ -62,7 +57,7 @@ export default function ProductMenu({navigation, route}) {
   };
   return (
     <>
-      <Header title={'Select Menu'} back />
+      <Header title={'Select Category'} back />
       {/* <CategoryNav /> */}
       <Container style={{flex: 1}}>
         <FlatList
@@ -72,7 +67,7 @@ export default function ProductMenu({navigation, route}) {
             paddingVertical: 2,
             paddingHorizontal: hPadding,
           }}
-          data={formatGridData(menuTitlesIds, col)}
+          data={formatGridData(selectedMenuTitleCategories, col)}
           keyExtractor={keyExtractor}
           renderItem={renderItem}
           // refreshing={!loaded}
@@ -86,9 +81,8 @@ export default function ProductMenu({navigation, route}) {
 }
 function _Item({data, onPress, containerWidth = theme.wp(100)}) {
   const dispatch = useDispatch();
-
-  const _data = useSelector(s => s.user.menuTitles.find(t => t.id == data));
-
+  const {categories} = useProducts();
+  const _data = categories[data];
   if (!_data) {
     return null;
   }
@@ -137,7 +131,7 @@ function _Item({data, onPress, containerWidth = theme.wp(100)}) {
         medium
         size={getPercentValue(itemSize, 7.6)}
         align="center">
-        {_data.title}
+        {_data.category_name}
       </Text>
     </TouchableOpacity>
   );
