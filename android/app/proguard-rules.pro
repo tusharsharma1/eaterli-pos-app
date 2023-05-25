@@ -30,3 +30,7 @@
 }
 
 # keep class com.google.android.gms.common.** {*;}
+
+-keep class com.zcs.base.SmartPosJni{*;}
+-keep class com.zcs.sdk.DriverManager{*;}
+-keep class com.zcs.sdk.emv.**{*;}

@@ -90,6 +90,13 @@ function Navigator() {
             require('../Screens/ProductMenu/ProductMenu').default
           }
         />
+        
+        <Stack.Screen
+          name="TestingPOS"
+          getComponent={() =>
+            require('../Screens/TestingPOS/TestingPOS').default
+          }
+        />
           <Stack.Screen
           name="MenuCategories"
           getComponent={() =>

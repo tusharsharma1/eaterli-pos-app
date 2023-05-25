@@ -188,6 +188,13 @@ function DrawerContent({navigation}) {
         /> */}
          <DrawerItem
           // icon={WalletIcon}
+          title="Testing POS"
+          // subTitle="USD 0"
+          onPress={drawerItemPress}
+          screenName="TestingPOS"
+        />
+         <DrawerItem
+          // icon={WalletIcon}
           title="Product Menu"
           // subTitle="USD 0"
           onPress={drawerItemPress}
