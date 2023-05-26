@@ -1,6 +1,12 @@
 import {convertDistance, getPreciseDistance} from 'geolib';
 import React, {useEffect, useState} from 'react';
-import {ScrollView, TouchableOpacity, View} from 'react-native';
+import {
+  PermissionsAndroid,
+  Platform,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import AppLoader from '../../components/AppLoader';
 import Container from '../../components/Container';
@@ -175,7 +181,7 @@ export default function Home(props) {
               text="No Sale"
               iconName="dollar-sign"
               onPress={() => {
-                POSModule.cutPaperPrint();
+                POSModule.doOpenCashBox();
               }}
             />
             <IconBtn text="Adjust Float" iconName="retweet" />
@@ -185,6 +191,30 @@ export default function Home(props) {
               iconName="utensils"
               onPress={() => {
                 toggleModal();
+              }}
+            />
+            <IconBtn
+              text="Scan Reader"
+              iconName="qrcode"
+              onPress={async () => {
+                // We need to ask permission for Android only
+                if (Platform.OS === 'android') {
+                  // Calling the permission function
+                  const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.CAMERA,
+                    {
+                      title: 'Eaterli POS Camera Permission',
+                      message: 'Eaterli POS needs access to your camera',
+                    },
+                  );
+                  if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                    // Permission Granted
+                    POSModule.scanQRCode();
+                  } else {
+                    // Permission Denied
+                    alert('CAMERA Permission Denied');
+                  }
+                }
               }}
             />
           </Container>
@@ -203,7 +233,7 @@ export default function Home(props) {
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'center',
-              marginTop:20
+              marginTop: 20,
             }}>
             <DiningItem
               iconName="utensils"
@@ -312,7 +342,7 @@ function DiningItem({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#eee',
-        borderRadius:5
+        borderRadius: 5,
       }}>
       <IconComponent color={'#9a9a9a'} size={18} name={iconName} />
       <Text medium mt={10} size={16}>

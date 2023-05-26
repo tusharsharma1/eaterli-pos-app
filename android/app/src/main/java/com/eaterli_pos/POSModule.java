@@ -1,5 +1,6 @@
 package com.eaterli_pos;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -36,7 +37,7 @@ import com.zcs.sdk.print.PrnStrFormat;
 import com.zcs.sdk.print.PrnTextFont;
 import com.zcs.sdk.print.PrnTextStyle;
 import org.json.JSONException;
-
+import com.google.zxing.client.android.CaptureActivity;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -150,7 +151,15 @@ public class POSModule extends ReactContextBaseJavaModule {
         callBack.invoke(map);
 
     }
+    @ReactMethod
+    public void scanQRCode() {
+        Intent mIntent = new Intent(context, CaptureActivity.class);
+         mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//          mIntent.setClass(getApplicationContext(), CaptureActivity.class);
+        context.startActivity(mIntent);
 
+
+    }
 
 
     private String printText() {
