@@ -1,6 +1,6 @@
 import {convertDistance, getPreciseDistance} from 'geolib';
 import React, {useEffect, useState} from 'react';
-import {ScrollView, View} from 'react-native';
+import {ScrollView, TouchableOpacity, View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import AppLoader from '../../components/AppLoader';
 import Container from '../../components/Container';
@@ -14,13 +14,24 @@ import CategoryGrid from '../components/CategoryGrid';
 import MenuItemGrid from '../components/MenuItemGrid';
 import Button from '../../components/Button';
 import Text from '../../components/Text';
+import theme from '../../theme';
+import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
+import POSModule from '../../helpers/pos.helper';
+import ModalContainer from '../../components/ModalContainer';
+import orderAction from '../../redux/actions/order.action';
+import {DINING_OPTION} from '../../constants/order.constant';
 export default function Home(props) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
   const [logs, setLogs] = useState([]);
   const userData = useSelector(s => s.user.userData);
+  const diningOption = useSelector(s => s.order.diningOption);
+  const diningOptionModal = useSelector(s => s.order.diningOptionModal);
+
   let {width} = useWindowDimensions();
+
   useEffect(() => {
+    POSModule.initSDK();
     setLogs([]);
     loadData();
   }, []);
@@ -97,7 +108,13 @@ export default function Home(props) {
     setLoaded(true);
   };
   //
-
+  const toggleModal = () => {
+    dispatch(
+      orderAction.set({
+        diningOptionModal: {show: !diningOptionModal.show, ref: ''},
+      }),
+    );
+  };
   return (
     <>
       <View style={{flex: 1, flexDirection: 'row'}}>
@@ -117,28 +134,190 @@ export default function Home(props) {
           }}>
           <CartView />
         </View>
-        {!loaded && <AppLoader message={'Loading'} />}
 
-        {/* <ScrollView
+        <View
           style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            width: 350,
-            height: 200,
-            backgroundColor: '#fff',
-            borderWidth: 2,
-            borderColor: 'red',
+            // width: 50,
+            backgroundColor: theme.colors.secondaryColor,
+            paddingHorizontal: 5,
+            paddingVertical: 5,
           }}>
-          <Button
-            onPress={() => {
-              props.navigation.navigate('ProductMenu');
+          <Container scroll showsVerticalScrollIndicator={false}>
+            <IconBtn
+              text="Menu"
+              iconName="desktop"
+              onPress={() => {
+                props.navigation.navigate('ProductMenu');
+              }}
+            />
+            <IconBtn text="Customers" iconName="users" />
+            <IconBtn
+              text="Orders"
+              iconName="clipboard"
+              onPress={() => {
+                props.navigation.navigate('Orders');
+              }}
+            />
+            <IconBtn
+              text="Print"
+              iconName="print"
+              onPress={() => {
+                POSModule.textPrint(
+                  {id: 22, name: 'aakash', active: true},
+                  res => {
+                    console.log('[textPrint]', res);
+                    // alert(JSON.stringify(res));
+                  },
+                );
+              }}
+            />
+            <IconBtn
+              text="No Sale"
+              iconName="dollar-sign"
+              onPress={() => {
+                POSModule.cutPaperPrint();
+              }}
+            />
+            <IconBtn text="Adjust Float" iconName="retweet" />
+            <IconBtn
+              text="Dining Option"
+              subText={DINING_OPTION[diningOption]?.text}
+              iconName="utensils"
+              onPress={() => {
+                toggleModal();
+              }}
+            />
+          </Container>
+        </View>
+
+        <ModalContainer
+          // hideTitle
+          center
+          // noscroll
+          onRequestClose={toggleModal}
+          visible={diningOptionModal.show}
+          title={`Dining Option`}
+          width={350}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop:20
             }}>
-            s
-          </Button>
-          <Text>{logs.join('\n')}</Text>
-        </ScrollView> */}
+            <DiningItem
+              iconName="utensils"
+              text={DINING_OPTION.dine_in.text}
+              onPress={() => {
+                dispatch(
+                  orderAction.set({
+                    diningOption: DINING_OPTION.dine_in.id,
+                  }),
+                );
+                toggleModal();
+                if (diningOptionModal.ref == 'pay-btn') {
+                  dispatch(
+                    orderAction.set({
+                      payModal: {show: true, ref: ''},
+                    }),
+                  );
+                }
+              }}
+            />
+            <DiningItem
+              iconName="utensils"
+              text={DINING_OPTION.take_out.text}
+              onPress={() => {
+                dispatch(
+                  orderAction.set({
+                    diningOption: DINING_OPTION.take_out.id,
+                  }),
+                );
+                toggleModal();
+                if (diningOptionModal.ref == 'pay-btn') {
+                  dispatch(
+                    orderAction.set({
+                      payModal: {show: true, ref: ''},
+                    }),
+                  );
+                }
+              }}
+            />
+          </View>
+        </ModalContainer>
+
+        {!loaded && <AppLoader message={'Loading'} />}
       </View>
     </>
+  );
+}
+
+function IconBtn({
+  text,
+  subText,
+  onPress,
+  iconName,
+  IconComponent = FontAwesome5Icon,
+}) {
+  let {width} = useWindowDimensions();
+  let w = Math.min(117, getPercentValue(width, 12));
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      style={{
+        width: w,
+        backgroundColor: '#eee',
+        borderRadius: 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: getPercentValue(w, 9),
+        paddingHorizontal: getPercentValue(w, 8),
+        marginBottom: 5,
+      }}>
+      <IconComponent
+        color={'#9a9a9a'}
+        size={getPercentValue(w, 16)}
+        name={iconName}
+      />
+      <Text semibold mt={getPercentValue(w, 5)} size={getPercentValue(w, 11)}>
+        {text}
+      </Text>
+      {!!subText && (
+        <Text semibold size={getPercentValue(w, 10)}>
+          {subText}
+        </Text>
+      )}
+    </TouchableOpacity>
+  );
+}
+
+function DiningItem({
+  text,
+  iconName,
+  IconComponent = FontAwesome5Icon,
+  onPress,
+}) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      style={{
+        paddingHorizontal: 10,
+        paddingVertical: 20,
+        // borderBottomColor: '#eee',
+        // borderBottomWidth: 1,
+        flex: 1,
+        marginHorizontal: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#eee',
+        borderRadius:5
+      }}>
+      <IconComponent color={'#9a9a9a'} size={18} name={iconName} />
+      <Text medium mt={10} size={16}>
+        {text}
+      </Text>
+    </TouchableOpacity>
   );
 }

@@ -314,24 +314,38 @@ function CartRow({id}) {
 function Footer({}) {
   const dispatch = useDispatch();
 
-  const [showModal, setShowModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
   const cart = useSelector(s => s.order.cart);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
   const userData = useSelector(s => s.user.userData);
   const deviceId = useSelector(s => s.user.deviceId);
+  const diningOption = useSelector(s => s.order.diningOption);
+
+  const payModal = useSelector(s => s.order.payModal);
   useEffect(() => {
-    if (!showModal) {
+    if (!payModal.show) {
       setPaymentMethod('');
     }
-  }, [showModal]);
+  }, [payModal]);
   const toggleModal = () => {
-    setShowModal(!showModal);
+    dispatch(
+      orderAction.set({
+        payModal: {show: !payModal.show, ref: ''},
+      }),
+    );
   };
   const onPayPress = () => {
     let products = getCartProducts();
     if (!products.length) {
       simpleToast('Add Products first.');
+      return;
+    }
+    if (!diningOption) {
+      dispatch(
+        orderAction.set({
+          diningOptionModal: {show: true, ref: 'pay-btn'},
+        }),
+      );
       return;
     }
     toggleModal();
@@ -373,7 +387,7 @@ function Footer({}) {
     if (r && r.status) {
       simpleToast(r.message);
       toggleModal();
-      dispatch(orderAction.set({cart: {}}));
+      dispatch(orderAction.set({cart: {}, diningOption: ''}));
     }
   };
   const renderView = () => {
@@ -468,7 +482,7 @@ function Footer({}) {
         center
         // noscroll
         onRequestClose={toggleModal}
-        visible={showModal}
+        visible={payModal.show}
         title={'Pay'}
         width={720}
         height={'98%'}

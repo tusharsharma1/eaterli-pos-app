@@ -137,7 +137,7 @@ function _ModalContainer({
                 style={{
                   paddingHorizontal: 10,
                   paddingVertical: 5,
-                  opacity: 0.9,
+                  // opacity: 0.9,
                   // backgroundColor: 'green',
                   alignSelf: 'flex-start',
                 }}
@@ -145,7 +145,7 @@ function _ModalContainer({
                 <FontAwesome5
                   name={'times'}
                   size={18}
-                  color={theme.colors.textColor}
+                  color={'gray'}
                 />
               </TouchableOpacity>
             </View>

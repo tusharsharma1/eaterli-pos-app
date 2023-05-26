@@ -68,7 +68,10 @@ const initialState = {
     cart: {},
     productMenuType: PRODUCT_MENU_TYPE.restuarant.id,
     orderType: 'pickup',
-    selectedCartItem:null
+    selectedCartItem:null,
+    diningOption:'',
+    diningOptionModal:{show:false,ref:''},
+    payModal:{show:false,ref:''}
   },
 };
 export default initialState;

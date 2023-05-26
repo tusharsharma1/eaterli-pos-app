@@ -10,3 +10,8 @@ export const PAYMENT_METHOD = {
   card: {id: 'card'},
   cash: {id: 'cash'},
 };
+
+export const DINING_OPTION = {
+  dine_in: {id: 'dine_in',text:'Dine In'},
+  take_out: {id: 'take_out',text:'Take Out'},
+};
