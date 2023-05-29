@@ -400,7 +400,8 @@ export default function Orders({navigation, route}) {
         onRequestClose={toggleModal}
         visible={showModal}
         title={`Order Details`}
-        width={550}
+        landscapeWidth={550}
+        // width={550}
         // height={theme.hp(60)}
         // borderRadius={25}
         // renderFooter={() => {

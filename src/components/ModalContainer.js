@@ -13,6 +13,8 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import theme from '../theme';
 import Text from './Text';
 import AppProgess from './AppProgess';
+import useWindowDimensions from '../hooks/useWindowDimensions';
+import {getPercentValue} from '../helpers/app.helpers';
 
 function _ModalContainer({
   visible,
@@ -21,14 +23,23 @@ function _ModalContainer({
   hideTitle = false,
   noscroll,
   fullHeight,
-  height = theme.hp(80),
+  height,
   minHeight = 200,
   center,
   children,
   renderFooter,
-  borderRadius=10,
-  width=theme.wp(92),
+  borderRadius = 10,
+  landscapeWidth,
+  width,
+  widthPerc = 92,
 }) {
+  let {width: sw, height: sh, isPortrait} = useWindowDimensions();
+  width = width ?? getPercentValue(sw, widthPerc);
+  if (!isPortrait) {
+    width = landscapeWidth ?? width;
+  }
+  height = height ?? getPercentValue(sh, 80);
+
   // console.log(onRequestClose);
   let ConELE = noscroll ? View : ScrollView;
   let heightProp = fullHeight ? 'height' : 'maxHeight';
@@ -142,11 +153,7 @@ function _ModalContainer({
                   alignSelf: 'flex-start',
                 }}
                 onPress={onRequestClose}>
-                <FontAwesome5
-                  name={'times'}
-                  size={18}
-                  color={'gray'}
-                />
+                <FontAwesome5 name={'times'} size={18} color={'gray'} />
               </TouchableOpacity>
             </View>
           )}

@@ -151,14 +151,23 @@ export function getGrandTotal() {
     );
     let add_ons = cart[id].add_ons || [];
     let add_onsTotal = getAddonsTotal(add_ons);
-
+    let _discount = parseFloat(cart[id].discount ?? 0);
+    if(isNaN(_discount)){
+      _discount=0
+    }
     // console.log(
     //   "[log",
-    //   price,
-    //   add_onsTotal,
-    //   cart[id].qty * (add_onsTotal + parseFloat(price))
+    //   _discount
     // );
     let pTotal = cart[id].qty * (add_onsTotal + parseFloat(price));
+
+    if (_discount) {
+      pTotal = pTotal - pTotal * (_discount / 100);
+    }
+    // console.log(
+    //   "[log pTotal",
+    //   pTotal
+    // );
     if (isNaN(pTotal)) {
       return r;
     }
@@ -209,6 +218,7 @@ export function getCartProducts() {
         variants: sizeData,
         add_ons: cartItem.add_ons,
         special_ins: cartItem.special_ins,
+        discount: cartItem.discount??0,
       };
       //return {...r,[i+1]:{id:itemData.id,qty:cartItem.qty,price,name:`${itemData.item_name}${sizeData?` - ${sizeData.variation_option_name}`:''}`}}
     }, {})

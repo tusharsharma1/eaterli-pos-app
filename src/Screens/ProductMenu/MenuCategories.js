@@ -11,6 +11,7 @@ import Text from '../../components/Text';
 import {FlatList, TouchableOpacity, View} from 'react-native';
 import {formatGridData, getPercentValue} from '../../helpers/app.helpers';
 import theme from '../../theme';
+import useWindowDimensions from '../../hooks/useWindowDimensions';
 let col = 4;
 let hPadding = 2;
 
@@ -79,9 +80,11 @@ export default function MenuCategories({navigation, route}) {
     </>
   );
 }
-function _Item({data, onPress, containerWidth = theme.wp(100)}) {
+function _Item({data, onPress}) {
   const dispatch = useDispatch();
   const {categories} = useProducts();
+  const {width} = useWindowDimensions();
+  let containerWidth = width;
   const _data = categories[data];
   if (!_data) {
     return null;

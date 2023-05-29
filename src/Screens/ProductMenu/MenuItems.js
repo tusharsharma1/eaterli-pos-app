@@ -20,6 +20,7 @@ import Switch from '../../components/Controls/Switch';
 import {getAddons, getVariants} from '../../helpers/order.helper';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import Button from '../../components/Button';
+import useWindowDimensions from '../../hooks/useWindowDimensions';
 let col = 4;
 let hPadding = 2;
 
@@ -207,7 +208,7 @@ export default function MenuItems({navigation, route}) {
         onRequestClose={toggleModal}
         visible={showModal}
         title={'Edit'}
-        width={350}
+         landscapeWidth={350}
         // height={'98%'}
         // borderRadius={25}
         renderFooter={() => {
@@ -227,8 +228,10 @@ export default function MenuItems({navigation, route}) {
     </>
   );
 }
-function _Item({data, onPress, containerWidth = theme.wp(100)}) {
+function _Item({data, onPress,}) {
   const dispatch = useDispatch();
+  const {width} = useWindowDimensions();
+  let containerWidth = width;
   const {menuItems} = useProducts();
   const _data = menuItems[data];
   if (!_data) {

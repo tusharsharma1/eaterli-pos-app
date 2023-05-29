@@ -135,7 +135,7 @@ export default function Home(props) {
         </View>
         <View
           style={{
-            width: getPercentValue(width, 30),
+            width: getPercentValue(width, 34),
             backgroundColor: '#ddd',
           }}>
           <CartView />

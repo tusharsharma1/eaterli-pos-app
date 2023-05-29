@@ -22,6 +22,8 @@ import CashPaymentForm from '../../forms/CashPaymentForm';
 import userAction from '../../redux/actions/user.action';
 import AppProgess from '../../components/AppProgess';
 import {showToast, simpleToast} from '../../helpers/app.helpers';
+import TextInput from '../../components/Controls/TextInput';
+import useWindowDimensions from '../../hooks/useWindowDimensions';
 
 // import BackIcon from '../assets/BackIcon';
 
@@ -101,6 +103,13 @@ function TableHeader({}) {
           flex: 1,
           alignItems: 'flex-end',
         }}>
+        <Text bold>Dis(%)</Text>
+      </View>
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'flex-end',
+        }}>
         <Text bold>Total</Text>
       </View>
     </View>
@@ -108,9 +117,20 @@ function TableHeader({}) {
 }
 function CartRow({id}) {
   const dispatch = useDispatch();
+  const [showNoteModal, setShowNoteModal] = useState(false);
+  const [note, setNote] = useState('');
+  const [showDiscountModal, setShowDiscountModal] = useState(false);
+  const [discount, setDiscount] = useState('');
   let menuItems = useSelector(s => s.user.menuItems);
   let selectedCartItem = useSelector(s => s.order.selectedCartItem);
   let data = useSelector(s => s.order.cart[id]);
+
+  useEffect(() => {
+    if (data) {
+      setNote(data.special_ins);
+      setDiscount(data.discount ?? '');
+    }
+  }, [data]);
 
   if (!data) {
     return null;
@@ -122,6 +142,14 @@ function CartRow({id}) {
   let add_onsTotal = getAddonsTotal(add_ons);
   let rate = add_onsTotal + price;
   let totalPrice = rate * data.qty;
+  let _discount = parseFloat(data.discount ?? 0);
+  if(isNaN(_discount)){
+    _discount=0
+  }
+  let cutPrice = totalPrice;
+  if(_discount){
+  totalPrice = totalPrice - totalPrice * (_discount / 100);
+  }
   // console.log(itemData.item_name, price, itemId, sizeId);
   const onDeletePress = () => {
     dispatch(
@@ -159,6 +187,33 @@ function CartRow({id}) {
         values: {qty: data.qty + 1},
       }),
     );
+  };
+  const updateNote = () => {
+    dispatch(
+      orderAction.set({
+        _prop: 'cart',
+        _subprop: id,
+        values: {special_ins: note},
+      }),
+    );
+    toggleNoteModal();
+  };
+  const updateDiscount = () => {
+    dispatch(
+      orderAction.set({
+        _prop: 'cart',
+        _subprop: id,
+        values: {discount: discount},
+      }),
+    );
+    toggleDiscountModal();
+  };
+
+  const toggleNoteModal = () => {
+    setShowNoteModal(!showNoteModal);
+  };
+  const toggleDiscountModal = () => {
+    setShowDiscountModal(!showDiscountModal);
   };
 
   if (!itemData) {
@@ -233,6 +288,27 @@ function CartRow({id}) {
               alignItems: 'flex-end',
             }}>
             <Text size={size} medium>
+              {_discount}%
+            </Text>
+          </View>
+          <View
+            style={{
+              flex: 1,
+              alignItems: 'flex-end',
+            }}>
+            {!!_discount && (
+              <Text
+                size={size}
+                medium
+                style={{
+                  textDecorationLine: 'line-through',
+                  textDecorationStyle: 'solid',
+                }}>
+                ${parseFloat(cutPrice).toFixed(2)}
+              </Text>
+            )}
+
+            <Text size={size} medium>
               ${parseFloat(totalPrice).toFixed(2)}
             </Text>
           </View>
@@ -290,23 +366,122 @@ function CartRow({id}) {
                   +
                 </Button>
               </View>
-              <Button
-                onPress={onDeletePress}
-                noShadow
-                width={30}
-                height={30}
-                borderRadius={30}
-                lineHeight={28}
-                // size={24}
-                bold
-                ph={0}
-                pv={0}>
-                <FontAwesome5Icon name="trash" size={18} />
-              </Button>
+              <View
+                style={{
+                  alignItems: 'center',
+                  marginRight: 5,
+                }}>
+                <Button
+                  onPress={toggleNoteModal}
+                  noShadow
+                  width={30}
+                  height={30}
+                  borderRadius={30}
+                  lineHeight={28}
+                  // size={24}
+                  bold
+                  // mr={5}
+                  ph={0}
+                  pv={0}>
+                  <FontAwesome5Icon name="pencil-alt" size={18} />
+                </Button>
+                <Text medium size={9}>
+                  NOTE
+                </Text>
+              </View>
+              <View
+                style={{
+                  alignItems: 'center',
+                  marginRight: 5,
+                }}>
+                <Button
+                  onPress={toggleDiscountModal}
+                  noShadow
+                  width={30}
+                  height={30}
+                  borderRadius={30}
+                  lineHeight={28}
+                  // size={24}
+                  bold
+                  ph={0}
+                  pv={0}>
+                  <FontAwesome5Icon name="tag" size={18} />
+                </Button>
+                <Text medium size={9}>
+                  DISCOUNT
+                </Text>
+              </View>
+              <View
+                style={{
+                  alignItems: 'center',
+                  marginRight: 5,
+                }}>
+                <Button
+                  onPress={onDeletePress}
+                  noShadow
+                  width={30}
+                  height={30}
+                  borderRadius={30}
+                  lineHeight={28}
+                  // size={24}
+                  bold
+                  ph={0}
+                  pv={0}>
+                  <FontAwesome5Icon name="trash" size={18} />
+                </Button>
+                <Text medium size={9}>
+                  DELETE
+                </Text>
+              </View>
             </View>
           </View>
         )}
       </View>
+
+      <ModalContainer
+        // hideTitle
+        center
+        // noscroll
+        onRequestClose={toggleNoteModal}
+        visible={showNoteModal}
+        title={`Note`}
+        width={350}>
+        <TextInput
+          textInputProps={{
+            placeholder: 'Type note here',
+            onChangeText: t => {
+              setNote(t);
+            },
+            value: note,
+          }}
+          textStyle={{
+            textAlign: 'left',
+          }}
+        />
+        <Button onPress={updateNote}> Ok</Button>
+      </ModalContainer>
+      <ModalContainer
+        // hideTitle
+        center
+        // noscroll
+        onRequestClose={toggleDiscountModal}
+        visible={showDiscountModal}
+        title={`Discount`}
+        width={350}>
+        <TextInput
+          textInputProps={{
+            onChangeText: t => {
+              setDiscount(t);
+            },
+            value: discount,
+            keyboardType: 'numeric',
+          }}
+          textStyle={{
+            textAlign: 'left',
+          }}
+        />
+        <Button onPress={updateDiscount}> Ok</Button>
+      </ModalContainer>
     </>
   );
 }
@@ -352,6 +527,10 @@ function Footer({}) {
   };
 
   const onDeletePress = () => {
+    let products = getCartProducts();
+    if (!products.length) {
+      return;
+    }
     dispatch(
       alertAction.showAlert({
         type: ALERT_TYPE.CONFIRM,
@@ -484,8 +663,10 @@ function Footer({}) {
         onRequestClose={toggleModal}
         visible={payModal.show}
         title={'Pay'}
-        width={720}
-        height={'98%'}
+        // widthPerc={60}
+        landscapeWidth={720}
+        // width={isPortrait?undefined:720} 
+        // height={'98%'}
         // borderRadius={25}
         // renderFooter={() => {
         //   return (
