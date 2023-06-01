@@ -36,7 +36,9 @@ function TextUI({
         backgroundColor: backgroundColor,
         ...style,
       }}
-      {...props}>
+      {...props}
+      
+      >
       {children}
     </TextReact>
   );

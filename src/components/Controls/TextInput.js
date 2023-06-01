@@ -13,9 +13,14 @@ function TextInputUI({
   text,
   containerStyle = {},
   textStyle = {},
+  title = '',
+  round,
 }) {
   return (
-    <ControlContainer containerStyle={containerStyle}>
+    <ControlContainer
+      round={round}
+      title={title}
+      containerStyle={containerStyle}>
       {error && error != '' ? (
         <Text size={12} ml={4} align="center" color={theme.colors.errorColor}>
           {error}
@@ -30,6 +35,7 @@ function TextInputUI({
             styles.inputText,
             {
               textAlignVertical: 'center',
+              textAlign: round ? 'center' : 'left',
               ...textStyle,
             },
           ]}
@@ -46,13 +52,13 @@ function TextInputUI({
             styles.inputText,
             {
               textAlignVertical: 'center',
+              textAlign: round ? 'center' : 'left',
               ...textStyle,
               // backgroundColor:'yellow'
             },
           ]}
           placeholderTextColor="#BDBDBD"
           {...textInputProps}
-          
         />
       )}
     </ControlContainer>

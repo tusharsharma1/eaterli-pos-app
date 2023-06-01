@@ -35,6 +35,7 @@ export async function postData(
   data = {},
   token = null,
   abortSignal = null,
+  addHeaders = {}
 ) {
   let authHeader = {};
   if (token) {
@@ -67,6 +68,11 @@ export async function postData(
   );
   colorLog(['Api headers--> '], [getStyle()]);
   console.log(headers);
+  
+  colorLog(["Api addHeaders--> "], [getStyle()]);
+  console.log(addHeaders);
+  headers = { ...headers, ...addHeaders };
+
   colorLog(['Api Body--> '], [getStyle({background: 'blue'})]);
   console.log(data);
 
@@ -96,9 +102,14 @@ export function callApi(
   method,
   url = '',
   data = {},
-  config = {isformData: true, applyToken: true, abortSignal: null},
+  config = {isformData: true, applyToken: true, abortSignal: null, headers: {}},
 ) {
-  let {isformData = true, applyToken = true, abortSignal = null} = config;
+  let {
+    isformData = true,
+    applyToken = true,
+    abortSignal = null,
+    headers = {},
+  } = config;
 
   let promise = new Promise((resolve, reject) => {
     url =
@@ -115,6 +126,7 @@ export function callApi(
       data,
       applyToken ? getTokenHeader() : null,
       abortSignal,
+      headers
     )
       .then(res => {
         let {response, json} = res;

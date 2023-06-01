@@ -80,7 +80,7 @@ public class POSModule extends ReactContextBaseJavaModule {
     public void doOpenCashBox() {
         Log.d(getName(), "doOpenCashBox");
         mPrinter.openBox();
-//        Cashbox.doOpenCashBox();
+        Cashbox.doOpenCashBox();
 
     }
 

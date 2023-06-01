@@ -5,7 +5,7 @@ const Container = ({scroll, children, ...rest}) => {
   return (
     <>
       {scroll ? (
-        <ScrollView keyboardShouldPersistTaps="handled"  {...rest}>
+        <ScrollView  keyboardShouldPersistTaps="handled"  {...rest}>
           {children}
         </ScrollView>
       ) : (

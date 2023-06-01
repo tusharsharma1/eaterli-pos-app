@@ -188,6 +188,13 @@ function DrawerContent({navigation}) {
         /> */}
          <DrawerItem
           // icon={WalletIcon}
+          title="Add Finix Device"
+          // subTitle="USD 0"
+          onPress={drawerItemPress}
+          screenName="AddFinixDevice"
+        />
+         <DrawerItem
+          // icon={WalletIcon}
           title="Testing POS"
           // subTitle="USD 0"
           onPress={drawerItemPress}

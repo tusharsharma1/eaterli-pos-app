@@ -109,6 +109,14 @@ function Navigator() {
             require('../Screens/ProductMenu/MenuItems').default
           }
         />
+          <Stack.Screen
+          name="AddFinixDevice"
+          getComponent={() =>
+            require('../Screens/AddFinixDevice/AddFinixDevice').default
+          }
+        />
+
+
 
 
       </Stack.Navigator>

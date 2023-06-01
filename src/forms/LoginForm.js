@@ -174,6 +174,7 @@ const LoginForm = ({email, password, onSubmitSuccess}) => {
                     ? props.errors.email
                     : ''
                 }
+                round
               />
 
               <TextInput
@@ -192,6 +193,7 @@ const LoginForm = ({email, password, onSubmitSuccess}) => {
                     ? props.errors.password
                     : ''
                 }
+                round
               />
 
               <Button
