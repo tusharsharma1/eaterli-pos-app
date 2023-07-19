@@ -1,5 +1,7 @@
 package com.eaterli_pos;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -12,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Dynamic;
@@ -33,11 +36,19 @@ import com.zcs.sdk.DriverManager;
 import com.zcs.sdk.HQrsanner;
 import com.zcs.sdk.Printer;
 import com.zcs.sdk.SdkResult;
+import com.zcs.sdk.card.CardInfoEntity;
+import com.zcs.sdk.card.CardReaderManager;
+import com.zcs.sdk.card.CardReaderTypeEnum;
+import com.zcs.sdk.card.CardSlotNoEnum;
+import com.zcs.sdk.card.ICCard;
+import com.zcs.sdk.listener.OnSearchCardListener;
 import com.zcs.sdk.print.PrnStrFormat;
 import com.zcs.sdk.print.PrnTextFont;
 import com.zcs.sdk.print.PrnTextStyle;
 import org.json.JSONException;
 import com.google.zxing.client.android.CaptureActivity;
+import com.zcs.sdk.util.StringUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -64,7 +75,9 @@ public class POSModule extends ReactContextBaseJavaModule {
     private Printer mPrinter;
     private HQrsanner mhqscanner;
     private ExecutorService mSingleThreadExecutor;
-
+    private CardReaderManager mCardReadManager;
+    private static final int READ_TIMEOUT = 60 * 1000;
+    private ProgressDialog mProgressDialog;
     POSModule(ReactApplicationContext context) {
         super(context);
          this.context=context;
@@ -111,6 +124,7 @@ public class POSModule extends ReactContextBaseJavaModule {
         mPrinter = mDriverManager.getPrinter();
         mSingleThreadExecutor = mDriverManager.getSingleThreadExecutor();
         mhqscanner = mDriverManager.getHQrsannerDriver();
+        mCardReadManager = mDriverManager.getCardReadManager();
     }
 
     @ReactMethod
@@ -162,6 +176,149 @@ public class POSModule extends ReactContextBaseJavaModule {
     }
 
 
+    @ReactMethod
+    public void readCard(ReadableMap data, Callback callBack) {
+        String type=data.getString("type");
+        Log.d(getName(), "readCard "+type);
+        if(type.equals("ic")){
+            Log.d(getName(), "call searchICCard ...");
+            searchICCard(callBack);
+        }
+
+
+//        WritableMap map = new WritableNativeMap();
+//        map.putString("type",type);
+//
+//        callBack.invoke(map);
+
+    }
+    private void showSearchCardDialog(String title, String msg) {
+        mProgressDialog = (ProgressDialog) DialogUtils.showProgress(context,title, msg, new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                mCardReadManager.cancelSearchCard();
+            }
+        });
+    }
+    private void searchICCard(Callback callBack) {
+        Log.d(getName(), " serching... ...");
+//        showSearchCardDialog("Waiting...", "Please inster IC Card");
+        mCardReadManager.cancelSearchCard();
+
+
+
+         OnSearchCardListener mICCardSearchCardListener = new OnSearchCardListener() {
+
+
+            @Override
+            public void onCardInfo(CardInfoEntity cardInfoEntity) {
+              //  mProgressDialog.dismiss();
+                mCardReadManager.cancelSearchCard();
+               // readICCard();
+              String result=  cardInfoToString(cardInfoEntity);
+
+
+                String result1=  readICCard();
+//                String result="call onCardInfo";
+                Log.d(getName(), "event onCardInfo");
+                WritableMap map = new WritableNativeMap();
+                map.putString("status","success");
+                map.putString("result",result);
+                map.putString("result1",result1);
+
+                callBack.invoke(map);
+            }
+
+            @Override
+            public void onError(int i) {
+              //  mProgressDialog.dismiss();
+               // showReadICCardErrorDialog(i);
+                mCardReadManager.cancelSearchCard();
+                Log.d(getName(), "event onError");
+                WritableMap map = new WritableNativeMap();
+                map.putInt("error",i);
+                callBack.invoke(map);
+            }
+
+            @Override
+            public void onNoCard(CardReaderTypeEnum cardReaderTypeEnum, boolean b) {
+                Log.d(getName(), "event onNoCard");
+                // mCardReadManager.cancelSearchCard();
+                // WritableMap map = new WritableNativeMap();
+                // map.putString("error","NO CARD");
+                // map.putString("event","onNoCard");
+                // map.putString("event",cardReaderTypeEnum.toString());
+                // map.putBoolean("b",b);
+                // callBack.invoke(map);
+            }
+        };
+
+        Log.d(getName(), " searchCard");
+        mCardReadManager.searchCard(CardReaderTypeEnum.IC_CARD, READ_TIMEOUT, mICCardSearchCardListener);
+    }
+    public static final byte[] APDU_SEND_IC = {0x00, (byte) 0xA4, 0x04, 0x00, 0x0E, 0x31, 0x50, 0x41, 0x59, 0x2E, 0x53, 0x59, 0x53, 0x2E, 0x44, 0x44, 0x46, 0x30, 0x31, 0X00};
+
+    private  String readICCard() {
+        ICCard icCard = mCardReadManager.getICCard();
+        int result = icCard.icCardReset(CardSlotNoEnum.SDK_ICC_USERCARD);
+        if (result == SdkResult.SDK_OK) {
+            int[] recvLen = new int[1];
+            byte[] recvData = new byte[300];
+            result = icCard.icExchangeAPDU(CardSlotNoEnum.SDK_ICC_USERCARD, APDU_SEND_IC, recvData, recvLen);
+            if (result == SdkResult.SDK_OK) {
+                final String apduRecv = StringUtils.convertBytesToHex(recvData).substring(0, recvLen[0] * 2);
+                icCard.icCardPowerDown(CardSlotNoEnum.SDK_ICC_USERCARD);
+
+                return apduRecv;
+
+//                CardFragment.this.getActivity().runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        DialogUtils.show(getActivity(), "Read IC card result", apduRecv);
+//                    }
+//                });
+            } else {
+                icCard.icCardPowerDown(CardSlotNoEnum.SDK_ICC_USERCARD);
+
+                return result+"";
+
+
+                // showReadICCardErrorDialog(result);
+            }
+        } else {
+            icCard.icCardPowerDown(CardSlotNoEnum.SDK_ICC_USERCARD);
+
+            return result+"";
+
+
+            // showReadICCardErrorDialog(result);
+        }
+
+        //return "";
+    }
+
+    private static String cardInfoToString(CardInfoEntity cardInfoEntity) {
+        if (cardInfoEntity == null)
+            return "";
+        StringBuilder sb = new StringBuilder();
+        try {
+
+            sb.append("Resultcode:\t" + cardInfoEntity.getResultcode() + "\n")
+                    .append(cardInfoEntity.getCardExistslot() == null ? "" : "Card type:\t" + cardInfoEntity.getCardExistslot().name() + "\n")
+                    .append(cardInfoEntity.getCardNo() == null ? "" : "Card no:\t" + cardInfoEntity.getCardNo() + "\n")
+                    .append(cardInfoEntity.getRfCardType() == 0 ? "" : "Rf card type:\t" + cardInfoEntity.getRfCardType() + "\n")
+                    .append(cardInfoEntity.getRFuid() == null ? "" : "RFUid:\t" + new String(cardInfoEntity.getRFuid()) + "\n")
+                    .append(cardInfoEntity.getAtr() == null ? "" : "Atr:\t" + cardInfoEntity.getAtr() + "\n")
+                    .append(cardInfoEntity.getTk1() == null ? "" : "Track1:\t" + cardInfoEntity.getTk1() + "\n")
+                    .append(cardInfoEntity.getTk2() == null ? "" : "Track2:\t" + cardInfoEntity.getTk2() + "\n")
+                    .append(cardInfoEntity.getTk3() == null ? "" : "Track3:\t" + cardInfoEntity.getTk3() + "\n")
+                    .append(cardInfoEntity.getExpiredDate() == null ? "" : "expiredDate:\t" + cardInfoEntity.getExpiredDate() + "\n")
+                    .append(cardInfoEntity.getServiceCode() == null ? "" : "serviceCode:\t" + cardInfoEntity.getServiceCode());
+        }catch (Exception e){
+            sb.append("ERROR:\t"+e.getMessage() +"\n"+e.toString());
+        }
+         return sb.toString();
+    }
     private String printText() {
         int printStatus = mPrinter.getPrinterStatus();
         if (printStatus == SdkResult.SDK_PRN_STATUS_PAPEROUT) {

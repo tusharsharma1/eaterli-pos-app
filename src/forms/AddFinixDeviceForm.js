@@ -132,6 +132,12 @@ const AddFinixDeviceForm = ({email, password, onSubmitSuccess}) => {
     }
     dispatch(appAction.hideProgress());
   };
+
+  const SetDevicePress = async () => {
+    await storageHelper.storeData('deviceid', 'DVtTMarXFnyVU6NmiMLTmvzb');
+    setDeviceId('DVtTMarXFnyVU6NmiMLTmvzb');
+  };
+
   const payPress = async () => {
     if (!amount) {
       return;
@@ -308,6 +314,15 @@ const AddFinixDeviceForm = ({email, password, onSubmitSuccess}) => {
                 // disabled={props.isSubmitting}
                 onPress={activatePress}>
                 Activate
+              </Button>
+
+              <Button
+                width={200}
+                mb={20}
+                style={{alignSelf: 'center'}}
+                // disabled={props.isSubmitting}
+                onPress={SetDevicePress}>
+                Set Device ID
               </Button>
 
               <TextInput

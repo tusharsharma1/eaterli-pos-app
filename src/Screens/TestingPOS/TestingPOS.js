@@ -16,13 +16,22 @@ import userAction from '../../redux/actions/user.action';
 import {getAddons, getVariants} from '../../helpers/order.helper';
 import POSModule from '../../helpers/pos.helper';
 import Button from '../../components/Button';
+import appAction from '../../redux/actions/app.action';
 export default function TestingPOS({navigation, route}) {
   const dispatch = useDispatch();
 
   useEffect(() => {
     POSModule.initSDK();
   }, []);
+  const readCard = type => {
+    dispatch(appAction.showProgress('Searching...'));
+    POSModule.readCard({type: type}, res => {
+      dispatch(appAction.hideProgress());
+      console.log('[readCard]', res);
+      alert(JSON.stringify(res));
 
+    });
+  };
   return (
     <>
       <Header title={'Testing POS'} back />
@@ -45,7 +54,7 @@ export default function TestingPOS({navigation, route}) {
           }}>
           Open Cashbox
         </Button>
-         <Button
+        <Button
           // style={{}}
           // backgroundColor="#00000000"
           noShadow
@@ -55,10 +64,10 @@ export default function TestingPOS({navigation, route}) {
           onPress={() => {
             POSModule.cutPaperPrint();
           }}>
-         Cut paper
+          Cut paper
         </Button>
         <Button
-         mr={10}
+          mr={10}
           onPress={() => {
             POSModule.textPrint({id: 22, name: 'aakash', active: true}, res => {
               console.log('[textPrint]', res);
@@ -67,15 +76,25 @@ export default function TestingPOS({navigation, route}) {
           }}>
           Test Printer
         </Button>
-         <Button
+        <Button
           mr={10}
           onPress={() => {
-            POSModule.scanHQRCode({id: 22, name: 'aakash', active: true}, res => {
-              console.log('[scanHQRCode]', res);
-              alert(JSON.stringify(res));
-            });
+            POSModule.scanHQRCode(
+              {id: 22, name: 'aakash', active: true},
+              res => {
+                console.log('[scanHQRCode]', res);
+                alert(JSON.stringify(res));
+              },
+            );
           }}>
           Scan QR Code
+        </Button>
+        <Button
+          mr={10}
+          onPress={() => {
+            readCard('ic');
+          }}>
+          IC Card
         </Button>
       </Container>
     </>
