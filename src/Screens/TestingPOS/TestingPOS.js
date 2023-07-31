@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import {TouchableOpacity, View} from 'react-native';
+import {PermissionsAndroid, TouchableOpacity, View} from 'react-native';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import {useDispatch, useSelector} from 'react-redux';
 import Container from '../../components/Container';
@@ -22,14 +22,43 @@ export default function TestingPOS({navigation, route}) {
 
   useEffect(() => {
     POSModule.initSDK();
+
+
+   loadData();
+
+
   }, []);
+
+const loadData=async()=>{
+  try {
+    const granted = await PermissionsAndroid.requestMultiple([
+      PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,PermissionsAndroid.PERMISSIONS.BLUETOOTH_ADVERTISE],
+      {
+        title: 'Camera Permission',
+        message:
+          'Needs access to your camera ' +
+          'so you can take pictures.',
+        buttonNeutral: 'Ask Me Later',
+        buttonNegative: 'Cancel',
+        buttonPositive: 'OK',
+      },
+    );
+    // if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+    //   console.log('You can use the camera');
+    // } else {
+    //   console.log('Camera permission denied');
+    // }
+  } catch (err) {
+    console.warn(err);
+  }
+}
+
   const readCard = type => {
     dispatch(appAction.showProgress('Searching...'));
     POSModule.readCard({type: type}, res => {
       dispatch(appAction.hideProgress());
       console.log('[readCard]', res);
       alert(JSON.stringify(res));
-
     });
   };
   return (
@@ -41,6 +70,7 @@ export default function TestingPOS({navigation, route}) {
           flexDirection: 'row',
           alignItems: 'flex-start',
           padding: 20,
+          flexWrap: 'wrap',
         }}>
         <Button
           // style={{}}
@@ -49,6 +79,7 @@ export default function TestingPOS({navigation, route}) {
           // bold
           // color="#212121"
           mr={10}
+          mb={10}
           onPress={() => {
             POSModule.doOpenCashBox();
           }}>
@@ -61,6 +92,7 @@ export default function TestingPOS({navigation, route}) {
           // bold
           // color="#212121"
           mr={10}
+          mb={10}
           onPress={() => {
             POSModule.cutPaperPrint();
           }}>
@@ -68,6 +100,7 @@ export default function TestingPOS({navigation, route}) {
         </Button>
         <Button
           mr={10}
+          mb={10}
           onPress={() => {
             POSModule.textPrint({id: 22, name: 'aakash', active: true}, res => {
               console.log('[textPrint]', res);
@@ -78,6 +111,7 @@ export default function TestingPOS({navigation, route}) {
         </Button>
         <Button
           mr={10}
+          mb={10}
           onPress={() => {
             POSModule.scanHQRCode(
               {id: 22, name: 'aakash', active: true},
@@ -91,10 +125,32 @@ export default function TestingPOS({navigation, route}) {
         </Button>
         <Button
           mr={10}
+          mb={10}
           onPress={() => {
             readCard('ic');
           }}>
           IC Card
+        </Button>
+        <Button
+          mr={10}
+          mb={10}
+          onPress={() => {
+            POSModule.initFinixSDK(
+              {
+                env: 'sandbox',
+                username: 'USss1r5jqUXgpndmp5vyEuBK',
+                password: '5433ee5f-2c8b-4289-b5aa-0e2394144703',
+                merchantId: 'MUeCcC7PToWcsgexGaERJ7jC',
+                deviceId: 'DVtTMarXFnyVU6NmiMLTmvzb',
+                deviceIdentifier: '3011087727539064',
+              },
+              res => {
+                console.log('[initFinixSDK]', res);
+                alert(JSON.stringify(res));
+              },
+            );
+          }}>
+          Init Finix Payment SDK
         </Button>
       </Container>
     </>

@@ -40,6 +40,9 @@ export default function Login(props) {
   };
 
   const onCompleted = async pin => {
+
+//     props.navigation.navigate('TestingPOS');
+// return
     let email = await storageHelper.getData('email');
     console.log('email', email);
     if (email) {

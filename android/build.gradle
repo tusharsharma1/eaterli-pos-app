@@ -3,7 +3,7 @@
 buildscript {
     ext {
         buildToolsVersion = "31.0.0"
-        minSdkVersion = 21
+        minSdkVersion = 26
         compileSdkVersion = 31
         targetSdkVersion = 31
         googlePlayServicesVersion      = "17.0.0"
@@ -14,6 +14,10 @@ buildscript {
             // Otherwise we default to the side-by-side NDK version from AGP.
             ndkVersion = "21.4.7075529"
         }
+
+        jacksonVersion = '2.12.4'
+        okhttpVersion = '4.9.2'
+        retrofitVersion = '2.9.0'
     }
     repositories {
         google()
@@ -25,6 +29,7 @@ buildscript {
         classpath("de.undercouch:gradle-download-task:5.0.1")
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+        classpath "io.realm:realm-gradle-plugin:10.10.1"
     }
 }
 

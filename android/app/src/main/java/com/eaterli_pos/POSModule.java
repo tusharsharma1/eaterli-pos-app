@@ -29,6 +29,9 @@ import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.finix.sdk.FinixMobileSDK;
+import com.finix.sdk.exceptions.FinixException;
+import com.finix.sdk.models.EnvironmentType;
 import com.hcd.hcdpos.cashbox.Cashbox;
 import com.hcd.hcdpos.printer.PrinterManager;
 import com.google.zxing.BarcodeFormat;
@@ -56,7 +59,17 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
-
+//import io.realm.annotations.RealmModule;
+//
+//import io.realm.internal.OsObjectSchemaInfo;
+//import io.realm.internal.OsSchemaInfo;
+//import io.realm.annotations.RealmModule;
+//import io.realm.internal.ColumnInfo;
+//import io.realm.internal.OsObjectSchemaInfo;
+//import io.realm.internal.OsSchemaInfo;
+//import io.realm.internal.RealmObjectProxy;
+//import io.realm.internal.RealmProxyMediator;
+//import io.realm.
 public class POSModule extends ReactContextBaseJavaModule {
      Context context;
     private static final String KEY_PRINT_TEXT = "print_text_key";
@@ -87,6 +100,34 @@ public class POSModule extends ReactContextBaseJavaModule {
     @Override
     public String getName() {
         return "POSModule";
+    }
+
+    @ReactMethod
+    public void initFinixSDK(ReadableMap data, Callback callBack) {
+        Log.d(getName(), "initFinixSDK "+data.getString("env"));
+        FinixMobileSDK SDK = FinixMobileSDK.client(
+                data.getString("env").equals("sandbox")? EnvironmentType.SANDBOX:EnvironmentType.PRODUCTION,
+                data.getString("username"),
+               data.getString("password"),
+                data.getString("merchantId"),
+               data.getString("deviceId"),
+                data.getString("deviceIdentifier"));
+        WritableMap map = new WritableNativeMap();
+        
+       try{
+           SDK.init(this.context);
+           Log.d(getName(), "initFinixSDK success ");
+           map.putString("success","true");
+       }
+       catch(FinixException finixException){
+           Log.d(getName(), "initFinixSDK error "+finixException.getMessage());
+           map.putString("error",finixException.getMessage());
+       }
+
+
+        map.putString("env",data.getString("env"));
+
+        callBack.invoke(map);
     }
 
     @ReactMethod
