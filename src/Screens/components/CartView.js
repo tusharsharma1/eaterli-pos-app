@@ -1,7 +1,13 @@
 import React, {memo, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import Button from '../../components/Button';
-import {TouchableOpacity, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Keyboard,
+  TouchableOpacity,
+  View,
+  TextInput as _TextInput,
+} from 'react-native';
 import Text from '../../components/Text';
 import theme from '../../theme';
 import {
@@ -17,16 +23,24 @@ import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import alertAction from '../../redux/actions/alert.action';
 import {ALERT_ICON_TYPE, ALERT_TYPE} from '../../constants/alert.constant';
 import ModalContainer from '../../components/ModalContainer';
-import {PAYMENT_METHOD} from '../../constants/order.constant';
+import {
+  CART_MODAL_VIEW,
+  CUSTOMER_DETAIL,
+  PAYMENT_METHOD,
+} from '../../constants/order.constant';
 import CashPaymentForm from '../../forms/CashPaymentForm';
 import userAction from '../../redux/actions/user.action';
 import AppProgess from '../../components/AppProgess';
-import {showToast, simpleToast} from '../../helpers/app.helpers';
+import {
+  getPercentValue,
+  showToast,
+  simpleToast,
+} from '../../helpers/app.helpers';
 import TextInput from '../../components/Controls/TextInput';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
+import * as yup from 'yup';
 
-// import BackIcon from '../assets/BackIcon';
-
+const Buffer = require('buffer').Buffer;
 function _CartView({}) {
   return (
     <>
@@ -143,12 +157,12 @@ function CartRow({id}) {
   let rate = add_onsTotal + price;
   let totalPrice = rate * data.qty;
   let _discount = parseFloat(data.discount ?? 0);
-  if(isNaN(_discount)){
-    _discount=0
+  if (isNaN(_discount)) {
+    _discount = 0;
   }
   let cutPrice = totalPrice;
-  if(_discount){
-  totalPrice = totalPrice - totalPrice * (_discount / 100);
+  if (_discount) {
+    totalPrice = totalPrice - totalPrice * (_discount / 100);
   }
   // console.log(itemData.item_name, price, itemId, sizeId);
   const onDeletePress = () => {
@@ -488,26 +502,75 @@ function CartRow({id}) {
 
 function Footer({}) {
   const dispatch = useDispatch();
-
+  const [modalView, setModalView] = useState(
+    CART_MODAL_VIEW.reward_question.id,
+  );
   const [paymentMethod, setPaymentMethod] = useState('');
+  const [existCustomer, setExistCustomer] = useState(false);
+  const [loyalityProgram, setLoyalityProgram] = useState(false);
+  const {height} = useWindowDimensions();
   const cart = useSelector(s => s.order.cart);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
   const userData = useSelector(s => s.user.userData);
   const deviceId = useSelector(s => s.user.deviceId);
   const diningOption = useSelector(s => s.order.diningOption);
-
+  const customerDetail = useSelector(s => s.order.customerDetail);
   const payModal = useSelector(s => s.order.payModal);
+
+  const [QRData, setQRData] = useState(''); //WzI3NSw3XQ==
+
   useEffect(() => {
     if (!payModal.show) {
       setPaymentMethod('');
+      dispatch(orderAction.set({customerDetail: CUSTOMER_DETAIL}));
+      setModalView(CART_MODAL_VIEW.reward_question.id);
     }
   }, [payModal]);
+
   const toggleModal = () => {
     dispatch(
       orderAction.set({
         payModal: {show: !payModal.show, ref: ''},
       }),
     );
+  };
+  const validateCutomerDetail = () => {
+    return new Promise(async res => {
+      const validationSchema = yup.object({
+        firstName: yup.string().trim().required('Enter First Name'),
+        lastName: yup.string().trim(),
+        phoneNo: yup
+          .string()
+          .min(14, 'Invalid Phone No.')
+          .required('Enter Phone No.'),
+        email: yup.string().email('Invalid Email').required('Enter Email'),
+      });
+      const validate = await validationSchema
+        .validate(customerDetail)
+        .catch(err => {
+          console.log(err);
+          simpleToast(err.message);
+        });
+      res(!!validate);
+    });
+  };
+
+  const validateCutomerPhoneNo = () => {
+    return new Promise(async res => {
+      const validationSchema = yup.object({
+        phoneNo: yup
+          .string()
+          .min(14, 'Invalid Phone No.')
+          .required('Enter Phone No.'),
+      });
+      const validate = await validationSchema
+        .validate(customerDetail)
+        .catch(err => {
+          console.log(err);
+          simpleToast(err.message);
+        });
+      res(!!validate);
+    });
   };
   const onPayPress = () => {
     let products = getCartProducts();
@@ -559,74 +622,543 @@ function Footer({}) {
       paymentMethod,
       deviceId: deviceId,
       userId: userData.user_id,
+
+      existCustomer,
+      loyalityProgram,
+      diningOption,
+      ...customerDetail,
     };
     console.log(body);
+    // return
     let r = await dispatch(userAction.createOrder(body));
     console.log(r);
     if (r && r.status) {
       simpleToast(r.message);
       toggleModal();
-      dispatch(orderAction.set({cart: {}, diningOption: ''}));
-    }
-  };
-  const renderView = () => {
-    if (paymentMethod == PAYMENT_METHOD.cash.id) {
-      return (
-        <View
-          style={{
-            // width: '80%',
-            alignSelf: 'center',
-            paddingVertical: 10,
-            // backgroundColor: 'red',
-            alignItems: 'center',
-          }}>
-          <View
-            style={
-              {
-                // flex:1
-                // width: '100%',
-                // backgroundColor: 'red',
-              }
-            }>
-            <CashPaymentForm
-              total={total}
-              onSubmitSuccess={onCashSubmitSuccess}
-            />
-          </View>
-        </View>
+      dispatch(
+        orderAction.set({
+          cart: {},
+          diningOption: '',
+          customerDetail: CUSTOMER_DETAIL,
+        }),
       );
     }
+  };
 
-    return (
-      <View
-        style={{
-          width: '60%',
-          alignSelf: 'center',
-          paddingVertical: 40,
-          // backgroundColor: 'red',
-        }}>
-        <Text mb={10} bold size={22}>
-          Select Payment Method
-        </Text>
-        <View
-          style={{
-            flexDirection: 'row',
-          }}>
-          <PayMethodButton
-            text="Cash"
-            onPress={() => {
-              setPaymentMethod(PAYMENT_METHOD.cash.id);
-            }}
-          />
-          <PayMethodButton
-            text="Card"
-            onPress={() => {
-              setPaymentMethod(PAYMENT_METHOD.card.id);
-            }}
-          />
-        </View>
-      </View>
-    );
+  const QRValidating = async () => {
+    if (QRData) {
+      let jsonob = null;
+      // console.log(QRData);
+      try {
+        let json = Buffer.from(QRData, 'base64').toString('utf8');
+
+        console.log(json);
+        jsonob = JSON.parse(json);
+      } catch {
+        jsonob = null;
+      }
+      jsonob = jsonob || [];
+      let [id, rid] = jsonob;
+      // console.log(id, rid);
+      if (jsonob && id && rid && rid == userData.restaurant.id) {
+        // console.log(jsonob);
+        let r = await dispatch(userAction.getCustomerDetail(rid, id));
+        if (r && r.status) {
+          
+          dispatch(
+            orderAction.set({
+              customerDetail: {
+                phoneNo: r.data.phone || '',
+                email: r.data.email || '',
+                firstName: r.data.first_name || '',
+                lastName: r.data.last_name || '',
+              },
+            }),
+          );
+        } else {
+          simpleToast('Invalid QR Code.');
+          // setQRValue('');
+          // setQRData({error: true, message: 'Invalid QR Code.'});
+        }
+      } else {
+        simpleToast('Invalid QR Code.');
+      }
+      // setValidating(false);
+    }
+  };
+
+  const renderView = () => {
+    switch (modalView) {
+      case CART_MODAL_VIEW.reward_question.id:
+        return (
+          <View
+            style={{
+              width: '60%',
+              alignSelf: 'center',
+              paddingVertical: 40,
+              // backgroundColor: 'red',
+            }}>
+            <Text mb={10} bold size={22}>
+              Existing Rewards Customer?
+            </Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+              }}>
+              <PayMethodButton
+                text="Yes"
+                onPress={() => {
+                  setExistCustomer(true);
+                  setModalView(CART_MODAL_VIEW.customer_phone.id);
+                }}
+              />
+              <PayMethodButton
+                text="No"
+                onPress={() => {
+                  setExistCustomer(false);
+                  setModalView(CART_MODAL_VIEW.loyality.id);
+
+                  // setPaymentMethod(PAYMENT_METHOD.card.id);
+                }}
+              />
+            </View>
+          </View>
+        );
+      case CART_MODAL_VIEW.customer_phone.id:
+        return (
+          <>
+            <Button
+              onPress={() => {
+                if (loyalityProgram) {
+                  setModalView(CART_MODAL_VIEW.loyality.id);
+                  return;
+                }
+
+                dispatch(orderAction.set({customerDetail: CUSTOMER_DETAIL}));
+                setModalView(CART_MODAL_VIEW.reward_question.id);
+              }}
+              style={{
+                alignSelf: 'flex-start',
+              }}>
+              Back
+            </Button>
+            <View
+              style={{
+                width: '60%',
+                alignSelf: 'center',
+                paddingVertical: 10,
+                // backgroundColor: 'red',
+              }}>
+              {existCustomer ? (
+                <>
+                  <Text mb={10} bold size={22}>
+                    Customer Phone No.
+                  </Text>
+                  <TextInput
+                    // title="Customer Phone No."
+                    textInputProps={{
+                      onChangeText: d => {
+                        dispatch(
+                          orderAction.set({
+                            _prop: 'customerDetail',
+                            values: {phoneNo: d},
+                          }),
+                        );
+                      },
+                      // onBlur: props.handleBlur('email'),
+                      value: customerDetail.phoneNo,
+
+                      autoCapitalize: 'none',
+                      returnKeyType: 'next',
+                      placeholder: 'Phone No.',
+                      //  onSubmitEditing: () => this.passwordInput.focus(),
+                      //ref: r => (this.emailInput = r),
+                      type: 'custom',
+                      options: {
+                        mask: '(999) 999 9999',
+                      },
+                    }}
+                    // error={
+                    //   props.errors.email && props.touched.email
+                    //     ? props.errors.email
+                    //     : ''
+                    // }
+                    // round
+                  />
+                </>
+              ) : (
+                <>
+                  <Text mb={10} bold size={22}>
+                    Customer Details
+                  </Text>
+                  <TextInput
+                    // title="Customer Phone No."
+                    textInputProps={{
+                      onChangeText: d => {
+                        dispatch(
+                          orderAction.set({
+                            _prop: 'customerDetail',
+                            values: {firstName: d},
+                          }),
+                        );
+                      },
+                      // onBlur: props.handleBlur('email'),
+                      value: customerDetail.firstName,
+                      // keyboardType: 'email-address',
+                      // autoCompleteType: 'email',
+                      // autoCapitalize: 'none',
+                      // returnKeyType: 'next',
+                      placeholder: 'First Name',
+                      //  onSubmitEditing: () => this.passwordInput.focus(),
+                      //ref: r => (this.emailInput = r),
+                    }}
+                    // error={
+                    //   props.errors.email && props.touched.email
+                    //     ? props.errors.email
+                    //     : ''
+                    // }
+                    // round
+                  />
+                  <TextInput
+                    // title="Customer Phone No."
+                    textInputProps={{
+                      onChangeText: d => {
+                        dispatch(
+                          orderAction.set({
+                            _prop: 'customerDetail',
+                            values: {lastName: d},
+                          }),
+                        );
+                      },
+                      // onBlur: props.handleBlur('email'),
+                      value: customerDetail.lastName,
+                      // keyboardType: 'email-address',
+                      // autoCompleteType: 'email',
+                      // autoCapitalize: 'none',
+                      // returnKeyType: 'next',
+                      placeholder: 'Last Name',
+                      //  onSubmitEditing: () => this.passwordInput.focus(),
+                      //ref: r => (this.emailInput = r),
+                    }}
+                    // error={
+                    //   props.errors.email && props.touched.email
+                    //     ? props.errors.email
+                    //     : ''
+                    // }
+                    // round
+                  />
+                  <TextInput
+                    // title="Customer Phone No."
+                    textInputProps={{
+                      onChangeText: d => {
+                        dispatch(
+                          orderAction.set({
+                            _prop: 'customerDetail',
+                            values: {email: d},
+                          }),
+                        );
+                      },
+                      // onBlur: props.handleBlur('email'),
+                      value: customerDetail.email,
+                      keyboardType: 'email-address',
+                      autoCompleteType: 'email',
+                      autoCapitalize: 'none',
+                      returnKeyType: 'next',
+                      placeholder: 'Email',
+                      //  onSubmitEditing: () => this.passwordInput.focus(),
+                      //ref: r => (this.emailInput = r),
+                    }}
+                    // error={
+                    //   props.errors.email && props.touched.email
+                    //     ? props.errors.email
+                    //     : ''
+                    // }
+                    // round
+                  />
+                  <TextInput
+                    // title="Customer Phone No."
+                    textInputProps={{
+                      onChangeText: d => {
+                        dispatch(
+                          orderAction.set({
+                            _prop: 'customerDetail',
+                            values: {phoneNo: d},
+                          }),
+                        );
+                      },
+                      // onBlur: props.handleBlur('email'),
+                      value: customerDetail.phoneNo,
+
+                      autoCapitalize: 'none',
+                      returnKeyType: 'next',
+                      placeholder: 'Phone No.',
+                      //  onSubmitEditing: () => this.passwordInput.focus(),
+                      //ref: r => (this.emailInput = r),
+                      type: 'custom',
+                      options: {
+                        mask: '(999) 999 9999',
+                      },
+                    }}
+                    // error={
+                    //   props.errors.email && props.touched.email
+                    //     ? props.errors.email
+                    //     : ''
+                    // }
+                    // round
+                  />
+                </>
+              )}
+              <Button
+                onPress={async () => {
+                  if (loyalityProgram) {
+                    let validate = await validateCutomerDetail();
+                    if (!validate) {
+                      return;
+                    }
+
+                    setModalView(CART_MODAL_VIEW.payment_method.id);
+                    return;
+                  }
+
+                  if (existCustomer) {
+                    let validate = await validateCutomerPhoneNo();
+                    if (!validate) {
+                      return;
+                    }
+                    setModalView(CART_MODAL_VIEW.payment_method.id);
+                  } else {
+                    setModalView(CART_MODAL_VIEW.loyality.id);
+                  }
+                }}
+                ph={40}
+                style={{
+                  alignSelf: 'center',
+                }}>
+                Next
+              </Button>
+              <Button
+                mt={10}
+                onPress={async () => {
+                  setModalView(CART_MODAL_VIEW.scan_qr.id);
+                  setQRData('');
+                }}
+                ph={40}
+                style={{
+                  alignSelf: 'center',
+                }}>
+                Scan QR
+              </Button>
+            </View>
+          </>
+        );
+      case CART_MODAL_VIEW.scan_qr.id:
+        //  if (device == null) return null;
+        return (
+          <>
+            <Button
+              mb={10}
+              onPress={() => {
+                setModalView(CART_MODAL_VIEW.customer_phone.id);
+              }}
+              style={{
+                alignSelf: 'flex-start',
+              }}>
+              Back
+            </Button>
+            <View
+              style={{
+                width: '100%',
+                height: getPercentValue(height, 60),
+                alignItems: 'center',
+                justifyContent: 'center',
+                // paddingVertical: 10,
+                // backgroundColor: 'red',
+              }}>
+              <View
+                style={{
+                  position: 'absolute',
+                  zIndex: 1,
+                }}>
+                <ActivityIndicator size={'large'} />
+                <Text>Scanning...</Text>
+              </View>
+              <_TextInput
+                style={{
+                  backgroundColor: '#000000',
+                  color: '#00000000',
+                  opacity: 0.1,
+                  width: '100%',
+                  height: '100%',
+                  zIndex: 2,
+                  textAlignVertical: 'top',
+                }}
+                caretHidden
+                selectionColor={'#00000000'}
+                // multiline
+                // onFocus={() => {
+                //   // Keyboard.dismiss();
+                // }}
+                autoFocus
+                showSoftInputOnFocus={false}
+                returnKeyType="next"
+                value={QRData}
+                onChangeText={t => {
+                  setQRData(t);
+                }}
+                onSubmitEditing={() => {
+                  QRValidating();
+                  setModalView(CART_MODAL_VIEW.customer_phone.id);
+                }}
+              />
+            </View>
+          </>
+        );
+      case CART_MODAL_VIEW.loyality.id:
+        return (
+          <>
+            <Button
+              onPress={() => {
+                setLoyalityProgram(false);
+                setModalView(CART_MODAL_VIEW.reward_question.id);
+              }}
+              style={{
+                alignSelf: 'flex-start',
+              }}>
+              Back
+            </Button>
+            <View
+              style={{
+                width: '60%',
+                alignSelf: 'center',
+                paddingVertical: 40,
+                // backgroundColor: 'red',
+              }}>
+              <Text mb={10} bold size={22}>
+                Would you like to add this customer to our the Rewards Program?
+              </Text>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                }}>
+                <PayMethodButton
+                  text="Yes"
+                  onPress={async () => {
+                    setLoyalityProgram(true);
+
+                    // let validate = await validateCutomerDetail();
+                    // if (!validate) {
+                    setModalView(CART_MODAL_VIEW.customer_phone.id);
+                    //   return;
+                    // }
+
+                    // setModalView(CART_MODAL_VIEW.payment_method.id);
+                  }}
+                />
+                <PayMethodButton
+                  text="No"
+                  onPress={() => {
+                    setLoyalityProgram(false);
+                    dispatch(
+                      orderAction.set({customerDetail: CUSTOMER_DETAIL}),
+                    );
+                    setModalView(CART_MODAL_VIEW.payment_method.id);
+                  }}
+                />
+              </View>
+            </View>
+          </>
+        );
+
+      case CART_MODAL_VIEW.payment_method.id:
+        return (
+          <>
+            <Button
+              onPress={() => {
+                if (existCustomer || loyalityProgram) {
+                  setModalView(CART_MODAL_VIEW.customer_phone.id);
+                  return;
+                }
+
+                setModalView(CART_MODAL_VIEW.loyality.id);
+              }}
+              style={{
+                alignSelf: 'flex-start',
+              }}>
+              Back
+            </Button>
+            <View
+              style={{
+                width: '60%',
+                alignSelf: 'center',
+                paddingVertical: 40,
+                // backgroundColor: 'red',
+              }}>
+              <Text mb={10} bold size={22}>
+                Select Payment Method
+              </Text>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                }}>
+                <PayMethodButton
+                  text="Cash"
+                  onPress={() => {
+                    setPaymentMethod(PAYMENT_METHOD.cash.id);
+                    setModalView(CART_MODAL_VIEW.price_calc.id);
+                  }}
+                />
+                <PayMethodButton
+                  text="Card"
+                  onPress={() => {
+                    setPaymentMethod(PAYMENT_METHOD.card.id);
+                  }}
+                />
+              </View>
+            </View>
+          </>
+        );
+
+      case CART_MODAL_VIEW.price_calc.id:
+        return (
+          <>
+            <Button
+              onPress={() => {
+                setModalView(CART_MODAL_VIEW.payment_method.id);
+              }}
+              style={{
+                alignSelf: 'flex-start',
+              }}>
+              Back
+            </Button>
+            <View
+              style={{
+                // width: '80%',
+                alignSelf: 'center',
+                paddingVertical: 10,
+                // backgroundColor: 'red',
+                alignItems: 'center',
+              }}>
+              <View
+                style={
+                  {
+                    // flex:1
+                    // width: '100%',
+                    // backgroundColor: 'red',
+                  }
+                }>
+                <CashPaymentForm
+                  // phoneNo={phoneNo}
+                  total={total}
+                  onSubmitSuccess={onCashSubmitSuccess}
+                />
+              </View>
+            </View>
+          </>
+        );
+    }
   };
 
   return (
@@ -665,7 +1197,7 @@ function Footer({}) {
         title={'Pay'}
         // widthPerc={60}
         landscapeWidth={720}
-        // width={isPortrait?undefined:720} 
+        // width={isPortrait?undefined:720}
         // height={'98%'}
         // borderRadius={25}
         // renderFooter={() => {

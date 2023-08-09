@@ -93,7 +93,7 @@ export default function CalculatorPriceInput({
     if (r > 0) {
       totalNotes = totalNotes + 1;
     }
-    console.log('nnn notesCountAmount',amount, note,totalNotes,totalNotes * note);
+    // console.log('nnn notesCountAmount',amount, note,totalNotes,totalNotes * note);
     return  totalNotes * note;
   };
  
@@ -125,7 +125,7 @@ export default function CalculatorPriceInput({
 
   let btns = getButtons(parseFloat(total));
   let price = getPrice();
-  console.log('nnn buttons final', total, btns);
+  // console.log('nnn buttons final', total, btns);
   // let completePrice = getCompleteNo(parseInt(total));
   return (
     <View

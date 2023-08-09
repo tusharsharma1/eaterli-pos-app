@@ -57,6 +57,11 @@ export default {
       isformData: config.isformData,
     });
   },
+
+  getCustomerDetail(restaurant_id, id) {
+  
+    return callApi('GET', `/api/get-customer-details/${restaurant_id}/${id}`);
+  },
 };
 
 //--->  https://maps.googleapis.com/maps/api/distancematrix/json?departure_time=now&destinations=place_id:ChIJVXLyCt0GoDkRDcqCTX7FDWs&origins=place_id:ChIJeYSWxSIHoDkR3sGoRXQaQBc&key=AIzaSyCL6zp79W047VPyb-sReTtHsklzYP767ac

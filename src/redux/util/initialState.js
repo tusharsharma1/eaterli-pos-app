@@ -1,5 +1,5 @@
-import { ALERT_TYPE } from '../../constants/alert.constant';
-import {PRODUCT_MENU_TYPE} from '../../constants/order.constant';
+import {ALERT_TYPE} from '../../constants/alert.constant';
+import {CUSTOMER_DETAIL, PRODUCT_MENU_TYPE} from '../../constants/order.constant';
 
 const initialState = {
   app: {
@@ -19,7 +19,7 @@ const initialState = {
     NegativeText: 'No',
   },
   user: {
-    deviceId:'',
+    deviceId: '',
     deviceToken: '',
     userData: null,
 
@@ -29,8 +29,6 @@ const initialState = {
 
     categoriesSortable1: {},
 
-
-
     selectedCategory: '',
     selectedCategory1: '',
     options: [],
@@ -38,9 +36,9 @@ const initialState = {
 
     addonProducts: [],
     addonProductsById: {},
-    menuTitles:[],
-    selectedMenuTitle:'',
-    orders:[],
+    menuTitles: [],
+    selectedMenuTitle: '',
+    orders: [],
 
     mobileBuilder: {
       layout: {
@@ -68,10 +66,11 @@ const initialState = {
     cart: {},
     productMenuType: PRODUCT_MENU_TYPE.restuarant.id,
     orderType: 'pickup',
-    selectedCartItem:null,
-    diningOption:'',
-    diningOptionModal:{show:false,ref:''},
-    payModal:{show:false,ref:''}
+    selectedCartItem: null,
+    diningOption: '',
+    diningOptionModal: {show: false, ref: ''},
+    payModal: {show: false, ref: ''},
+    customerDetail: CUSTOMER_DETAIL,
   },
 };
 export default initialState;

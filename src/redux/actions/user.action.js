@@ -38,7 +38,7 @@ export default {
       return userService
         .loginWithPin({
           ...data,
-          device_token: getState().user.deviceToken,
+         device_token: getState().user.deviceToken,
         })
         .then(res => {
           let returnResult = res;
@@ -457,6 +457,29 @@ export default {
             returnResult = false;
           }
           if (returnResult) {
+          }
+          showLoader && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+
+  getCustomerDetail(restaurant_id,id, showLoader = true) {
+    return (dispatch, getState) => {
+      showLoader && dispatch(appAction.showProgress());
+      return userService
+        .getCustomerDetail(restaurant_id,id)
+        .then(res => {
+          let returnResult = res;
+
+          if (res && !res.status) {
+            // apiMessageHandler(res.message);
+            returnResult = false;
+          }
+          if (returnResult) {
+            let data = res.data;
+          
           }
           showLoader && dispatch(appAction.hideProgress());
           return returnResult;

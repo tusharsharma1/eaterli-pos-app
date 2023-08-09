@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {BackHandler, Linking, View} from 'react-native';
-// import {Camera} from 'react-native-vision-camera';
+
 import {requestLocationPermission} from '../helpers/location.helper';
 import useWindowDimensions from '../hooks/useWindowDimensions';
 import Button from './Button';

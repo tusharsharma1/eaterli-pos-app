@@ -11,7 +11,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import AppLoader from '../../components/AppLoader';
 import Container from '../../components/Container';
 import Header from '../../components/Header';
-import {getPercentValue} from '../../helpers/app.helpers';
+import {getPercentValue, showToast} from '../../helpers/app.helpers';
 import {getCurrentPosition} from '../../helpers/location.helper';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
 import userAction from '../../redux/actions/user.action';
@@ -26,6 +26,7 @@ import POSModule from '../../helpers/pos.helper';
 import ModalContainer from '../../components/ModalContainer';
 import orderAction from '../../redux/actions/order.action';
 import {DINING_OPTION} from '../../constants/order.constant';
+
 export default function Home(props) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
@@ -40,6 +41,8 @@ export default function Home(props) {
     POSModule.initSDK();
     setLogs([]);
     loadData();
+
+  
   }, []);
 
   const loadData = async () => {
@@ -111,6 +114,9 @@ export default function Home(props) {
       // console.timeEnd('prom');
     }
     setLogs(_logs => [..._logs, `End`]);
+    toggleModal();
+
+  
     setLoaded(true);
   };
   //

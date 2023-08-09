@@ -41,6 +41,9 @@ const LoginForm = ({email, password, onSubmitSuccess}) => {
       // GreatDays12
 
 
+      // email: email || 'john@gmail.com',
+      // password: password || '12345678', 
+
     });
   };
 

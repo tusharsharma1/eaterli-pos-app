@@ -26,6 +26,7 @@ import ModalContainer from '../../components/ModalContainer';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import Button from '../../components/Button';
 import Container from '../../components/Container';
+import orderAction from '../../redux/actions/order.action';
 let col = 4;
 
 let hPadding = 2;
@@ -37,6 +38,7 @@ export default function MenuItemGrid(props) {
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   let {selectedCategory, categories} = useProducts();
+  const diningOption = useSelector(s => s.order.diningOption);
   useEffect(() => {
     setShowModal(false);
   }, [selectedCategory]);
@@ -67,6 +69,14 @@ export default function MenuItemGrid(props) {
     return index; //item.id;
   };
   const onItemPress = data => {
+    if (!diningOption) {
+      dispatch(
+        orderAction.set({
+          diningOptionModal: {show: true, ref: ''},
+        }),
+      );
+      return
+    }
     let variants = getVariants(data);
     if (variants.length) {
       setSelectedItem(data);
@@ -409,7 +419,7 @@ function Variants({data, selectedItems = [], onItemPress, containerWidth}) {
   if (!items.length) {
     return null;
   }
- 
+
   let op = options.find(s => s.id == data.title_id);
   if (!op) {
     return null;
@@ -491,15 +501,15 @@ function Variants({data, selectedItems = [], onItemPress, containerWidth}) {
               {multiselect ? (
                 <FontAwesome5Icon
                   size={16}
-                  color={selected ? theme.colors.secondaryColor : '#aaa'}
-                  name={selected ? 'check-square' : 'square'}
+                  color={selected ? theme.colors.successColor : '#aaa'}
+                  name={selected ? 'check-circle' : ''}
                   solid={selected}
                 />
               ) : (
                 <FontAwesome5Icon
                   size={16}
-                  color={selected ? theme.colors.secondaryColor : '#aaa'}
-                  name={selected ? 'dot-circle' : 'circle'}
+                  color={selected ? theme.colors.successColor : '#aaa'}
+                  name={selected ? 'check-circle' : ''}
                   solid={selected}
                 />
               )}
@@ -598,8 +608,8 @@ function AddOns({data, selectedItems = [], onItemPress, containerWidth}) {
               style={_style}>
               <FontAwesome5Icon
                 size={16}
-                color={selected ? theme.colors.secondaryColor : '#aaa'}
-                name={selected ? 'check-square' : 'square'}
+                color={selected ? theme.colors.successColor : '#aaa'}
+                name={selected ? 'check-circle' : ''}
                 solid={selected}
               />
 
