@@ -41,8 +41,6 @@ export default function Home(props) {
     POSModule.initSDK();
     setLogs([]);
     loadData();
-
-  
   }, []);
 
   const loadData = async () => {
@@ -53,7 +51,7 @@ export default function Home(props) {
       let l = await getCurrentPosition().catch(e => {
         console.log('distL CurrentPosition error', e);
         setLogs(_logs => [..._logs, `getCurrentPosition Error`]);
-        alert(e.message);
+        // alert(e.message);
       });
       setLogs(_logs => [..._logs, `fetched location ${JSON.stringify(l)}`]);
       // console.log('distL l', l);
@@ -102,7 +100,7 @@ export default function Home(props) {
         await Promise.all([
           dispatch(userAction.getMenuTitle(restaurant.id, false)),
           dispatch(userAction.getVariations(restaurant.id, false)),
-          dispatch(userAction.getMenus(distL.id, false)),
+          dispatch(userAction.getMenus(distL.id,userData.restaurant.id, false)),
           dispatch(userAction.getAddons(distL.id, '', false)),
         ]);
         setLogs(_logs => [..._logs, `Calling Apis done`]);

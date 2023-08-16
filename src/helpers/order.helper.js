@@ -152,8 +152,8 @@ export function getGrandTotal() {
     let add_ons = cart[id].add_ons || [];
     let add_onsTotal = getAddonsTotal(add_ons);
     let _discount = parseFloat(cart[id].discount ?? 0);
-    if(isNaN(_discount)){
-      _discount=0
+    if (isNaN(_discount)) {
+      _discount = 0;
     }
     // console.log(
     //   "[log",
@@ -218,7 +218,7 @@ export function getCartProducts() {
         variants: sizeData,
         add_ons: cartItem.add_ons,
         special_ins: cartItem.special_ins,
-        discount: cartItem.discount??0,
+        discount: cartItem.discount ?? 0,
       };
       //return {...r,[i+1]:{id:itemData.id,qty:cartItem.qty,price,name:`${itemData.item_name}${sizeData?` - ${sizeData.variation_option_name}`:''}`}}
     }, {})
@@ -303,4 +303,10 @@ export function getAllCategories(categoriesSortable) {
 
 export function mergeCategorySortable(categoriesSortable) {
   return Array.from(new Set([].concat(...Object.values(categoriesSortable))));
+}
+
+export function getTotalRewardBagPoints(rewardBag) {
+  return rewardBag.reduce((s, d) => {
+    return s + parseInt(d.qty) * parseInt(d.points);
+  }, 0);
 }

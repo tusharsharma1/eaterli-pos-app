@@ -1,15 +1,26 @@
 import React, {memo, useEffect, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import Button from '../../components/Button';
 import {
   ActivityIndicator,
-  Keyboard,
   TouchableOpacity,
   View,
   TextInput as _TextInput,
 } from 'react-native';
+import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
+import {useDispatch, useSelector} from 'react-redux';
+import * as yup from 'yup';
+import Button from '../../components/Button';
+import Container from '../../components/Container';
+import TextInput from '../../components/Controls/TextInput';
+import ModalContainer from '../../components/ModalContainer';
 import Text from '../../components/Text';
-import theme from '../../theme';
+import {ALERT_ICON_TYPE, ALERT_TYPE} from '../../constants/alert.constant';
+import {
+  CART_MODAL_VIEW,
+  CUSTOMER_DETAIL,
+  PAYMENT_METHOD,
+} from '../../constants/order.constant';
+import CashPaymentForm from '../../forms/CashPaymentForm';
+import {getPercentValue, simpleToast} from '../../helpers/app.helpers';
 import {
   getAddonsTotal,
   getCartItem,
@@ -17,28 +28,11 @@ import {
   getGrandTotal,
   getPrice,
 } from '../../helpers/order.helper';
-import Container from '../../components/Container';
-import orderAction from '../../redux/actions/order.action';
-import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
-import alertAction from '../../redux/actions/alert.action';
-import {ALERT_ICON_TYPE, ALERT_TYPE} from '../../constants/alert.constant';
-import ModalContainer from '../../components/ModalContainer';
-import {
-  CART_MODAL_VIEW,
-  CUSTOMER_DETAIL,
-  PAYMENT_METHOD,
-} from '../../constants/order.constant';
-import CashPaymentForm from '../../forms/CashPaymentForm';
-import userAction from '../../redux/actions/user.action';
-import AppProgess from '../../components/AppProgess';
-import {
-  getPercentValue,
-  showToast,
-  simpleToast,
-} from '../../helpers/app.helpers';
-import TextInput from '../../components/Controls/TextInput';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
-import * as yup from 'yup';
+import alertAction from '../../redux/actions/alert.action';
+import orderAction from '../../redux/actions/order.action';
+import userAction from '../../redux/actions/user.action';
+import theme from '../../theme';
 
 const Buffer = require('buffer').Buffer;
 function _CartView({}) {
@@ -516,7 +510,7 @@ function Footer({}) {
   const diningOption = useSelector(s => s.order.diningOption);
   const customerDetail = useSelector(s => s.order.customerDetail);
   const payModal = useSelector(s => s.order.payModal);
-
+  const [QRDataScaning, setQRDataScaning] = useState(false); //
   const [QRData, setQRData] = useState(''); //WzI3NSw3XQ==
 
   useEffect(() => {
@@ -526,6 +520,14 @@ function Footer({}) {
       setModalView(CART_MODAL_VIEW.reward_question.id);
     }
   }, [payModal]);
+
+  useEffect(() => {
+    if (QRDataScaning) {
+      setQRDataScaning(false);
+
+      customerDetailNextPress();
+    }
+  }, [customerDetail]);
 
   const toggleModal = () => {
     dispatch(
@@ -550,6 +552,7 @@ function Footer({}) {
         .catch(err => {
           console.log(err);
           simpleToast(err.message);
+          setModalView(CART_MODAL_VIEW.customer_phone.id);
         });
       res(!!validate);
     });
@@ -568,6 +571,7 @@ function Footer({}) {
         .catch(err => {
           console.log(err);
           simpleToast(err.message);
+          setModalView(CART_MODAL_VIEW.customer_phone.id);
         });
       res(!!validate);
     });
@@ -664,7 +668,12 @@ function Footer({}) {
         // console.log(jsonob);
         let r = await dispatch(userAction.getCustomerDetail(rid, id));
         if (r && r.status) {
-          
+          if (!r.data) {
+            simpleToast('Invalid QR Code.');
+            setQRData('');
+            return;
+          }
+
           dispatch(
             orderAction.set({
               customerDetail: {
@@ -675,18 +684,41 @@ function Footer({}) {
               },
             }),
           );
+
+          // setModalView(CART_MODAL_VIEW.customer_phone.id);
         } else {
           simpleToast('Invalid QR Code.');
-          // setQRValue('');
+          setQRData('');
           // setQRData({error: true, message: 'Invalid QR Code.'});
         }
       } else {
         simpleToast('Invalid QR Code.');
+        setQRData('');
       }
       // setValidating(false);
     }
   };
+  const customerDetailNextPress = async () => {
+    if (loyalityProgram) {
+      let validate = await validateCutomerDetail();
+      if (!validate) {
+        return;
+      }
 
+      setModalView(CART_MODAL_VIEW.payment_method.id);
+      return;
+    }
+
+    if (existCustomer) {
+      let validate = await validateCutomerPhoneNo();
+      if (!validate) {
+        return;
+      }
+      setModalView(CART_MODAL_VIEW.payment_method.id);
+    } else {
+      setModalView(CART_MODAL_VIEW.loyality.id);
+    }
+  };
   const renderView = () => {
     switch (modalView) {
       case CART_MODAL_VIEW.reward_question.id:
@@ -910,27 +942,7 @@ function Footer({}) {
                 </>
               )}
               <Button
-                onPress={async () => {
-                  if (loyalityProgram) {
-                    let validate = await validateCutomerDetail();
-                    if (!validate) {
-                      return;
-                    }
-
-                    setModalView(CART_MODAL_VIEW.payment_method.id);
-                    return;
-                  }
-
-                  if (existCustomer) {
-                    let validate = await validateCutomerPhoneNo();
-                    if (!validate) {
-                      return;
-                    }
-                    setModalView(CART_MODAL_VIEW.payment_method.id);
-                  } else {
-                    setModalView(CART_MODAL_VIEW.loyality.id);
-                  }
-                }}
+                onPress={customerDetailNextPress}
                 ph={40}
                 style={{
                   alignSelf: 'center',
@@ -940,8 +952,9 @@ function Footer({}) {
               <Button
                 mt={10}
                 onPress={async () => {
-                  setModalView(CART_MODAL_VIEW.scan_qr.id);
+                  setQRDataScaning(true);
                   setQRData('');
+                  setModalView(CART_MODAL_VIEW.scan_qr.id);
                 }}
                 ph={40}
                 style={{
@@ -995,10 +1008,6 @@ function Footer({}) {
                 }}
                 caretHidden
                 selectionColor={'#00000000'}
-                // multiline
-                // onFocus={() => {
-                //   // Keyboard.dismiss();
-                // }}
                 autoFocus
                 showSoftInputOnFocus={false}
                 returnKeyType="next"
@@ -1008,7 +1017,6 @@ function Footer({}) {
                 }}
                 onSubmitEditing={() => {
                   QRValidating();
-                  setModalView(CART_MODAL_VIEW.customer_phone.id);
                 }}
               />
             </View>
@@ -1088,13 +1096,43 @@ function Footer({}) {
               }}>
               Back
             </Button>
+
             <View
               style={{
-                width: '60%',
+                width: '70%',
                 alignSelf: 'center',
                 paddingVertical: 40,
                 // backgroundColor: 'red',
               }}>
+              {!!customerDetail?.phoneNo &&
+                !!(customerDetail?.firstName || customerDetail?.lastName) && (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 15,
+                    }}>
+                    <Text medium size={20} mr={10}>
+                      Reward Member :{' '}
+                      <Text
+                        // mb={10}
+                        style={{
+                          textTransform: 'capitalize',
+                        }}
+                        semibold
+                        size={20}>
+                        {customerDetail?.firstName} {customerDetail?.lastName}
+                      </Text>
+                    </Text>
+                    <FontAwesome5Icon
+                      size={20}
+                      color={theme.colors.successColor}
+                      name="check-circle"
+                      solid
+                    />
+                  </View>
+                )}
+
               <Text mb={10} bold size={22}>
                 Select Payment Method
               </Text>

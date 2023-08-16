@@ -214,6 +214,13 @@ function DrawerContent({navigation}) {
           onPress={drawerItemPress}
           screenName="Orders"
         />
+         <DrawerItem
+          // icon={WalletIcon}
+          title="Scan Reward Bag QR"
+          // subTitle="USD 0"
+          onPress={drawerItemPress}
+          screenName="ScanRewardBagQR"
+        />
         <DrawerItem
           //  icon={PreviousRideIcon}
           title="Logout"

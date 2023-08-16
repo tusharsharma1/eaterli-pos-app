@@ -20,8 +20,11 @@ export default {
     });
   },
 
-  getMenus(location_id) {
-    return callApi('GET', `/api/restaurants/locations/${location_id}`);
+  getMenus(location_id, rest_id) {
+    return callApi(
+      'GET',
+      `/api/restaurants/locations/${location_id}?restaurant_id=${rest_id}`,
+    );
   },
   getMobileBuilder(restaurant_id) {
     return callApi('GET', `/api/mobile/config/get/${restaurant_id}`);
@@ -48,9 +51,12 @@ export default {
       isformData: false,
     });
   },
-  getOrders(restaurant_location_id) {
-    let d = getQueryString({restaurant_location_id});
-    return callApi('GET', `/api/pos-order/list?${d}`);
+  getOrders(rest_id, restaurant_location_id) {
+    //  let d = getQueryString({restaurant_location_id});
+    return callApi(
+      'GET',
+      `/api/pos-order/list/${rest_id}/${restaurant_location_id}`,
+    );
   },
   updateSubCategory(data, id, config) {
     return callApi(config.method, `/api/menu-items/${id}`, data, {
@@ -59,8 +65,20 @@ export default {
   },
 
   getCustomerDetail(restaurant_id, id) {
-  
     return callApi('GET', `/api/get-customer-details/${restaurant_id}/${id}`);
+  },
+
+  getRewardBag(restaurant_id, id) {
+    return callApi('GET', `/api/redeem-bag/${id}/${restaurant_id}`);
+  },
+  getRewards(res_id) {
+    return callApi('GET', `/api/rewards/${res_id}`);
+  },
+
+  createRewardBagOrder(data) {
+    return callApi('POST', `/api/reward-bag/create/order`, data, {
+      isformData: false,
+    });
   },
 };
 

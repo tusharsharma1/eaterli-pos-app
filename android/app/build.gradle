@@ -1,5 +1,6 @@
 apply plugin: "com.android.application"
-
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "org.jetbrains.kotlin.kapt"
 import com.android.build.OutputFile
 
 /**
@@ -300,7 +301,7 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'commons-validator:commons-validator:1.7'
 //
-//    implementation 'io.realm:realm-gradle-plugin:10.0.0'
+//    implementation 'io.realm:realm-gradle-plugin:4.2.0'
 
 
     

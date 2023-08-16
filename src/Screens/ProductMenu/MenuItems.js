@@ -27,6 +27,7 @@ let hPadding = 2;
 export default function MenuItems({navigation, route}) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
+  const userData = useSelector(s => s.user.userData);
   const [selectedItem, setSelectedItem] = useState(null);
   const selectedLocation=useSelector(s=>s.user.selectedLocation)
   let {categories} = useProducts();
@@ -112,7 +113,7 @@ export default function MenuItems({navigation, route}) {
     );
     if (r && r.status) {
       simpleToast(r.message);
-      await dispatch(userAction.getMenus(selectedLocation));
+      await dispatch(userAction.getMenus(selectedLocation,userData.restaurant.id ));
       toggleModal();
     }
   };

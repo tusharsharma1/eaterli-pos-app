@@ -61,6 +61,7 @@ const initialState = {
       logo: '',
       app_name: '',
     },
+    rewards:[]
   },
   order: {
     cart: {},

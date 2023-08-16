@@ -19,6 +19,7 @@ export default function Orders({navigation, route}) {
   const [showModal, setShowModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
+  const userData = useSelector(s => s.user.userData);
   const orders = useSelector(s => s.user.orders);
   const toggleModal = () => {
     setShowModal(!showModal);
@@ -27,7 +28,13 @@ export default function Orders({navigation, route}) {
     loadData();
   }, []);
   const loadData = async () => {
-    let r = await dispatch(userAction.getOrders(selectedLocation,!orders.length));
+    let r = await dispatch(
+      userAction.getOrders(
+        userData.restaurant.id,
+        selectedLocation,
+        !orders.length,
+      ),
+    );
   };
 
   const columns = useMemo(() => {
@@ -528,14 +535,18 @@ export default function Orders({navigation, route}) {
                     title: 'Rate',
                     align: 'right',
                     renderValue: data => {
-                      return data.rate?`$${parseFloat(data.rate).toFixed(2)}`:'';
+                      return data.rate
+                        ? `$${parseFloat(data.rate).toFixed(2)}`
+                        : '';
                     },
                   },
                   {
                     title: 'Total',
                     align: 'right',
                     renderValue: data => {
-                      return data.total_price?`$${parseFloat(data.total_price).toFixed(2)}`:'';
+                      return data.total_price
+                        ? `$${parseFloat(data.total_price).toFixed(2)}`
+                        : '';
                     },
                   },
                 ]}

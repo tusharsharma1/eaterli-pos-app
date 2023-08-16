@@ -8,7 +8,7 @@ import theme from '../theme';
 import {getUniqueId} from 'react-native-device-info';
 import {useDispatch} from 'react-redux';
 import userAction from '../redux/actions/user.action';
-import { YEAR_OPTIONS } from '../helpers/payment.helper';
+import {YEAR_OPTIONS} from '../helpers/payment.helper';
 // import {fcmService} from '../firebase/FCMService';
 // import {loginFromKeyChain} from '../helpers/user.helper';
 // import userAction from '../redux/actions/user.action';
@@ -92,35 +92,37 @@ function Navigator() {
             require('../Screens/ProductMenu/ProductMenu').default
           }
         />
-        
+
         <Stack.Screen
           name="TestingPOS"
           getComponent={() =>
             require('../Screens/TestingPOS/TestingPOS').default
           }
         />
-          <Stack.Screen
+        <Stack.Screen
           name="MenuCategories"
           getComponent={() =>
             require('../Screens/ProductMenu/MenuCategories').default
           }
         />
-          <Stack.Screen
+        <Stack.Screen
           name="MenuItems"
           getComponent={() =>
             require('../Screens/ProductMenu/MenuItems').default
           }
         />
-          <Stack.Screen
+        <Stack.Screen
           name="AddFinixDevice"
           getComponent={() =>
             require('../Screens/AddFinixDevice/AddFinixDevice').default
           }
         />
-
-
-
-
+        <Stack.Screen
+          name="ScanRewardBagQR"
+          getComponent={() =>
+            require('../Screens/ScanRewardBagQR/ScanRewardBagQR').default
+          }
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

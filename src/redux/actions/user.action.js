@@ -56,15 +56,15 @@ export default {
         .catch(apiErrorHandler);
     };
   },
-  getMenus(location_id, showProgress = true) {
+  getMenus(location_id,rest_id, showProgress = true) {
     return (dispatch, getState) => {
       showProgress && dispatch(appAction.showProgress());
       return userService
-        .getMenus(location_id)
+        .getMenus(location_id,rest_id)
         .then(res => {
           let returnResult = res;
           if (res && !res.status) {
-            showAlert && apiMessageHandler(res);
+              apiMessageHandler(res);
             returnResult = false;
           }
           if (returnResult) {
@@ -412,11 +412,11 @@ export default {
         .catch(apiErrorHandler);
     };
   },
-  getOrders(restaurant_location_id, showLoader = true) {
+  getOrders(rest_id,restaurant_location_id, showLoader = true) {
     return (dispatch, getState) => {
       showLoader && dispatch(appAction.showProgress());
       return userService
-        .getOrders(restaurant_location_id)
+        .getOrders(rest_id,restaurant_location_id)
         .then(res => {
           let returnResult = res;
 
@@ -470,6 +470,78 @@ export default {
       showLoader && dispatch(appAction.showProgress());
       return userService
         .getCustomerDetail(restaurant_id,id)
+        .then(res => {
+          let returnResult = res;
+
+          if (res && !res.status) {
+            // apiMessageHandler(res.message);
+            returnResult = false;
+          }
+          if (returnResult) {
+            let data = res.data;
+          
+          }
+          showLoader && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+
+  getRewardBag(restaurant_id,id, showLoader = true) {
+    return (dispatch, getState) => {
+      showLoader && dispatch(appAction.showProgress());
+      return userService
+        .getRewardBag(restaurant_id,id)
+        .then(res => {
+          let returnResult = res;
+
+          if (res && !res.status) {
+            // apiMessageHandler(res.message);
+            returnResult = false;
+          }
+          if (returnResult) {
+            let data = res.data;
+          
+          }
+          showLoader && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+  getRewards(res_id, showProgress = true) {
+    return (dispatch, getState) => {
+      showProgress && dispatch(appAction.showProgress());
+      return userService
+        .getRewards(res_id)
+        .then(res => {
+          let returnResult = res;
+          if (res && !res.status) {
+            showAlert && apiMessageHandler(res);
+            returnResult = false;
+          }
+          if (returnResult) {
+            if (res.data) {
+              dispatch(
+                actions.set({
+                  rewards: res.data,
+                }),
+              );
+            }
+          }
+          showProgress && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+
+  createRewardBagOrder(data,showLoader = true) {
+    return (dispatch, getState) => {
+      showLoader && dispatch(appAction.showProgress());
+      return userService
+        .createRewardBagOrder(data)
         .then(res => {
           let returnResult = res;
 
