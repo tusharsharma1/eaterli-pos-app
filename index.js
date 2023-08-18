@@ -6,12 +6,16 @@ import {Provider} from 'react-redux';
 import {name as appName} from './app.json';
 import App from './src/App';
 import store from './src/redux/store';
+import {MenuProvider} from 'react-native-popup-menu';
+
 React.store = store;
 LogBox.ignoreAllLogs();
 function MainApp() {
   return (
     <Provider store={store}>
-      <App />
+      <MenuProvider>
+        <App />
+      </MenuProvider>
     </Provider>
   );
 }

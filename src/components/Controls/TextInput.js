@@ -57,7 +57,7 @@ function TextInputUI({
               // backgroundColor:'yellow'
             },
           ]}
-          placeholderTextColor="#BDBDBD"
+          placeholderTextColor="#BDBDBD"        
           {...textInputProps}
         />
       )}

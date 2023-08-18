@@ -450,6 +450,37 @@ export default function Orders({navigation, route}) {
                 </>
               )}
             </View>
+
+            {selectedOrder.point_transactions && !!selectedOrder.point_transactions.length &&(
+              <View>
+                <Text size={18} bold mb={5}>
+                  Reward Points
+                </Text>
+                {selectedOrder.point_transactions.map((d, i) => {
+                  return (
+                    <View
+                      key={i}
+                      style={{
+                        marginBottom: 5,
+                      }}>
+                      <Text size={14}>
+                        Description:{' '}
+                        <Text size={14} semibold>
+                          {d.description}
+                        </Text>
+                      </Text>
+                      <Text size={14}>
+                        Point:{' '}
+                        <Text size={14} semibold>
+                          {d.point}
+                        </Text>
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+
             <Text size={18} bold>
               Products
             </Text>

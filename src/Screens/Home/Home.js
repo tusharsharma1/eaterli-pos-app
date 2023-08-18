@@ -100,7 +100,9 @@ export default function Home(props) {
         await Promise.all([
           dispatch(userAction.getMenuTitle(restaurant.id, false)),
           dispatch(userAction.getVariations(restaurant.id, false)),
-          dispatch(userAction.getMenus(distL.id,userData.restaurant.id, false)),
+          dispatch(
+            userAction.getMenus(distL.id, userData.restaurant.id, false),
+          ),
           dispatch(userAction.getAddons(distL.id, '', false)),
         ]);
         setLogs(_logs => [..._logs, `Calling Apis done`]);
@@ -114,7 +116,6 @@ export default function Home(props) {
     setLogs(_logs => [..._logs, `End`]);
     toggleModal();
 
-  
     setLoaded(true);
   };
   //

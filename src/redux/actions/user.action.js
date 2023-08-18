@@ -559,4 +559,26 @@ export default {
         .catch(apiErrorHandler);
     };
   },
+  getCustomerDetailPhoneNo(restaurant_id,phone_no, showLoader = true) {
+    return (dispatch, getState) => {
+      showLoader && dispatch(appAction.showProgress());
+      return userService
+        .getCustomerDetailPhoneNo(restaurant_id,phone_no)
+        .then(res => {
+          let returnResult = res;
+
+          if (res && !res.status) {
+            // apiMessageHandler(res.message);
+            returnResult = false;
+          }
+          if (returnResult) {
+            let data = res.data;
+          
+          }
+          showLoader && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
 };

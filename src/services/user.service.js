@@ -68,6 +68,10 @@ export default {
     return callApi('GET', `/api/get-customer-details/${restaurant_id}/${id}`);
   },
 
+  getCustomerDetailPhoneNo(restaurant_id, phone_no) {
+    return callApi('GET', `/api/get-user-details/${restaurant_id}/phone?phone=${phone_no}`);
+  },
+
   getRewardBag(restaurant_id, id) {
     return callApi('GET', `/api/redeem-bag/${id}/${restaurant_id}`);
   },

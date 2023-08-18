@@ -9,6 +9,7 @@ export const PRODUCT_MENU_TYPE = {
 export const PAYMENT_METHOD = {
   card: {id: 'card'},
   cash: {id: 'cash'},
+  split_payment: {id: 'split payment'},
 };
 
 export const DINING_OPTION = {
@@ -21,6 +22,8 @@ export const CART_MODAL_VIEW = {
   customer_phone: {id: 'customer_phone'},
   scan_qr: {id: 'scan_qr'},
   loyality: {id: 'loyality'},
+  ask_split_payment: {id: 'ask_split_payment'},
+  split_payment: {id: 'split_payment'},
   payment_method: {id: 'payment_method'},
   price_calc: {id: 'price_calc'},
 };

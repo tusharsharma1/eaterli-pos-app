@@ -151,6 +151,7 @@ export function getGrandTotal() {
     );
     let add_ons = cart[id].add_ons || [];
     let add_onsTotal = getAddonsTotal(add_ons);
+    let discount_type = cart[id].discount_type ?? '1';
     let _discount = parseFloat(cart[id].discount ?? 0);
     if (isNaN(_discount)) {
       _discount = 0;
@@ -162,7 +163,15 @@ export function getGrandTotal() {
     let pTotal = cart[id].qty * (add_onsTotal + parseFloat(price));
 
     if (_discount) {
-      pTotal = pTotal - pTotal * (_discount / 100);
+
+      if (discount_type == '1') {
+        pTotal = pTotal - pTotal * (_discount / 100);
+         } else if (discount_type == '2') {
+        pTotal = pTotal - _discount;
+      }
+
+
+     
     }
     // console.log(
     //   "[log pTotal",
@@ -219,6 +228,7 @@ export function getCartProducts() {
         add_ons: cartItem.add_ons,
         special_ins: cartItem.special_ins,
         discount: cartItem.discount ?? 0,
+        discount_type: cartItem.discount_type ?? '1',
       };
       //return {...r,[i+1]:{id:itemData.id,qty:cartItem.qty,price,name:`${itemData.item_name}${sizeData?` - ${sizeData.variation_option_name}`:''}`}}
     }, {})

@@ -1,6 +1,7 @@
 import React, {memo, useEffect, useState} from 'react';
 import {
   ActivityIndicator,
+  Keyboard,
   TouchableOpacity,
   View,
   TextInput as _TextInput,
@@ -33,6 +34,9 @@ import alertAction from '../../redux/actions/alert.action';
 import orderAction from '../../redux/actions/order.action';
 import userAction from '../../redux/actions/user.action';
 import theme from '../../theme';
+import Select from '../../components/Controls/Select';
+import {MenuProvider} from 'react-native-popup-menu';
+import SelectRadio from '../../components/Controls/SelectRadio';
 
 const Buffer = require('buffer').Buffer;
 function _CartView({}) {
@@ -111,7 +115,7 @@ function TableHeader({}) {
           flex: 1,
           alignItems: 'flex-end',
         }}>
-        <Text bold>Dis(%)</Text>
+        <Text bold>Dis.</Text>
       </View>
       <View
         style={{
@@ -129,6 +133,7 @@ function CartRow({id}) {
   const [note, setNote] = useState('');
   const [showDiscountModal, setShowDiscountModal] = useState(false);
   const [discount, setDiscount] = useState('');
+  const [discountType, setDiscountType] = useState('1');
   let menuItems = useSelector(s => s.user.menuItems);
   let selectedCartItem = useSelector(s => s.order.selectedCartItem);
   let data = useSelector(s => s.order.cart[id]);
@@ -137,6 +142,7 @@ function CartRow({id}) {
     if (data) {
       setNote(data.special_ins);
       setDiscount(data.discount ?? '');
+      setDiscountType(data.discount_type ?? '1');
     }
   }, [data]);
 
@@ -150,15 +156,20 @@ function CartRow({id}) {
   let add_onsTotal = getAddonsTotal(add_ons);
   let rate = add_onsTotal + price;
   let totalPrice = rate * data.qty;
+  let discount_type = data.discount_type ?? '1';
   let _discount = parseFloat(data.discount ?? 0);
   if (isNaN(_discount)) {
     _discount = 0;
   }
   let cutPrice = totalPrice;
   if (_discount) {
-    totalPrice = totalPrice - totalPrice * (_discount / 100);
+    if (discount_type == '1') {
+      totalPrice = totalPrice - totalPrice * (_discount / 100);
+    } else if (discount_type == '2') {
+      totalPrice = totalPrice - _discount;
+    }
   }
-  // console.log(itemData.item_name, price, itemId, sizeId);
+  // console.log(data);
   const onDeletePress = () => {
     dispatch(
       alertAction.showAlert({
@@ -211,7 +222,7 @@ function CartRow({id}) {
       orderAction.set({
         _prop: 'cart',
         _subprop: id,
-        values: {discount: discount},
+        values: {discount: discount, discount_type: discountType},
       }),
     );
     toggleDiscountModal();
@@ -296,7 +307,9 @@ function CartRow({id}) {
               alignItems: 'flex-end',
             }}>
             <Text size={size} medium>
-              {_discount}%
+              {discount_type == '2' && '$'}
+              {_discount}
+              {discount_type == '1' && '%'}
             </Text>
           </View>
           <View
@@ -476,6 +489,23 @@ function CartRow({id}) {
         visible={showDiscountModal}
         title={`Discount`}
         width={350}>
+        <SelectRadio
+          // disabled={submitted}
+          // error={
+          //   props.errors[data.id] && props.touched[data.id]
+          //     ? props.errors[data.id]
+          //     : ''
+          // }
+          onValueChange={value => {
+            setDiscountType(value);
+          }}
+          value={discountType}
+          data={[
+            {label: 'Discount by percentage', value: '1'},
+            {label: 'Discount by Amount', value: '2'},
+          ]}
+        />
+
         <TextInput
           textInputProps={{
             onChangeText: t => {
@@ -500,6 +530,8 @@ function Footer({}) {
     CART_MODAL_VIEW.reward_question.id,
   );
   const [paymentMethod, setPaymentMethod] = useState('');
+  const [splitPayment, setSplitPayment] = useState(true);
+
   const [existCustomer, setExistCustomer] = useState(false);
   const [loyalityProgram, setLoyalityProgram] = useState(false);
   const {height} = useWindowDimensions();
@@ -512,12 +544,32 @@ function Footer({}) {
   const payModal = useSelector(s => s.order.payModal);
   const [QRDataScaning, setQRDataScaning] = useState(false); //
   const [QRData, setQRData] = useState(''); //WzI3NSw3XQ==
-
+  const [splitNo, setSplitNo] = useState(2);
+  const [splitPayments, setSplitPayments] = useState([
+    // {
+    //   type: 'cash',
+    //   amount: 23,
+    // },
+    // {
+    //   type: 'cash',
+    //   amount: 22,
+    // },
+    // {
+    //   type: 'cash',
+    //   amount: 24,
+    // },
+    // {
+    //   type: 'cash',
+    //   amount: 25,
+    // },
+  ]);
+  let total = getGrandTotal();
   useEffect(() => {
     if (!payModal.show) {
       setPaymentMethod('');
       dispatch(orderAction.set({customerDetail: CUSTOMER_DETAIL}));
       setModalView(CART_MODAL_VIEW.reward_question.id);
+      setSplitNo(2);
     }
   }, [payModal]);
 
@@ -528,6 +580,19 @@ function Footer({}) {
       customerDetailNextPress();
     }
   }, [customerDetail]);
+
+  useEffect(() => {
+    let perUser = (total / splitNo).toFixed(2);
+
+    let spmts = Array.from(Array(splitNo)).map((r, i) => {
+      return {
+        type: splitPayments[i]?.type || 'cash',
+        amount: perUser,
+      };
+    });
+
+    setSplitPayments(spmts);
+  }, [splitNo, total]);
 
   const toggleModal = () => {
     dispatch(
@@ -545,7 +610,7 @@ function Footer({}) {
           .string()
           .min(14, 'Invalid Phone No.')
           .required('Enter Phone No.'),
-        email: yup.string().email('Invalid Email').required('Enter Email'),
+        email: yup.string().email('Invalid Email'),
       });
       const validate = await validationSchema
         .validate(customerDetail)
@@ -611,7 +676,7 @@ function Footer({}) {
       }),
     );
   };
-  let total = getGrandTotal();
+
   const onCashSubmitSuccess = async values => {
     let products = getCartProducts();
     if (!products.length) {
@@ -623,13 +688,18 @@ function Footer({}) {
       restaurant_id: userData.restaurant.id,
       total,
       received_amount: values.received_amount,
-      paymentMethod,
+      paymentMethod: splitPayment
+        ? PAYMENT_METHOD.split_payment.id
+        : paymentMethod,
       deviceId: deviceId,
       userId: userData.user_id,
 
       existCustomer,
       loyalityProgram,
       diningOption,
+
+      split_payments: splitPayment ? JSON.stringify(splitPayments) : '[]',
+
       ...customerDetail,
     };
     console.log(body);
@@ -705,7 +775,7 @@ function Footer({}) {
         return;
       }
 
-      setModalView(CART_MODAL_VIEW.payment_method.id);
+      setModalView(CART_MODAL_VIEW.ask_split_payment.id);
       return;
     }
 
@@ -714,7 +784,33 @@ function Footer({}) {
       if (!validate) {
         return;
       }
-      setModalView(CART_MODAL_VIEW.payment_method.id);
+      Keyboard.dismiss();
+      let r = await dispatch(
+        userAction.getCustomerDetailPhoneNo(
+          userData.restaurant.id,
+          customerDetail.phoneNo,
+        ),
+      );
+      if (r && r.status && r.data) {
+        // console.log('eeee',r.data.phone )
+
+        dispatch(
+          orderAction.set({
+            customerDetail: {
+              phoneNo: r.data.phone || '',
+              email: r.data.email || '',
+              firstName: r.data.first_name || '',
+              lastName: r.data.last_name || '',
+            },
+          }),
+        );
+      } else {
+        simpleToast('Phone No. does not exist.');
+        return;
+      }
+      // return;
+
+      setModalView(CART_MODAL_VIEW.ask_split_payment.id);
     } else {
       setModalView(CART_MODAL_VIEW.loyality.id);
     }
@@ -941,27 +1037,39 @@ function Footer({}) {
                   />
                 </>
               )}
-              <Button
-                onPress={customerDetailNextPress}
-                ph={40}
+              <View
                 style={{
+                  flexDirection: 'row',
                   alignSelf: 'center',
                 }}>
-                Next
-              </Button>
-              <Button
-                mt={10}
-                onPress={async () => {
-                  setQRDataScaning(true);
-                  setQRData('');
-                  setModalView(CART_MODAL_VIEW.scan_qr.id);
-                }}
-                ph={40}
-                style={{
-                  alignSelf: 'center',
-                }}>
-                Scan QR
-              </Button>
+                <Button
+                  // mt={10}
+                  onPress={async () => {
+                    setQRDataScaning(true);
+                    setQRData('');
+                    setModalView(CART_MODAL_VIEW.scan_qr.id);
+                  }}
+                  ph={40}
+                  backgroundColor={theme.colors.primaryColor}
+                  style={
+                    {
+                      // alignSelf: 'center',
+                    }
+                  }>
+                  Scan QR
+                </Button>
+                <Button
+                  onPress={customerDetailNextPress}
+                  ph={40}
+                  ml={10}
+                  style={
+                    {
+                      // alignSelf: 'center',
+                    }
+                  }>
+                  Next
+                </Button>
+              </View>
             </View>
           </>
         );
@@ -1071,15 +1179,14 @@ function Footer({}) {
                     dispatch(
                       orderAction.set({customerDetail: CUSTOMER_DETAIL}),
                     );
-                    setModalView(CART_MODAL_VIEW.payment_method.id);
+                    setModalView(CART_MODAL_VIEW.ask_split_payment.id);
                   }}
                 />
               </View>
             </View>
           </>
         );
-
-      case CART_MODAL_VIEW.payment_method.id:
+      case CART_MODAL_VIEW.ask_split_payment.id:
         return (
           <>
             <Button
@@ -1090,6 +1197,290 @@ function Footer({}) {
                 }
 
                 setModalView(CART_MODAL_VIEW.loyality.id);
+              }}
+              style={{
+                alignSelf: 'flex-start',
+              }}>
+              Back
+            </Button>
+
+            <View
+              style={{
+                width: '70%',
+                alignSelf: 'center',
+                paddingVertical: 40,
+                // backgroundColor: 'red',
+              }}>
+              {!!customerDetail?.phoneNo &&
+                !!(customerDetail?.firstName || customerDetail?.lastName) && (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 15,
+                    }}>
+                    <Text medium size={20} mr={10}>
+                      Reward Member :{' '}
+                      <Text
+                        // mb={10}
+                        style={{
+                          textTransform: 'capitalize',
+                        }}
+                        semibold
+                        size={20}>
+                        {customerDetail?.firstName} {customerDetail?.lastName}
+                      </Text>
+                    </Text>
+                    <FontAwesome5Icon
+                      size={20}
+                      color={theme.colors.successColor}
+                      name="check-circle"
+                      solid
+                    />
+                  </View>
+                )}
+
+              <Text mb={10} bold size={22}>
+                Would like to split payment?
+              </Text>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                }}>
+                <PayMethodButton
+                  text="Yes"
+                  onPress={() => {
+                    setSplitPayment(true);
+                    setModalView(CART_MODAL_VIEW.split_payment.id);
+                  }}
+                />
+                <PayMethodButton
+                  text="No"
+                  onPress={() => {
+                    setSplitPayment(false);
+                    setModalView(CART_MODAL_VIEW.payment_method.id);
+                  }}
+                />
+              </View>
+            </View>
+          </>
+        );
+
+      case CART_MODAL_VIEW.split_payment.id:
+        return (
+          <>
+            <Button
+              onPress={() => {
+                setModalView(CART_MODAL_VIEW.ask_split_payment.id);
+              }}
+              style={{
+                alignSelf: 'flex-start',
+              }}>
+              Back
+            </Button>
+            <MenuProvider skipInstanceCheck>
+              <View
+                style={
+                  {
+                    // width: '70%',
+                    // alignItems: 'center',
+                    // justifyContent:'flex-start',
+                    // paddingVertical: 40,
+                    // backgroundColor: 'red',
+                  }
+                }>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    // justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                  <Text semibold>
+                    Total Amount: <Text>{total}</Text>
+                  </Text>
+                  <View
+                    style={{
+                      flex: 1,
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Button
+                      onPress={() => {
+                        if (splitNo > 1) {
+                          setSplitNo(s => {
+                            return s - 1;
+                          });
+                        }
+                      }}>
+                      -
+                    </Button>
+                    <Text
+                      align="center"
+                      style={{
+                        minWidth: 50,
+                      }}>
+                      {splitNo}
+                    </Text>
+                    <Button
+                      onPress={() => {
+                        setSplitNo(s => {
+                          return s + 1;
+                        });
+                      }}>
+                      +
+                    </Button>
+                  </View>
+                </View>
+                <Container>
+                  {splitPayments.map((r, i) => {
+                    return (
+                      <View
+                        key={i}
+                        style={{
+                          flexDirection: 'row',
+                          // backgroundColor:'red',
+                          alignItems: 'center',
+                          marginBottom: 10,
+                        }}>
+                        <Text mr={5}>{i + 1}.</Text>
+
+                        <Select
+                          containerStyle={{
+                            marginBottom: 0,
+                            flex: 1,
+                            paddingVertical: 5,
+                            paddingHorizontal: 15,
+                            // backgroundColor: 'red',
+                            marginRight: 5,
+                          }}
+                          // sm
+                          // title="Mode of Pooja"
+                          // leftComponent={
+                          //   <Image
+                          //     resizeMode="contain"
+                          //     style={{
+                          //       width: 25,
+                          //       height: 25,
+                          //       marginRight: 10,
+                          //       // backgroundColor:'red'
+                          //     }}
+                          //     source={require('../assets/images/list.png')}
+                          //   />
+                          // }
+                          onValueChange={item => {
+                            setSplitPayments(_sp => {
+                              let sp = [..._sp];
+                              sp.splice(i, 1, {
+                                ...sp[i],
+                                type: item,
+                              });
+                              return sp;
+                            });
+                            // console.log(item);
+                            //  props.setFieldValue('mode', item);
+                          }}
+                          data={[
+                            // {
+                            //   value: '',
+                            //   label: 'Select',
+                            // },
+                            {
+                              value: 'cash',
+                              label: 'Cash',
+                            },
+                            {
+                              value: 'card',
+                              label: 'Card',
+                            },
+                            {
+                              value: 'gift-card',
+                              label: 'Gift Card',
+                            },
+                          ]}
+                          value={r.type}
+                          // error={props.errors.mode?.value ? props.errors.mode?.value : ''}
+                          // containerStyle={{marginBottom: 20}}
+                        />
+
+                        <TextInput
+                          containerStyle={{
+                            marginBottom: 0,
+                            flex: 2,
+                            paddingVertical: 5,
+                            paddingHorizontal: 15,
+                            // backgroundColor: 'red',
+                          }}
+                          // title="Customer Phone No."
+                          textInputProps={{
+                            onChangeText: d => {
+                              setSplitPayments(_sp => {
+                                let sp = [..._sp];
+                                sp.splice(i, 1, {
+                                  ...sp[i],
+                                  amount: d,
+                                });
+                                return sp;
+                              });
+                              // dispatch(
+                              //   orderAction.set({
+                              //     _prop: 'customerDetail',
+                              //     values: {phoneNo: d},
+                              //   }),
+                              // );
+                            },
+                            // onBlur: props.handleBlur('email'),
+                            value: r.amount.toString(),
+                            keyboardType: 'numeric',
+                            autoCapitalize: 'none',
+                            // returnKeyType: 'next',
+                            // placeholder: 'Phone No.',
+                            //  onSubmitEditing: () => this.passwordInput.focus(),
+                            //ref: r => (this.emailInput = r),
+                            // type: 'custom',
+                            // options: {
+                            //   mask: '(999) 999 9999',
+                            // },
+                          }}
+                          // error={
+                          //   props.errors.email && props.touched.email
+                          //     ? props.errors.email
+                          //     : ''
+                          // }
+                          // round
+                        />
+                      </View>
+                    );
+                  })}
+                </Container>
+              </View>
+            </MenuProvider>
+
+            <Button
+              onPress={() => {
+                setModalView(CART_MODAL_VIEW.price_calc.id);
+              }}
+              ph={40}
+              ml={10}
+              style={{
+                alignSelf: 'center',
+              }}>
+              Next
+            </Button>
+          </>
+        );
+      case CART_MODAL_VIEW.payment_method.id:
+        return (
+          <>
+            <Button
+              onPress={() => {
+                if (splitPayment) {
+                  setModalView(CART_MODAL_VIEW.split_payment.id);
+                  return;
+                }
+
+                setModalView(CART_MODAL_VIEW.ask_split_payment.id);
               }}
               style={{
                 alignSelf: 'flex-start',
@@ -1164,6 +1555,10 @@ function Footer({}) {
           <>
             <Button
               onPress={() => {
+                if (splitPayment) {
+                  setModalView(CART_MODAL_VIEW.split_payment.id);
+                  return;
+                }
                 setModalView(CART_MODAL_VIEW.payment_method.id);
               }}
               style={{

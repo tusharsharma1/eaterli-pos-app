@@ -19,7 +19,7 @@ export default StyleSheet.create({
     // borderColor: "#9392b4",
     paddingVertical: 0,
     // paddingHorizontal: 10,
-    // backgroundColor: "red",
+    // backgroundColor: "yellow",
     // textAlign: 'center',
     // height:50,
     // borderRadius:50,
