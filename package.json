@@ -3,16 +3,16 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
-    "release": "react-native run-android --variant=release",
+    "android": "react-native run-android --port 2222",
+    "release": "react-native run-android --variant=release --port 2222",
     "ios": "react-native run-ios",
-    "start": "react-native start",
+    "start": "react-native start --port 2222",
     "test": "jest",
     "lint": "eslint .",
     "prettier": "prettier --check \"src/**/*.{ts,js,jsx}\"",
     "prettier-write": "prettier --write \"src/**/*.{ts,js,jsx}\"",
     "refresh-d": "./gradlew build --refresh-dependencies",
-    "start-emulator": "emulator -avd tablet_Nexus_7_API_33 -netdelay none -netspeed full"
+    "emulator": "emulator -avd tablet_Nexus_7_API_33 -netdelay none -netspeed full"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.17.10",

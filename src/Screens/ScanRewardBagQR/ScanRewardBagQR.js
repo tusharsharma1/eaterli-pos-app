@@ -17,7 +17,7 @@ import {getTotalRewardBagPoints} from '../../helpers/order.helper';
 const Buffer = require('buffer').Buffer;
 export default function ScanRewardBagQR({navigation, route}) {
   const dispatch = useDispatch();
-  const [QRData, setQRData] = useState(''); //WzEsMjc1LDdd
+  const [QRData, setQRData] = useState(''); //WzQsMjc1LDdd
   const userData = useSelector(s => s.user.userData);
   const rewards = useSelector(s => s.user.rewards);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
@@ -162,6 +162,8 @@ export default function ScanRewardBagQR({navigation, route}) {
               {bagJson.map(r => {
                 let reward = rewards.find(d => d.id == r.id);
                 if (!reward) return null;
+
+                let menuItem = reward.menu_item;
                 return (
                   <View
                     key={r.id}
@@ -172,7 +174,7 @@ export default function ScanRewardBagQR({navigation, route}) {
                       borderRadius: 8,
                       marginBottom: 10,
                     }}>
-                    <Text bold>{reward.title}</Text>
+                    <Text bold>{menuItem?.item_name || reward.title}</Text>
                     <Text medium>Qty- {r.qty}</Text>
 
                     <Text medium>Points- {reward.points}</Text>

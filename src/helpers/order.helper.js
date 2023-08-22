@@ -216,6 +216,7 @@ export function getCartProducts() {
       // console.log(id,cartItem,itemData,price,sizeData)
 
       return {
+        cart_id:id,
         id: itemData.id,
         qty: cartItem.qty,
         price,
@@ -253,10 +254,10 @@ export function getAddons(data) {
   } catch {}
   return addons;
 }
-export function getCartItem() {
+export function getCartItem(cart) {
   let {store} = React;
   let {menuItems} = store.getState().user;
-  let {cart} = store.getState().order;
+
   let Ids = Object.keys(cart)
     .map((id, i) => {
       let [itemId, sizeId, addon, productMenuType] = id.split('-');
