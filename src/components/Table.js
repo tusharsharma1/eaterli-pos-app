@@ -50,6 +50,7 @@ export default function Table({
         }}
         data={data}
         keyExtractor={keyExtractor}
+        
       />
     );
   };

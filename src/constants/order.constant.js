@@ -26,6 +26,7 @@ export const CART_MODAL_VIEW = {
   split_payment: {id: 'split_payment'},
   payment_method: {id: 'payment_method'},
   price_calc: {id: 'price_calc'},
+  price_calc_split: {id: 'price_calc_split'},
 };
 
 export const CUSTOMER_DETAIL = {

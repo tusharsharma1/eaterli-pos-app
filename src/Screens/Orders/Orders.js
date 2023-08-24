@@ -451,35 +451,36 @@ export default function Orders({navigation, route}) {
               )}
             </View>
 
-            {selectedOrder.point_transactions && !!selectedOrder.point_transactions.length &&(
-              <View>
-                <Text size={18} bold mb={5}>
-                  Reward Points
-                </Text>
-                {selectedOrder.point_transactions.map((d, i) => {
-                  return (
-                    <View
-                      key={i}
-                      style={{
-                        marginBottom: 5,
-                      }}>
-                      <Text size={14}>
-                        Description:{' '}
-                        <Text size={14} semibold>
-                          {d.description}
+            {selectedOrder.point_transactions &&
+              !!selectedOrder.point_transactions.length && (
+                <View>
+                  <Text size={18} bold mb={5}>
+                    Reward Points
+                  </Text>
+                  {selectedOrder.point_transactions.map((d, i) => {
+                    return (
+                      <View
+                        key={i}
+                        style={{
+                          marginBottom: 5,
+                        }}>
+                        <Text size={14}>
+                          Description:{' '}
+                          <Text size={14} semibold>
+                            {d.description}
+                          </Text>
                         </Text>
-                      </Text>
-                      <Text size={14}>
-                        Point:{' '}
-                        <Text size={14} semibold>
-                          {d.point}
+                        <Text size={14}>
+                          Point:{' '}
+                          <Text size={14} semibold>
+                            {d.point}
+                          </Text>
                         </Text>
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
-            )}
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
 
             <Text size={18} bold>
               Products
@@ -592,7 +593,10 @@ export default function Orders({navigation, route}) {
                 title={'Grand Total:'}
                 value={`$ ${parseFloat(selectedOrder.order_total).toFixed(2)}`}
               />
-              {selectedOrder.payment_method == PAYMENT_METHOD.cash.id && (
+              {[
+                PAYMENT_METHOD.cash.id,
+                PAYMENT_METHOD.split_payment.id,
+              ].includes(selectedOrder.payment_method) && (
                 <>
                   <InfoRow
                     title={'Received Amount:'}

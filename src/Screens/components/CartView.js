@@ -21,7 +21,11 @@ import {
   PAYMENT_METHOD,
 } from '../../constants/order.constant';
 import CashPaymentForm from '../../forms/CashPaymentForm';
-import {getPercentValue, simpleToast} from '../../helpers/app.helpers';
+import {
+  getPercentValue,
+  showToast,
+  simpleToast,
+} from '../../helpers/app.helpers';
 import {
   getAddonsTotal,
   getCartItem,
@@ -533,7 +537,7 @@ function Footer({}) {
 
   const [existCustomer, setExistCustomer] = useState(false);
   const [loyalityProgram, setLoyalityProgram] = useState(false);
-  const {height} = useWindowDimensions();
+  const {height, width} = useWindowDimensions();
   const cart = useSelector(s => s.order.cart);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
   const userData = useSelector(s => s.user.userData);
@@ -542,25 +546,36 @@ function Footer({}) {
   const customerDetail = useSelector(s => s.order.customerDetail);
   const payModal = useSelector(s => s.order.payModal);
   const [QRDataScaning, setQRDataScaning] = useState(false); //
-  const [QRData, setQRData] = useState(''); //WzI3NSw3XQ==
+  const [QRData, setQRData] = useState('WzI3NSw3XQ=='); //WzI3NSw3XQ==
   const [splitNo, setSplitNo] = useState(2);
   const [splitPayments, setSplitPayments] = useState([]);
+  const [selectedSplitAmtRow, setSelectedSplitAmtRow] = useState(0);
   const [splitPayment, setSplitPayment] = useState(false);
   const [splitPaymentBy, setSplitPaymentBy] = useState(1);
   const [totalSplitBills, setTotalSplitBills] = useState(2);
 
   const splitBills = useSelector(s => s.order.splitBills);
-  let total = getGrandTotal();
+
+  const location = userData.locations.find(s => s.id == selectedLocation);
+
+  let tax_per = location?.tax ? parseFloat(location.tax) : 0;
+
+  let sub_total = getGrandTotal();
+  let tax_amt = (sub_total * tax_per) / 100;
+  let total = tax_amt + sub_total;
+
   useEffect(() => {
     if (!payModal.show) {
       setPaymentMethod('');
       dispatch(orderAction.set({customerDetail: CUSTOMER_DETAIL}));
       setModalView(CART_MODAL_VIEW.reward_question.id);
+
       setSplitNo(2);
+      genarateSplitPayments(2, true);
       setSplitPayment(false);
-      setSplitPaymentBy(1)
-      dispatch(orderAction.set({splitBills: []}));
+      setSplitPaymentBy(1);
       setTotalSplitBills(2);
+      genarateSplitPaymentsBill(2, true);
     }
   }, [payModal]);
 
@@ -573,20 +588,36 @@ function Footer({}) {
   }, [customerDetail]);
 
   useEffect(() => {
-    let perUser = (total / splitNo).toFixed(2);
-
-    let spmts = Array.from(Array(splitNo)).map((r, i) => {
-      return {
-        type: splitPayments[i]?.type || 'cash',
-        amount: perUser,
-      };
-    });
-
-    setSplitPayments(spmts);
+    genarateSplitPayments(splitNo);
   }, [splitNo, total]);
 
   useEffect(() => {
-    let spmts = Array.from(Array(totalSplitBills)).map((r, i) => {
+    let allPaid = splitPayments.every(d => d.paid);
+    // console.log('call',allPaid);
+    if (
+      modalView == CART_MODAL_VIEW.split_payment.id &&
+      splitPaymentBy == 1 &&
+      allPaid
+    ) {
+      // console.log('call', splitPayments);
+      let received_amount = splitPayments.reduce((s, r) => {
+        return s + parseFloat(r.received_amount);
+      }, 0);
+      onCashSubmitSuccess({received_amount: received_amount});
+    }
+  }, [splitPayments, splitPaymentBy, modalView]);
+
+  useEffect(() => {
+    genarateSplitPaymentsBill(totalSplitBills);
+  }, [totalSplitBills]);
+  const genarateSplitPaymentsBill = (_totalSplitBills = 2, refresh = false) => {
+    let spmts = Array.from(Array(_totalSplitBills)).map((r, i) => {
+      if (refresh) {
+        return {
+          cart: {},
+        };
+      }
+
       return (
         splitBills[i] || {
           cart: {},
@@ -595,7 +626,32 @@ function Footer({}) {
     });
 
     dispatch(orderAction.set({splitBills: spmts}));
-  }, [totalSplitBills]);
+  };
+  const genarateSplitPayments = (_splitNo = 2, refresh = false) => {
+    let perUser = (total / _splitNo).toFixed(2);
+
+    let spmts = Array.from(Array(_splitNo)).map((r, i) => {
+      if (refresh) {
+        return {
+          type: 'cash',
+          paid: false,
+          amount: perUser,
+          received_amount: 0,
+        };
+      }
+
+      return {
+        type: splitPayments[i]?.type || 'cash',
+        paid: splitPayments[i]?.paid ?? false,
+        amount: splitPayments[i]?.paid
+          ? splitPayments[i]?.amount ?? '00.00'
+          : perUser,
+        received_amount: splitPayments[i]?.received_amount ?? 0,
+      };
+    });
+
+    setSplitPayments(spmts);
+  };
 
   const toggleModal = () => {
     dispatch(
@@ -689,7 +745,14 @@ function Footer({}) {
       products: products,
       restaurant_location_id: selectedLocation,
       restaurant_id: userData.restaurant.id,
-      total,
+      // total,
+
+      sub_total: sub_total.toFixed(2),
+      order_total: total.toFixed(2),
+      tax_per: tax_per,
+      tax_amt: tax_amt,
+      tax_title: "TAX Fee",
+
       received_amount: values.received_amount,
       paymentMethod: splitPayment
         ? PAYMENT_METHOD.split_payment.id
@@ -1049,7 +1112,7 @@ function Footer({}) {
                   // mt={10}
                   onPress={async () => {
                     setQRDataScaning(true);
-                    setQRData('');
+                    // setQRData('');
                     setModalView(CART_MODAL_VIEW.scan_qr.id);
                   }}
                   ph={40}
@@ -1120,7 +1183,7 @@ function Footer({}) {
                 caretHidden
                 selectionColor={'#00000000'}
                 autoFocus
-                showSoftInputOnFocus={false}
+                // showSoftInputOnFocus={false}
                 returnKeyType="next"
                 value={QRData}
                 onChangeText={t => {
@@ -1424,6 +1487,14 @@ function Footer({}) {
         );
 
       case CART_MODAL_VIEW.split_payment.id:
+        let _total = splitPayments.reduce((s, r) => {
+          return s + parseFloat(r.amount);
+        }, 0);
+
+        let remaining_amount = parseFloat(_total) - parseFloat(total);
+        if (!isFinite(remaining_amount)) {
+          remaining_amount = 0;
+        }
         return (
           <>
             <View
@@ -1506,14 +1577,25 @@ function Footer({}) {
                       alignItems: 'center',
                     }}>
                     <Text semibold>
-                      Total Amount: <Text>{total}</Text>
+                      Total Amount: <Text>${parseFloat(total).toFixed(2)}</Text>
                     </Text>
+                    <Text semibold ml={10}>
+                      Remaining Amount:{' '}
+                      <Text
+                        semibold
+                        color={remaining_amount >= 0 ? 'green' : 'red'}>
+                        {remaining_amount >= 0 ? '+' : '-'}$
+                        {Math.abs(remaining_amount).toFixed(2)}
+                      </Text>
+                    </Text>
+
                     <View
                       style={{
                         flex: 1,
                         flexDirection: 'row',
                         justifyContent: 'center',
                         alignItems: 'center',
+                        marginLeft: -190,
                       }}>
                       <Button
                         onPress={() => {
@@ -1544,6 +1626,12 @@ function Footer({}) {
                   </View>
                   <Container>
                     {splitPayments.map((r, i) => {
+                      let _rem_amount =
+                        parseFloat(r.received_amount) - parseFloat(r.amount);
+                      if (!isFinite(_rem_amount)) {
+                        _rem_amount = 0;
+                      }
+
                       return (
                         <View
                           key={i}
@@ -1558,7 +1646,8 @@ function Footer({}) {
                           <Select
                             containerStyle={{
                               marginBottom: 0,
-                              flex: 1,
+                              // flex: 1,
+                              width: getPercentValue(width, 20),
                               paddingVertical: 5,
                               paddingHorizontal: 15,
                               // backgroundColor: 'red',
@@ -1616,7 +1705,8 @@ function Footer({}) {
                           <TextInput
                             containerStyle={{
                               marginBottom: 0,
-                              flex: 2,
+                              // flex: 2,
+                              width: getPercentValue(width, 40),
                               paddingVertical: 5,
                               paddingHorizontal: 15,
                               // backgroundColor: 'red',
@@ -1624,14 +1714,17 @@ function Footer({}) {
                             // title="Customer Phone No."
                             textInputProps={{
                               onChangeText: d => {
-                                setSplitPayments(_sp => {
-                                  let sp = [..._sp];
-                                  sp.splice(i, 1, {
-                                    ...sp[i],
-                                    amount: d,
+                                let input = parseFloat(d) || 0;
+                                if (input <= parseFloat(total)) {
+                                  setSplitPayments(_sp => {
+                                    let sp = [..._sp];
+                                    sp.splice(i, 1, {
+                                      ...sp[i],
+                                      amount: d,
+                                    });
+                                    return sp;
                                   });
-                                  return sp;
-                                });
+                                }
                                 // dispatch(
                                 //   orderAction.set({
                                 //     _prop: 'customerDetail',
@@ -1659,14 +1752,63 @@ function Footer({}) {
                             // }
                             // round
                           />
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              justifyContent: 'flex-end',
+                              flex: 1,
+                            }}>
+                            <Text semibold ml={10}>
+                              Received Amount:{' '}
+                              <Text semibold>
+                                ${parseFloat(r.received_amount).toFixed(2)}
+                              </Text>
+                            </Text>
 
-                          <Button
-                            backgroundColor={theme.colors.primaryColor}
-                            ml={10}
-                            ph={20}
-                            pv={5}>
-                            Charge
-                          </Button>
+                            {/* <Text semibold ml={10}>
+                            Remaining Amount:{' '}
+                            <Text
+                              semibold
+                              color={_rem_amount >= 0 ? 'green' : 'red'}>
+                              {_rem_amount >= 0 ? '+' : '-'}$
+                              {Math.abs(_rem_amount).toFixed(2)}
+                            </Text>
+                          </Text> */}
+
+                            {r.paid ? (
+                              <View
+                                style={{
+                                  width: 105,
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                }}>
+                                <FontAwesome5Icon
+                                  size={20}
+                                  color={theme.colors.successColor}
+                                  name="check-circle"
+                                />
+                              </View>
+                            ) : (
+                              <Button
+                                onPress={() => {
+                                  if (remaining_amount != 0) {
+                                    simpleToast('Settle Remaining Amount.');
+                                    return;
+                                  }
+                                  setSelectedSplitAmtRow(i);
+                                  setModalView(
+                                    CART_MODAL_VIEW.price_calc_split.id,
+                                  );
+                                }}
+                                backgroundColor={theme.colors.primaryColor}
+                                ml={10}
+                                ph={20}
+                                pv={5}>
+                                Charge
+                              </Button>
+                            )}
+                          </View>
                         </View>
                       );
                     })}
@@ -1754,6 +1896,70 @@ function Footer({}) {
             </Button> */}
           </>
         );
+
+      case CART_MODAL_VIEW.price_calc_split.id:
+        return (
+          <>
+            <View
+              style={{
+                flexDirection: 'row',
+              }}>
+              <View
+                style={{
+                  flex: 1,
+                }}>
+                <Button
+                  onPress={() => {
+                    // if (splitPayment) {
+                    //   setModalView(CART_MODAL_VIEW.split_payment.id);
+                    //   return;
+                    // }
+                    setModalView(CART_MODAL_VIEW.split_payment.id);
+                  }}
+                  style={{
+                    alignSelf: 'flex-start',
+                  }}>
+                  Back
+                </Button>
+              </View>
+            </View>
+            <View
+              style={{
+                // width: '80%',
+                alignSelf: 'center',
+                paddingVertical: 10,
+                // backgroundColor: 'red',
+                alignItems: 'center',
+              }}>
+              <View
+                style={
+                  {
+                    // flex:1
+                    // width: '100%',
+                    // backgroundColor: 'red',
+                  }
+                }>
+                <CashPaymentForm
+                  // phoneNo={phoneNo}
+                  total={splitPayments[selectedSplitAmtRow]?.amount || 0}
+                  onSubmitSuccess={values => {
+                    setSplitPayments(_sp => {
+                      let sp = [..._sp];
+                      sp.splice(selectedSplitAmtRow, 1, {
+                        ...sp[selectedSplitAmtRow],
+                        paid: true,
+                        received_amount: values.received_amount,
+                      });
+                      return sp;
+                    });
+
+                    setModalView(CART_MODAL_VIEW.split_payment.id);
+                  }}
+                />
+              </View>
+            </View>
+          </>
+        );
     }
   };
 
@@ -1761,12 +1967,43 @@ function Footer({}) {
     <>
       <View
         style={{
-          // backgroundColor: theme.colors.primaryColor,
+          backgroundColor: '#fff',
           // height: 50,
           paddingHorizontal: 10,
           justifyContent: 'center',
           paddingVertical: 10,
         }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            marginBottom: 10,
+          }}>
+          <Text
+            style={{
+              flex: 1,
+            }}
+            semibold
+            size={16}>
+            Total
+          </Text>
+          <Text size={16}>${parseFloat(sub_total).toFixed(2)}</Text>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            marginBottom: 10,
+          }}>
+          <Text
+            style={{
+              flex: 1,
+            }}
+            semibold
+            size={16}>
+            Tax Fee ({tax_per}%)
+          </Text>
+          <Text size={16}>${parseFloat(tax_amt).toFixed(2)}</Text>
+        </View>
+
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Button
             onPress={onDeletePress}
