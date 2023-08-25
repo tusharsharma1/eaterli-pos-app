@@ -10,7 +10,10 @@ import ModalContainer from '../../components/ModalContainer';
 import ProgressImage from '../../components/react-native-image-progress';
 import Text from '../../components/Text';
 import theme from '../../theme';
-import {PAYMENT_METHOD} from '../../constants/order.constant';
+import {
+  DEFAULT_TAX_TITLE,
+  PAYMENT_METHOD,
+} from '../../constants/order.constant';
 import {dummyImage} from '../../assets';
 import userAction from '../../redux/actions/user.action';
 import {getAddons, getVariants} from '../../helpers/order.helper';
@@ -93,8 +96,8 @@ export default function Orders({navigation, route}) {
     ];
   }, []);
   let remaining_amount =
-    parseFloat(selectedOrder?.received_amount) -
-    parseFloat(selectedOrder?.order_total);
+    parseFloat(selectedOrder?.order_total) -
+    parseFloat(selectedOrder?.received_amount);
   if (!isFinite(remaining_amount)) {
     remaining_amount = 0;
   }
@@ -573,22 +576,102 @@ export default function Orders({navigation, route}) {
                     },
                   },
                   {
+                    title: 'Dis.',
+                    align: 'right',
+                    renderValue: data => {
+                      return `${data.discount_type == '2' ? '$' : ''}${
+                        data.discount
+                      }${data.discount_type == '1' ? '%' : ''}`;
+                      // return data.rate
+                      //   ? `$${parseFloat(data.rate).toFixed(2)}`
+                      //   : '';
+                    },
+                  },
+                  {
                     title: 'Total',
                     align: 'right',
                     renderValue: data => {
-                      return data.total_price
-                        ? `$${parseFloat(data.total_price).toFixed(2)}`
+                      let discount_type = data.discount_type ?? '1';
+
+                      let _discount = parseFloat(data.discount ?? 0);
+                      let totalPrice = data.total_price;
+                      if (_discount) {
+                        if (discount_type == '1') {
+                          totalPrice =
+                            totalPrice - totalPrice * (_discount / 100);
+                        } else if (discount_type == '2') {
+                          totalPrice = totalPrice - _discount;
+                        }
+                      }
+                      return totalPrice
+                        ? `$${parseFloat(totalPrice).toFixed(2)}`
                         : '';
                     },
                   },
                 ]}
               />
             </View>
+
+            {[PAYMENT_METHOD.split_payment.id].includes(
+              selectedOrder.payment_method,
+            ) && (
+              <View
+                style={{
+                  marginBottom: 10,
+                }}>
+                <Text size={18} bold>
+                  Split Payment
+                </Text>
+
+                <Table
+                  data={selectedOrder.order_split_payments || []}
+                  columns={[
+                    {
+                      title: 'Type',
+                      align: 'left',
+                      key: 'type',
+                    },
+
+                    {
+                      title: 'Amount',
+                      align: 'right',
+                      renderValue: data => {
+                        return data.amount
+                          ? `$${parseFloat(data.amount).toFixed(2)}`
+                          : '';
+                      },
+                    },
+                    {
+                      title: 'Received Amount',
+                      align: 'right',
+                      renderValue: data => {
+                        return data.received_amount
+                          ? `$${parseFloat(data.received_amount).toFixed(2)}`
+                          : '';
+                      },
+                    },
+                  ]}
+                />
+
+                {/* {(selectedOrder.order_split_payments || []).map(sp => {
+                  return <View key={sp.id}></View>;
+                })} */}
+              </View>
+            )}
+
             <View
               style={{
                 alignSelf: 'flex-end',
                 width: 300,
               }}>
+              <InfoRow
+                title={'Sub Total:'}
+                value={`$ ${parseFloat(selectedOrder.sub_total).toFixed(2)}`}
+              />
+              <InfoRow
+                title={`${selectedOrder?.tax_title || DEFAULT_TAX_TITLE} (${parseFloat(selectedOrder?.tax_per||0)}%)`}
+                value={`$ ${parseFloat(selectedOrder.tax_amt).toFixed(2)}`}
+              />
               <InfoRow
                 title={'Grand Total:'}
                 value={`$ ${parseFloat(selectedOrder.order_total).toFixed(2)}`}

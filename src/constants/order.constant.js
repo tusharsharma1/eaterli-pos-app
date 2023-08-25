@@ -35,3 +35,6 @@ export const CUSTOMER_DETAIL = {
   firstName: '',
   lastName: '',
 };
+
+export const DEFAULT_TAX_TITLE = "Tax Fee";
+

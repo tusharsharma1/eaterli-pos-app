@@ -18,6 +18,7 @@ import {ALERT_ICON_TYPE, ALERT_TYPE} from '../../constants/alert.constant';
 import {
   CART_MODAL_VIEW,
   CUSTOMER_DETAIL,
+  DEFAULT_TAX_TITLE,
   PAYMENT_METHOD,
 } from '../../constants/order.constant';
 import CashPaymentForm from '../../forms/CashPaymentForm';
@@ -160,6 +161,7 @@ function CartRow({id}) {
   let add_onsTotal = getAddonsTotal(add_ons);
   let rate = add_onsTotal + price;
   let totalPrice = rate * data.qty;
+  let subPrice = totalPrice;
   let discount_type = data.discount_type ?? '1';
   let _discount = parseFloat(data.discount ?? 0);
   if (isNaN(_discount)) {
@@ -222,6 +224,15 @@ function CartRow({id}) {
     toggleNoteModal();
   };
   const updateDiscount = () => {
+    if (discountType == '1' && parseFloat(discount) > 100) {
+      simpleToast('Invalid discount');
+      return;
+    }
+    if (discountType == '2' && parseFloat(discount) > subPrice) {
+      simpleToast('Invalid discount');
+      return;
+    }
+
     dispatch(
       orderAction.set({
         _prop: 'cart',
@@ -517,6 +528,7 @@ function CartRow({id}) {
             },
             value: discount,
             keyboardType: 'numeric',
+            autoFocus: true,
           }}
           textStyle={{
             textAlign: 'left',
@@ -546,7 +558,7 @@ function Footer({}) {
   const customerDetail = useSelector(s => s.order.customerDetail);
   const payModal = useSelector(s => s.order.payModal);
   const [QRDataScaning, setQRDataScaning] = useState(false); //
-  const [QRData, setQRData] = useState('WzI3NSw3XQ=='); //WzI3NSw3XQ==
+  const [QRData, setQRData] = useState(''); //WzI3NSw3XQ==
   const [splitNo, setSplitNo] = useState(2);
   const [splitPayments, setSplitPayments] = useState([]);
   const [selectedSplitAmtRow, setSelectedSplitAmtRow] = useState(0);
@@ -557,7 +569,9 @@ function Footer({}) {
   const splitBills = useSelector(s => s.order.splitBills);
 
   const location = userData.locations.find(s => s.id == selectedLocation);
-
+  
+  let tax_title = location?.tax_title || DEFAULT_TAX_TITLE
+   
   let tax_per = location?.tax ? parseFloat(location.tax) : 0;
 
   let sub_total = getGrandTotal();
@@ -601,7 +615,7 @@ function Footer({}) {
     ) {
       // console.log('call', splitPayments);
       let received_amount = splitPayments.reduce((s, r) => {
-        return s + parseFloat(r.received_amount);
+        return s + (parseFloat(r.received_amount) || 0);
       }, 0);
       onCashSubmitSuccess({received_amount: received_amount});
     }
@@ -628,7 +642,19 @@ function Footer({}) {
     dispatch(orderAction.set({splitBills: spmts}));
   };
   const genarateSplitPayments = (_splitNo = 2, refresh = false) => {
-    let perUser = (total / _splitNo).toFixed(2);
+    let paidTotal = splitPayments.reduce((s, r) => {
+      if (r.paid) {
+        return s + 1;
+      }
+      return s;
+    }, 0);
+    let paidTotalAmt = splitPayments.reduce((s, r) => {
+      if (r.paid) {
+        return s + (parseFloat(r.amount) || 0);
+      }
+      return s;
+    }, 0);
+    let perUser = ((total - paidTotalAmt) / (_splitNo - paidTotal)).toFixed(3);
 
     let spmts = Array.from(Array(_splitNo)).map((r, i) => {
       if (refresh) {
@@ -739,8 +765,17 @@ function Footer({}) {
   const onCashSubmitSuccess = async values => {
     let products = getCartProducts();
     if (!products.length) {
+      simpleToast('No Product Added.');
       return;
     }
+
+    if (parseFloat(total) > parseFloat(values.received_amount)) {
+      // console.log('success no');
+
+      simpleToast('Received amount is not valid.');
+      return;
+    }
+
     let body = {
       products: products,
       restaurant_location_id: selectedLocation,
@@ -751,7 +786,7 @@ function Footer({}) {
       order_total: total.toFixed(2),
       tax_per: tax_per,
       tax_amt: tax_amt,
-      tax_title: "TAX Fee",
+      tax_title: tax_title,
 
       received_amount: values.received_amount,
       paymentMethod: splitPayment
@@ -768,6 +803,7 @@ function Footer({}) {
 
       ...customerDetail,
     };
+
     console.log(body);
     // return
     let r = await dispatch(userAction.createOrder(body));
@@ -1112,7 +1148,7 @@ function Footer({}) {
                   // mt={10}
                   onPress={async () => {
                     setQRDataScaning(true);
-                    // setQRData('');
+                    setQRData('');
                     setModalView(CART_MODAL_VIEW.scan_qr.id);
                   }}
                   ph={40}
@@ -1183,7 +1219,7 @@ function Footer({}) {
                 caretHidden
                 selectionColor={'#00000000'}
                 autoFocus
-                // showSoftInputOnFocus={false}
+                showSoftInputOnFocus={false}
                 returnKeyType="next"
                 value={QRData}
                 onChangeText={t => {
@@ -1488,13 +1524,15 @@ function Footer({}) {
 
       case CART_MODAL_VIEW.split_payment.id:
         let _total = splitPayments.reduce((s, r) => {
-          return s + parseFloat(r.amount);
+          return s + (parseFloat(r.amount) || 0);
         }, 0);
 
-        let remaining_amount = parseFloat(_total) - parseFloat(total);
+        let remaining_amount = parseFloat(total) - parseFloat(_total);
         if (!isFinite(remaining_amount)) {
           remaining_amount = 0;
         }
+        remaining_amount=parseFloat(remaining_amount.toFixed(2))
+        // console.log('remaining_amount', remaining_amount);
         return (
           <>
             <View
@@ -1626,11 +1664,11 @@ function Footer({}) {
                   </View>
                   <Container>
                     {splitPayments.map((r, i) => {
-                      let _rem_amount =
-                        parseFloat(r.received_amount) - parseFloat(r.amount);
-                      if (!isFinite(_rem_amount)) {
-                        _rem_amount = 0;
-                      }
+                      // let _rem_amount =
+                      //   parseFloat(r.received_amount) - parseFloat(r.amount);
+                      // if (!isFinite(_rem_amount)) {
+                      //   _rem_amount = 0;
+                      // }
 
                       return (
                         <View
@@ -1668,6 +1706,9 @@ function Footer({}) {
                             //   />
                             // }
                             onValueChange={item => {
+                              if (r.paid) {
+                                return;
+                              }
                               setSplitPayments(_sp => {
                                 let sp = [..._sp];
                                 sp.splice(i, 1, {
@@ -1714,8 +1755,31 @@ function Footer({}) {
                             // title="Customer Phone No."
                             textInputProps={{
                               onChangeText: d => {
+                                if (r.paid) {
+                                  return;
+                                }
+
                                 let input = parseFloat(d) || 0;
-                                if (input <= parseFloat(total)) {
+                                let maxValue = splitPayments.reduce(
+                                  (s, r, j) => {
+                                    if (i == j) {
+                                      return s;
+                                    }
+                                    return s + (parseFloat(r.amount) || 0);
+                                  },
+                                  0,
+                                );
+
+                                maxValue = parseFloat(total) - maxValue;
+                               
+                                maxValue=parseFloat(maxValue.toFixed(2))
+                               
+                                console.log(
+                                  input <= parseFloat(maxValue),
+                                  input,
+                                  parseFloat(maxValue),
+                                );
+                                if (input <= parseFloat(maxValue)) {
                                   setSplitPayments(_sp => {
                                     let sp = [..._sp];
                                     sp.splice(i, 1, {
@@ -1792,8 +1856,11 @@ function Footer({}) {
                             ) : (
                               <Button
                                 onPress={() => {
+                                  console.log(remaining_amount)
                                   if (remaining_amount != 0) {
-                                    simpleToast('Settle Remaining Amount.');
+                                    simpleToast(
+                                      'Your total amount is over the balance',
+                                    );
                                     return;
                                   }
                                   setSelectedSplitAmtRow(i);
@@ -1801,7 +1868,11 @@ function Footer({}) {
                                     CART_MODAL_VIEW.price_calc_split.id,
                                   );
                                 }}
-                                backgroundColor={theme.colors.primaryColor}
+                                backgroundColor={
+                                  remaining_amount != 0
+                                    ? 'red'
+                                    : theme.colors.primaryColor
+                                }
                                 ml={10}
                                 ph={20}
                                 pv={5}>
@@ -1999,7 +2070,7 @@ function Footer({}) {
             }}
             semibold
             size={16}>
-            Tax Fee ({tax_per}%)
+            {tax_title} ({tax_per}%)
           </Text>
           <Text size={16}>${parseFloat(tax_amt).toFixed(2)}</Text>
         </View>

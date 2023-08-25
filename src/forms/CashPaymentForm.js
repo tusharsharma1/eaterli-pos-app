@@ -8,7 +8,7 @@ import {useDispatch} from 'react-redux';
 import * as yup from 'yup';
 import Button from '../components/Button';
 import TextInput from '../components/Controls/TextInput';
-import {showToast} from '../helpers/app.helpers';
+import {showToast, simpleToast} from '../helpers/app.helpers';
 import storageHelper from '../helpers/storage.helper';
 import stringHelper from '../helpers/string.helper';
 import userAction from '../redux/actions/user.action';
@@ -46,106 +46,21 @@ const CashPaymentForm = ({total = 0, onSubmitSuccess}) => {
   const onSubmit = async (values, helpers) => {
     // console.log(values);
     Keyboard.dismiss();
+
+    if (parseFloat(total) > values.received_amount) {
+      // console.log('success no');
+
+      simpleToast('Received amount is not valid.');
+      return;
+    }
+
+    // console.log('success');
+
     onSubmitSuccess && onSubmitSuccess(values);
-    // let r = await dispatch(userAction.login(values));
-    // console.log('result===>  ', r);
-    // if (r && r.status) {
-    //   // let {onSubmit} = this.props;
-    //   helpers.resetForm();
-    //   // showSnackbar('Sign successfully.');
-    //   showToast(r.message, 'success');
-
-    //   let data = r.data;
-    //   console.log('srsss', data);
-    //   let password = await stringHelper.encrypt(values.password);
-    //   console.log('password', password);
-
-    //   await storageHelper.storeData('email', values.email);
-
-    //   // Store the credentials
-    //   // await Keychain.setGenericPassword(values.email, password);
-    //   onSubmitSuccess && onSubmitSuccess(values);
-    //   // this.props.dispatch(UserActions.setProperty('userData', data));
-    //   // this.props.dispatch(UserActions.setFavLocation(data.location_id));
-
-    //   // StorageService.storeData(AppConfig.STORAGE_USER_KEY, data).then((_) => {
-
-    //   // });
-
-    //   // onSubmit && onSubmit(values);
-
-    //   // this.props.dispatch(
-    //   //   AlertActions.showAlert(
-    //   //     AlertActions.type.ALERT,
-    //   //     's',
-    //   //     r.message,
-    //   //     'Success',
-    //   //     {
-    //   //       text: 'OK',
-    //   //       onPress: () => {
-    //   //         onSubmit && onSubmit(values, helpers);
-    //   //       },
-    //   //     },
-    //   //   ),
-    //   // );
-    // }
-    // return;
-    // let r = await this.props.dispatch(UserActions.login(values));
-    // console.log(r);
-    // if (r && r.status) {
-    //   let {onSubmit} = this.props;
-    //   helpers.resetForm();
-    //   // showSnackbar('Sign successfully.');
-    //   showToast(r.message, 'success');
-
-    //   let data = {...r.result, token: r.token};
-    //   console.log('srsss', data);
-    //   let password = await stringHelper.encrypt(values.password);
-    //   // Store the credentials
-    //   await Keychain.setGenericPassword(values.email, password);
-    //   this.props.dispatch(UserActions.setProperty('userData', data));
-    //   // this.props.dispatch(UserActions.setFavLocation(data.location_id));
-
-    //   // StorageService.storeData(AppConfig.STORAGE_USER_KEY, data).then((_) => {
-
-    //   // });
-
-    //   onSubmit && onSubmit(values);
-
-    //   // this.props.dispatch(
-    //   //   AlertActions.showAlert(
-    //   //     AlertActions.type.ALERT,
-    //   //     's',
-    //   //     r.message,
-    //   //     'Success',
-    //   //     {
-    //   //       text: 'OK',
-    //   //       onPress: () => {
-    //   //         onSubmit && onSubmit(values, helpers);
-    //   //       },
-    //   //     },
-    //   //   ),
-    //   // );
-    // }
   };
 
   return (
     <>
-      {/* <ActionSheet
-        ref={(o) => (this.ActionSheet = o)}
-        title={'Which one do you like ?'}
-        options={['Camera', 'Gallery', 'Cancel']}
-        cancelButtonIndex={2}
-        onPress={(index) => {
-          if (index == 0) {
-            this.onSelectCamera();
-          }
-
-          if (index == 1) {
-            this.onSelectFile();
-          }
-        }}
-      /> */}
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
@@ -155,11 +70,12 @@ const CashPaymentForm = ({total = 0, onSubmitSuccess}) => {
         {props => {
           // console.log(props.values);
 
-          let received_amount =
-            parseFloat(props.values.received_amount) - parseFloat(total);
-          if (!isFinite(received_amount)) {
-            received_amount = 0;
+          let remaining_amount =
+            parseFloat(total) - parseFloat(props.values.received_amount);
+          if (!isFinite(remaining_amount)) {
+            remaining_amount = 0;
           }
+          // console.log('remaining_amount', remaining_amount);
           return (
             <>
               <Row title={'Total amount'}>
@@ -188,8 +104,9 @@ const CashPaymentForm = ({total = 0, onSubmitSuccess}) => {
                 />
               </Row> */}
               <Row title={'Remaining amount'}>
-                <Text semibold color={received_amount >= 0 ? 'green' : 'red'}>
-                  ${Math.abs(received_amount).toFixed(2)}
+                <Text semibold color={remaining_amount >= 0 ? 'green' : 'red'}>
+                  {remaining_amount >= 0 ? '+' : '-'}$
+                  {Math.abs(remaining_amount).toFixed(2)}
                 </Text>
               </Row>
               <View
