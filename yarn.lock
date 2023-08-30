@@ -1531,6 +1531,13 @@
     "prompts" "^2.4.0"
     "semver" "^6.3.0"
 
+"@react-native-community/datetimepicker@^7.4.2":
+  "integrity" "sha512-+QztrvktEzMEjcmZuyg9yJ4X9i/ly3QBU+SulJeH71X/IxsBRdrEcMRWByYrIpbXhmkk9y+roATUJFT5Z3XwvA=="
+  "resolved" "https://registry.npmjs.org/@react-native-community/datetimepicker/-/datetimepicker-7.4.2.tgz"
+  "version" "7.4.2"
+  dependencies:
+    "invariant" "^2.2.4"
+
 "@react-native-community/eslint-config@^2.0.0":
   "integrity" "sha512-vHaMMfvMp9BWCQQ0lNIXibOJTcXIbYUQ8dSUsMOsrXgVkeVQJj88OwrKS00rQyqwMaC4/a6HuDiFzYUkGKOpVg=="
   "resolved" "https://registry.npmmirror.com/@react-native-community/eslint-config/-/eslint-config-2.0.0.tgz"

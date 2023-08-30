@@ -1,5 +1,5 @@
 import React, {PureComponent} from 'react';
-import {Text,TouchableOpacity, View} from 'react-native';
+import {Text, TouchableOpacity, View} from 'react-native';
 import styles from '../../styles';
 import ControlContainer from './ControlContainer';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -10,7 +10,7 @@ class SelectRadio extends PureComponent {
       error,
 
       containerStyle,
-
+      title = '',
       data,
 
       value,
@@ -21,9 +21,14 @@ class SelectRadio extends PureComponent {
     let t = data.length;
     let Root = disabled ? View : TouchableOpacity;
     return (
-      <ControlContainer containerStyle={[containerStyle, {
-        borderBottomWidth: 0,
-      }]}>
+      <ControlContainer
+        title={title}
+        containerStyle={[
+          containerStyle,
+          {
+            borderBottomWidth: 0,
+          },
+        ]}>
         <View style={{}}>
           {data.map((v, i) => {
             let checked = value == v.value;

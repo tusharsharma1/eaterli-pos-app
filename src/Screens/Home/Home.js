@@ -26,6 +26,7 @@ import POSModule from '../../helpers/pos.helper';
 import ModalContainer from '../../components/ModalContainer';
 import orderAction from '../../redux/actions/order.action';
 import {DINING_OPTION} from '../../constants/order.constant';
+import GiftCardsModal from '../components/GiftCardsModal';
 
 export default function Home(props) {
   const dispatch = useDispatch();
@@ -170,6 +171,17 @@ export default function Home(props) {
               }}
             />
             <IconBtn
+              text="Gift Cards"
+              iconName="id-card"
+              onPress={() => {
+                dispatch(
+                  userAction.set({
+                    giftCardModal: {show: true, ref: ''},
+                  }),
+                );
+              }}
+            />
+            <IconBtn
               text="Print"
               iconName="print"
               onPress={() => {
@@ -280,6 +292,8 @@ export default function Home(props) {
             />
           </View>
         </ModalContainer>
+
+        <GiftCardsModal />
 
         {!loaded && <AppLoader message={'Loading'} />}
       </View>

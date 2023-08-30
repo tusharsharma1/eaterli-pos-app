@@ -6,7 +6,7 @@ import Text from '../Text';
 const ControlContainer = memo(({containerStyle,round, title, children}) => {
   return (
     <>
-      {!!title && <Text mb={10} bold size={18}>{title}</Text>}
+      {!!title && <Text mb={4} bold size={18}>{title}</Text>}
       <View
         style={[
           {

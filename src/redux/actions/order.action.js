@@ -4,33 +4,33 @@ import {actions} from '../reducers/order.reducer';
 
 export default {
   ...actions,
-  addToCart(itemid, sizeId, price, addons = [], special_ins = '') {
+  addToCart(cart_id, params = {}) {
     return (dispatch, getState) => {
       // let idPart = [itemid];
       // sizeId && idPart.push(sizeId);
       // let { productMenuType } = getState().theme;
-      let productMenuType = PRODUCT_MENU_TYPE.restuarant.id;
-      let id = getCartItemID(itemid, sizeId, addons, productMenuType); //idPart.join("-");
+      // let productMenuType = PRODUCT_MENU_TYPE.restuarant.id;
+      // let id = getCartItemID(itemid, sizeId, addons, productMenuType); //idPart.join("-");
 
       let {cart} = getState().order;
       let qty = 1;
-      if (cart[id]) {
+      if (cart[cart_id]) {
         // return false;
-        qty = cart[id].qty + 1;
+        qty = cart[cart_id].qty + 1;
       }
 
       dispatch(
         actions.set({
           _prop: 'cart',
           values: {
-            [id]: {qty: qty, price, add_ons: addons, special_ins},
+            [cart_id]: {qty: qty, ...params},
           },
         }),
       );
 
       dispatch(
         actions.set({
-          selectedCartItem: id,
+          selectedCartItem: cart_id,
         }),
       );
 

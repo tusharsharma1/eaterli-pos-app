@@ -9,6 +9,7 @@ export default function Table({
     return index;
   },
   columns = [],
+  ...props
 }) {
   const renderHeader = () => {
     return (
@@ -50,7 +51,7 @@ export default function Table({
         }}
         data={data}
         keyExtractor={keyExtractor}
-        
+        {...props}
       />
     );
   };

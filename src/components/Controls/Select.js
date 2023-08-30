@@ -16,6 +16,7 @@ class Select extends PureComponent {
  
   render() {
     let {
+      title,
       data = [],
       value = '',
       containerStyle,
@@ -27,7 +28,7 @@ class Select extends PureComponent {
     let _value = (data || []).find(d => d.value == value);
     return (
       <>
-        <ControlContainer containerStyle={[containerStyle, {}]}>
+        <ControlContainer title={title} containerStyle={[containerStyle, {}]}>
           <Menu onSelect={onValueChange}>
             <MenuTrigger>
               <View

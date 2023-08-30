@@ -59,6 +59,7 @@ function TextInputUI({
           ]}
           placeholderTextColor="#BDBDBD"        
           {...textInputProps}
+          
         />
       )}
     </ControlContainer>

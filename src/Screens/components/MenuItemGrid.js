@@ -19,6 +19,7 @@ import {
   addToCart,
   getAddons,
   getAddonsTotal,
+  getCartItemID,
   getPrice,
   getVariants,
 } from '../../helpers/order.helper';
@@ -27,6 +28,7 @@ import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import Button from '../../components/Button';
 import Container from '../../components/Container';
 import orderAction from '../../redux/actions/order.action';
+import {PRODUCT_MENU_TYPE} from '../../constants/order.constant';
 let col = 4;
 
 let hPadding = 2;
@@ -75,7 +77,7 @@ export default function MenuItemGrid(props) {
           diningOptionModal: {show: true, ref: ''},
         }),
       );
-      return
+      return;
     }
     let variants = getVariants(data);
     if (variants.length) {
@@ -83,7 +85,20 @@ export default function MenuItemGrid(props) {
       toggleModal();
     } else {
       let {price, cutPrice} = getPrice(data.id, '', false);
-      let added = addToCart(data.id, {}, price, [], '');
+
+      let id = getCartItemID(
+        'menu',
+        data.id,
+        {},
+        [],
+        PRODUCT_MENU_TYPE.restuarant.id,
+      ); //idPart.join("-");
+
+      let added = dispatch(
+        orderAction.addToCart(id, {price, add_ons: [], special_ins: ''}),
+      );
+
+      // let added = addToCart(data.id, {}, price, [], '');
     }
   };
   const renderItem = ({item, index}) => {
@@ -207,6 +222,7 @@ function _Item({data, onPress, containerWidth}) {
 const Item = memo(_Item);
 
 function ItemModal({toggleModal, showModal, data, containerWidth}) {
+  const dispatch = useDispatch();
   const [selectedVar, setSelectedVar] = useState({});
   const [selectedAddons, setSelectedAddons] = useState([]);
   let addonProductsById = useSelector(s => s.user.addonProductsById);
@@ -236,7 +252,19 @@ function ItemModal({toggleModal, showModal, data, containerWidth}) {
 
     let addons = selectedAddons.map(r => addonProductsById[r]);
 
-    let added = addToCart(data.id, selectedVar, price, addons, '');
+    let id = getCartItemID(
+      'menu',
+      data.id,
+      selectedVar,
+      addons,
+      PRODUCT_MENU_TYPE.restuarant.id,
+    ); //idPart.join("-");
+
+    let added = dispatch(
+      orderAction.addToCart(id, {price, add_ons: addons, special_ins: ''}),
+    );
+
+    // let added1 = addToCart(data.id, selectedVar, price, addons, '');
 
     if (added) {
       toggleModal();

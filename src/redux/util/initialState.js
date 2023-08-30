@@ -61,7 +61,9 @@ const initialState = {
       logo: '',
       app_name: '',
     },
-    rewards:[]
+    rewards:[],
+
+    giftCardModal:{show: false, ref: ''},
   },
   order: {
     cart: {},

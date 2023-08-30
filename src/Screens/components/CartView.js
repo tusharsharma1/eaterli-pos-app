@@ -154,9 +154,19 @@ function CartRow({id}) {
   if (!data) {
     return null;
   }
-  let [itemId, sizeId, addon, productMenuType] = id.split('-');
+  let [itemtype, itemId, sizeId, addon, productMenuType] = id.split('-');
   let itemData = menuItems[itemId];
+
   let {price, sizeData} = getPrice(itemId, JSON.parse(sizeId));
+  if (itemtype == 'giftcard') {
+    itemData = {
+      id: itemId,
+      item_name: `Gift Card - ${
+        data.card_type == '1' ? 'eGift Card' : 'Classic Gift Card'
+      }`,
+    };
+    price = data.price;
+  }
   let add_ons = data.add_ons || [];
   let add_onsTotal = getAddonsTotal(add_ons);
   let rate = add_onsTotal + price;
@@ -249,7 +259,7 @@ function CartRow({id}) {
   const toggleDiscountModal = () => {
     setShowDiscountModal(!showDiscountModal);
   };
-
+  console.log('cccccc', itemData, data);
   if (!itemData) {
     return null;
   }
@@ -287,12 +297,12 @@ function CartRow({id}) {
               flex: 2,
             }}>
             <Text medium>{itemData.item_name}</Text>
-            {!!sizeData.length && (
+            {!!sizeData?.length && (
               <Text color="#666" size={12}>
                 {sizeData.map(r => r.title).join(', ')}
               </Text>
             )}
-            {!!add_ons.length && (
+            {!!add_ons?.length && (
               <Text color="#666" size={12}>
                 {add_ons.map(r => r.product_name).join(', ')}
               </Text>
@@ -359,94 +369,105 @@ function CartRow({id}) {
                 flexDirection: 'row',
                 alignItems: 'center',
               }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  flex: 1,
-                }}>
-                <Button
-                  onPress={onMinusPress}
-                  noShadow
-                  width={30}
-                  height={30}
-                  borderRadius={30}
-                  lineHeight={28}
-                  size={24}
-                  bold
-                  ph={0}
-                  pv={0}>
-                  -
-                </Button>
-                <Text
-                  ml={5}
-                  style={{minWidth: 45}}
-                  backgroundColor={'#eeeeee67'}
-                  align="center"
-                  semibold
-                  size={18}
-                  mr={5}>
-                  {data.qty}
-                </Text>
-                <Button
-                  onPress={onAddPress}
-                  noShadow
-                  width={30}
-                  height={30}
-                  borderRadius={30}
-                  lineHeight={28}
-                  size={24}
-                  bold
-                  ph={0}
-                  pv={0}>
-                  +
-                </Button>
-              </View>
-              <View
-                style={{
-                  alignItems: 'center',
-                  marginRight: 5,
-                }}>
-                <Button
-                  onPress={toggleNoteModal}
-                  noShadow
-                  width={30}
-                  height={30}
-                  borderRadius={30}
-                  lineHeight={28}
-                  // size={24}
-                  bold
-                  // mr={5}
-                  ph={0}
-                  pv={0}>
-                  <FontAwesome5Icon name="pencil-alt" size={18} />
-                </Button>
-                <Text medium size={9}>
-                  NOTE
-                </Text>
-              </View>
-              <View
-                style={{
-                  alignItems: 'center',
-                  marginRight: 5,
-                }}>
-                <Button
-                  onPress={toggleDiscountModal}
-                  noShadow
-                  width={30}
-                  height={30}
-                  borderRadius={30}
-                  lineHeight={28}
-                  // size={24}
-                  bold
-                  ph={0}
-                  pv={0}>
-                  <FontAwesome5Icon name="tag" size={18} />
-                </Button>
-                <Text medium size={9}>
-                  DISCOUNT
-                </Text>
-              </View>
+              {itemtype == 'menu' ? (
+                <>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      flex: 1,
+                    }}>
+                    <Button
+                      onPress={onMinusPress}
+                      noShadow
+                      width={30}
+                      height={30}
+                      borderRadius={30}
+                      lineHeight={28}
+                      size={24}
+                      bold
+                      ph={0}
+                      pv={0}>
+                      -
+                    </Button>
+                    <Text
+                      ml={5}
+                      style={{minWidth: 45}}
+                      backgroundColor={'#eeeeee67'}
+                      align="center"
+                      semibold
+                      size={18}
+                      mr={5}>
+                      {data.qty}
+                    </Text>
+                    <Button
+                      onPress={onAddPress}
+                      noShadow
+                      width={30}
+                      height={30}
+                      borderRadius={30}
+                      lineHeight={28}
+                      size={24}
+                      bold
+                      ph={0}
+                      pv={0}>
+                      +
+                    </Button>
+                  </View>
+                  <View
+                    style={{
+                      alignItems: 'center',
+                      marginRight: 5,
+                    }}>
+                    <Button
+                      onPress={toggleNoteModal}
+                      noShadow
+                      width={30}
+                      height={30}
+                      borderRadius={30}
+                      lineHeight={28}
+                      // size={24}
+                      bold
+                      // mr={5}
+                      ph={0}
+                      pv={0}>
+                      <FontAwesome5Icon name="pencil-alt" size={18} />
+                    </Button>
+                    <Text medium size={9}>
+                      NOTE
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      alignItems: 'center',
+                      marginRight: 5,
+                    }}>
+                    <Button
+                      onPress={toggleDiscountModal}
+                      noShadow
+                      width={30}
+                      height={30}
+                      borderRadius={30}
+                      lineHeight={28}
+                      // size={24}
+                      bold
+                      ph={0}
+                      pv={0}>
+                      <FontAwesome5Icon name="tag" size={18} />
+                    </Button>
+                    <Text medium size={9}>
+                      DISCOUNT
+                    </Text>
+                  </View>
+                </>
+              ) : (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    flex: 1,
+                  }}></View>
+              )}
               <View
                 style={{
                   alignItems: 'center',
@@ -569,9 +590,9 @@ function Footer({}) {
   const splitBills = useSelector(s => s.order.splitBills);
 
   const location = userData.locations.find(s => s.id == selectedLocation);
-  
-  let tax_title = location?.tax_title || DEFAULT_TAX_TITLE
-   
+
+  let tax_title = location?.tax_title || DEFAULT_TAX_TITLE;
+
   let tax_per = location?.tax ? parseFloat(location.tax) : 0;
 
   let sub_total = getGrandTotal();
@@ -614,9 +635,7 @@ function Footer({}) {
       allPaid
     ) {
       // console.log('call', splitPayments);
-      let received_amount = splitPayments.reduce((s, r) => {
-        return s + (parseFloat(r.received_amount) || 0);
-      }, 0);
+      let received_amount = getSptilReceivedAmt(splitPayments);
       onCashSubmitSuccess({received_amount: received_amount});
     }
   }, [splitPayments, splitPaymentBy, modalView]);
@@ -648,13 +667,14 @@ function Footer({}) {
       }
       return s;
     }, 0);
-    let paidTotalAmt = splitPayments.reduce((s, r) => {
-      if (r.paid) {
-        return s + (parseFloat(r.amount) || 0);
-      }
-      return s;
-    }, 0);
-    let perUser = ((total - paidTotalAmt) / (_splitNo - paidTotal)).toFixed(3);
+    let paidTotalAmt = getSplitPaidTotal();
+    //  splitPayments.reduce((s, r) => {
+    //   if (r.paid) {
+    //     return s + (parseFloat(r.amount) || 0);
+    //   }
+    //   return s;
+    // }, 0);
+    let perUser = ((total - paidTotalAmt) / (_splitNo - paidTotal)).toFixed(2);
 
     let spmts = Array.from(Array(_splitNo)).map((r, i) => {
       if (refresh) {
@@ -675,6 +695,19 @@ function Footer({}) {
         received_amount: splitPayments[i]?.received_amount ?? 0,
       };
     });
+
+    let rma = getSplitRemainingAmt(spmts);
+    console.log('sssssss',rma)
+    if (rma != 0) {
+      let index = spmts.findIndex(r => {
+        return !r.paid;
+      });
+      index != -1 &&
+        spmts.splice(index, 1, {
+          ...spmts[index],
+          amount: (parseFloat(spmts[index].amount) + rma).toFixed(2),
+        });
+    }
 
     setSplitPayments(spmts);
   };
@@ -916,6 +949,39 @@ function Footer({}) {
     } else {
       setModalView(CART_MODAL_VIEW.loyality.id);
     }
+  };
+  const getSplitPaidTotal = () => {
+    let _total = splitPayments.reduce((s, r) => {
+      if (r.paid) {
+        return s + (parseFloat(r.amount) || 0);
+      }
+      return s;
+    }, 0);
+    return _total;
+  };
+  const getSplitTotal = (_splitPayments) => {
+    let _total = _splitPayments.reduce((s, r) => {
+      return s + (parseFloat(r.amount) || 0);
+    }, 0);
+    return _total;
+  };
+
+  const getSptilReceivedAmt = _splitPayments => {
+    let received_amount = _splitPayments.reduce((s, r) => {
+      return s + (parseFloat(r.received_amount) || 0);
+    }, 0);
+    return received_amount;
+  };
+
+  const getSplitRemainingAmt = (_splitPayments) => {
+    let _total = getSplitTotal(_splitPayments);
+
+    let remaining_amount = parseFloat(total) - parseFloat(_total);
+    if (!isFinite(remaining_amount)) {
+      remaining_amount = 0;
+    }
+    remaining_amount = parseFloat(remaining_amount.toFixed(2));
+    return remaining_amount;
   };
   const renderView = () => {
     switch (modalView) {
@@ -1445,6 +1511,13 @@ function Footer({}) {
                   }}
                 />
                 <PayMethodButton
+                  text="Gift Card"
+                  onPress={() => {
+                    setPaymentMethod(PAYMENT_METHOD.gift_card.id);
+                    // setModalView(CART_MODAL_VIEW.price_calc.id);
+                  }}
+                />
+                <PayMethodButton
                   text="Card"
                   onPress={() => {
                     setPaymentMethod(PAYMENT_METHOD.card.id);
@@ -1523,15 +1596,7 @@ function Footer({}) {
         );
 
       case CART_MODAL_VIEW.split_payment.id:
-        let _total = splitPayments.reduce((s, r) => {
-          return s + (parseFloat(r.amount) || 0);
-        }, 0);
-
-        let remaining_amount = parseFloat(total) - parseFloat(_total);
-        if (!isFinite(remaining_amount)) {
-          remaining_amount = 0;
-        }
-        remaining_amount=parseFloat(remaining_amount.toFixed(2))
+        let remaining_amount = getSplitRemainingAmt(splitPayments);
         // console.log('remaining_amount', remaining_amount);
         return (
           <>
@@ -1691,20 +1756,6 @@ function Footer({}) {
                               // backgroundColor: 'red',
                               marginRight: 5,
                             }}
-                            // sm
-                            // title="Mode of Pooja"
-                            // leftComponent={
-                            //   <Image
-                            //     resizeMode="contain"
-                            //     style={{
-                            //       width: 25,
-                            //       height: 25,
-                            //       marginRight: 10,
-                            //       // backgroundColor:'red'
-                            //     }}
-                            //     source={require('../assets/images/list.png')}
-                            //   />
-                            // }
                             onValueChange={item => {
                               if (r.paid) {
                                 return;
@@ -1771,9 +1822,9 @@ function Footer({}) {
                                 );
 
                                 maxValue = parseFloat(total) - maxValue;
-                               
-                                maxValue=parseFloat(maxValue.toFixed(2))
-                               
+
+                                maxValue = parseFloat(maxValue.toFixed(2));
+
                                 console.log(
                                   input <= parseFloat(maxValue),
                                   input,
@@ -1856,7 +1907,7 @@ function Footer({}) {
                             ) : (
                               <Button
                                 onPress={() => {
-                                  console.log(remaining_amount)
+                                  console.log(remaining_amount);
                                   if (remaining_amount != 0) {
                                     simpleToast(
                                       'Your total amount is over the balance',
@@ -2275,7 +2326,7 @@ function SplitCartItem({id, index, data}) {
   if (!data) {
     return null;
   }
-  let [itemId, sizeId, addon, productMenuType] = id.split('-');
+  let [itemtype, itemId, sizeId, addon, productMenuType] = id.split('-');
   let itemData = menuItems[itemId];
   let {price, sizeData} = getPrice(itemId, JSON.parse(sizeId));
   let add_ons = data.add_ons || [];

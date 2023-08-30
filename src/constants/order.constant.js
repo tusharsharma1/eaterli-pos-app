@@ -8,6 +8,7 @@ export const PRODUCT_MENU_TYPE = {
 
 export const PAYMENT_METHOD = {
   card: {id: 'card'},
+  gift_card: {id: 'gift card'},
   cash: {id: 'cash'},
   split_payment: {id: 'split payment'},
 };

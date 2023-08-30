@@ -94,12 +94,13 @@ export function addToCart(
 }
 
 export function getCartItemID(
+  itemtype,
   itemid,
-  sizeId,
+  sizeId = {},
   add_ons = [],
   type = PRODUCT_MENU_TYPE.restuarant.id,
 ) {
-  let idPart = [itemid];
+  let idPart = [itemtype, itemid];
   idPart.push(JSON.stringify(sizeId) ?? '');
 
   idPart.push(add_ons.map(r => r.id).join(','));
@@ -142,13 +143,18 @@ export function getGrandTotal() {
   let Ids = Object.keys(cart);
 
   let total = Ids.reduce((r, id) => {
-    let [itemId, sizeId, add_on, productMenuType] = id.split('-');
+    let [itemtype, itemId, sizeId, add_on, productMenuType] = id.split('-');
 
     let {price} = getPrice(
       itemId,
       JSON.parse(sizeId),
       productMenuType == PRODUCT_MENU_TYPE.catering.id,
     );
+
+    if (itemtype == 'giftcard') {
+      price = cart[id].price;
+    }
+
     let add_ons = cart[id].add_ons || [];
     let add_onsTotal = getAddonsTotal(add_ons);
     let discount_type = cart[id].discount_type ?? '1';
@@ -163,15 +169,11 @@ export function getGrandTotal() {
     let pTotal = cart[id].qty * (add_onsTotal + parseFloat(price));
 
     if (_discount) {
-
       if (discount_type == '1') {
         pTotal = pTotal - pTotal * (_discount / 100);
-         } else if (discount_type == '2') {
+      } else if (discount_type == '2') {
         pTotal = pTotal - _discount;
       }
-
-
-     
     }
     // console.log(
     //   "[log pTotal",
@@ -195,8 +197,18 @@ export function getCartProducts() {
     .map((id, i) => {
       let cartItem = cart[id];
 
-      let [itemId, sizeId, addon, productMenuType] = id.split('-');
+      let [itemtype, itemId, sizeId, addon, productMenuType] = id.split('-');
       let itemData = menuItems[itemId];
+
+      if (itemtype == 'giftcard') {
+        itemData = {
+          id: itemId,
+          item_name: `Gift Card - ${
+            cartItem.card_type == '1' ? 'eGift Card' : 'Classic Gift Card'
+          }`,
+          ...cartItem,
+        };
+      }
 
       if (!itemData) {
         return false;
@@ -209,25 +221,29 @@ export function getCartProducts() {
         JSON.parse(sizeId),
         productMenuType == PRODUCT_MENU_TYPE.catering.id,
       );
-
-      let add_onsTotal = getAddonsTotal(cartItem.add_ons);
+      if (itemtype == 'giftcard') {
+        price = cartItem.price;
+      }
+      let add_onsTotal = getAddonsTotal(cartItem.add_ons||[]);
       let rate = add_onsTotal + price;
       let totalPrice = rate * cartItem.qty;
       // console.log(id,cartItem,itemData,price,sizeData)
 
       return {
-        cart_id:id,
+        ...cartItem,
+        item_type: itemtype,
+        cart_id: id,
         id: itemData.id,
         qty: cartItem.qty,
         price,
         rate,
         totalPrice,
         name: `${itemData.item_name}`,
-        image: itemData.item_image,
+        image: itemData.item_image||'',
         // vid: sizeData ? sizeData.id : "",
-        variants: sizeData,
-        add_ons: cartItem.add_ons,
-        special_ins: cartItem.special_ins,
+        variants: sizeData||[],
+        add_ons: cartItem.add_ons||[],
+        special_ins: cartItem.special_ins||'',
         discount: cartItem.discount ?? 0,
         discount_type: cartItem.discount_type ?? '1',
       };
@@ -260,10 +276,12 @@ export function getCartItem(cart) {
 
   let Ids = Object.keys(cart)
     .map((id, i) => {
-      let [itemId, sizeId, addon, productMenuType] = id.split('-');
+      let [itemtype, itemId, sizeId, addon, productMenuType] = id.split('-');
 
       let itemData = menuItems[itemId];
-
+      if (itemtype == 'giftcard') {
+        itemData = {id: itemId};
+      }
       if (!itemData) {
         return false;
       }
