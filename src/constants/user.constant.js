@@ -6,4 +6,6 @@ export const GIFT_CARD_VIEW = {
   send_to: {id: 'send_to'},
   purchaser_info: {id: 'purchaser_info'},
   personalized_message: {id: 'personalized_message'},
+  balance_inquiry: {id: 'balance_inquiry'},
+  add_value: {id: 'add_value'},
 };

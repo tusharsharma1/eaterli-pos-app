@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {View} from 'react-native';
+import {ActivityIndicator, View, TextInput as _TextInput} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import ModalContainer from '../../components/ModalContainer';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
@@ -23,6 +23,8 @@ import * as yup from 'yup';
 import DateTimePicker from '../../components/Controls/DateTimePicker';
 import {uniqueId} from 'lodash';
 import {getCartItemID} from '../../helpers/order.helper';
+import theme from '../../theme';
+const Buffer = require('buffer').Buffer;
 let initialFormData = {
   amount: '',
   card_type: '1',
@@ -44,12 +46,16 @@ export default function GiftCardsModal(props) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(true);
   const [view, setView] = useState(GIFT_CARD_VIEW.options.id);
+
   const [formData, setFormData] = useState(initialFormData);
   const userData = useSelector(s => s.user.userData);
-
+  const {height, width} = useWindowDimensions();
   const giftCardModal = useSelector(s => s.user.giftCardModal);
+  const [balance, setBalanace] = useState('');
 
-  let {width} = useWindowDimensions();
+  const [addValueData, setAddValueData] = useState('');
+
+  const [QRData, setQRData] = useState(''); //WyJnaWZ0LWNhcmQiLDE1LDI3NSw3XQ==
 
   // useEffect(() => {
   //   loadData();
@@ -94,6 +100,55 @@ export default function GiftCardsModal(props) {
     //   toggleModal();
     // }
   };
+  const balanceQRValidating = async () => {
+    if (QRData) {
+      let jsonob = null;
+      // console.log(QRData);
+      try {
+        let json = Buffer.from(QRData, 'base64').toString('utf8');
+
+        console.log(json);
+        jsonob = JSON.parse(json);
+      } catch {
+        jsonob = null;
+      }
+      jsonob = jsonob || [];
+      let [type, card_id, uid, rid] = jsonob;
+      // console.log(id, rid);
+      if (
+        jsonob &&
+        card_id &&
+        id &&
+        rid &&
+        rid == userData.restaurant.id &&
+        type == 'gift-card'
+      ) {
+        // console.log(jsonob);
+        let r = await dispatch(userAction.getGiftCardBalance(rid, card_id));
+        if (r && r.status) {
+          if (!r.data) {
+            simpleToast('Invalid QR Code.');
+            setQRData('');
+            return;
+          }
+          setBalanace(r.data.total_balance || 0);
+
+          // setModalView(CART_MODAL_VIEW.customer_phone.id);
+        } else {
+          simpleToast('Invalid QR Code.');
+          setQRData('');
+          // setQRData({error: true, message: 'Invalid QR Code.'});
+        }
+      } else {
+        simpleToast('Invalid QR Code.');
+        setQRData('');
+      }
+      // setValidating(false);
+    }
+  };
+  const addValueQRValidating = async () => {
+    setAddValueData(QRData);
+  };
 
   const renderView = () => {
     switch (view) {
@@ -112,8 +167,22 @@ export default function GiftCardsModal(props) {
               }}
               text={'Sell Card'}
             />
-            <POSButton text={'Add Value($)'} />
-            <POSButton text={'Balance Inquiry'} />
+            <POSButton
+              text={'Add Value($)'}
+              onPress={() => {
+                setAddValueData('');
+                setQRData('');
+                setView(GIFT_CARD_VIEW.add_value.id);
+              }}
+            />
+            <POSButton
+              text={'Balance Inquiry'}
+              onPress={() => {
+                setBalanace('');
+                setQRData('');
+                setView(GIFT_CARD_VIEW.balance_inquiry.id);
+              }}
+            />
           </View>
         );
 
@@ -604,6 +673,161 @@ export default function GiftCardsModal(props) {
               <Button onPress={createCardPress}>Create</Button>
             </View>
           </View>
+        );
+      ////////////////////
+      case GIFT_CARD_VIEW.balance_inquiry.id:
+        return (
+          <>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <Button
+                onPress={() => {
+                  setView(GIFT_CARD_VIEW.options.id);
+                }}
+                style={{
+                  alignSelf: 'flex-start',
+                }}>
+                Back
+              </Button>
+              <Text ml={10} size={18} medium>
+                Balance Inquiry
+              </Text>
+            </View>
+            {balance != '' ? (
+              <View>
+                <Text align="center" semibold mt={30} mb={30} size={22}>
+                  Total Balance:{' '}
+                  <Text
+                    align="center"
+                    color={theme.colors.primaryColor}
+                    bold
+                    size={22}>
+                    $ {parseFloat(balance).toFixed(2)}
+                  </Text>
+                </Text>
+              </View>
+            ) : (
+              <View
+                style={{
+                  width: '100%',
+                  height: getPercentValue(height, 60),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  // paddingVertical: 10,
+                  // backgroundColor: 'red',
+                }}>
+                <View
+                  style={{
+                    position: 'absolute',
+                    zIndex: 1,
+                  }}>
+                  <ActivityIndicator size={'large'} />
+                  <Text>Scanning...</Text>
+                </View>
+                <_TextInput
+                  style={{
+                    backgroundColor: '#000000',
+                    color: '#00000000',
+                    opacity: 0.1,
+                    width: '100%',
+                    height: '100%',
+                    zIndex: 2,
+                    textAlignVertical: 'top',
+                  }}
+                  caretHidden
+                  selectionColor={'#00000000'}
+                  autoFocus
+                  showSoftInputOnFocus={false}
+                  returnKeyType="next"
+                  value={QRData}
+                  onChangeText={t => {
+                    setQRData(t);
+                  }}
+                  onSubmitEditing={() => {
+                    balanceQRValidating();
+                  }}
+                />
+              </View>
+            )}
+          </>
+        );
+      ////////////////////////
+      case GIFT_CARD_VIEW.add_value.id:
+        return (
+          <>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <Button
+                onPress={() => {
+                  setView(GIFT_CARD_VIEW.options.id);
+                }}
+                style={{
+                  alignSelf: 'flex-start',
+                }}>
+                Back
+              </Button>
+              <Text ml={10} size={18} medium>
+                Add Value($)
+              </Text>
+            </View>
+            {addValueData != '' ? (
+              <View>
+                <Text align="center" semibold mt={30} mb={30} size={22}>
+                  {addValueData}
+                </Text>
+              </View>
+            ) : (
+              <View
+                style={{
+                  width: '100%',
+                  height: getPercentValue(height, 60),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  // paddingVertical: 10,
+                  // backgroundColor: 'red',
+                }}>
+                <View
+                  style={{
+                    position: 'absolute',
+                    zIndex: 1,
+                  }}>
+                  <ActivityIndicator size={'large'} />
+                  <Text>Scanning...</Text>
+                </View>
+                <_TextInput
+                  style={{
+                    backgroundColor: '#000000',
+                    color: '#00000000',
+                    opacity: 0.1,
+                    width: '100%',
+                    height: '100%',
+                    zIndex: 2,
+                    textAlignVertical: 'top',
+                  }}
+                  caretHidden
+                  selectionColor={'#00000000'}
+                  autoFocus
+                  showSoftInputOnFocus={false}
+                  returnKeyType="next"
+                  value={QRData}
+                  onChangeText={t => {
+                    setQRData(t);
+                  }}
+                  onSubmitEditing={() => {
+                    addValueQRValidating();
+                  }}
+                />
+              </View>
+            )}
+          </>
         );
     }
   };

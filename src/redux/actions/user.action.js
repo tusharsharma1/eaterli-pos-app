@@ -604,4 +604,24 @@ export default {
         .catch(apiErrorHandler);
     };
   },
+
+  getGiftCardBalance(res_id, card_id, showProgress = true) {
+    return (dispatch, getState) => {
+      showProgress && dispatch(appAction.showProgress());
+      return userService
+        .getGiftCardBalance(res_id, card_id)
+        .then(res => {
+          let returnResult = res;
+          if (res && !res.status) {
+            apiMessageHandler(res);
+            returnResult = false;
+          }
+          if (returnResult) {
+          }
+          showProgress && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
 };

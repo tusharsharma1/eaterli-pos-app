@@ -90,6 +90,14 @@ export default {
       isformData: false,
     });
   },
+
+  getGiftCardBalance(res_id, card_id) {
+ 
+    return callApi(
+      'GET',
+      `/api/restaurant/${res_id}/egift-cards/${card_id}/balance`,
+    );
+  },
 };
 
 //--->  https://maps.googleapis.com/maps/api/distancematrix/json?departure_time=now&destinations=place_id:ChIJVXLyCt0GoDkRDcqCTX7FDWs&origins=place_id:ChIJeYSWxSIHoDkR3sGoRXQaQBc&key=AIzaSyCL6zp79W047VPyb-sReTtHsklzYP767ac

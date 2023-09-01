@@ -17,7 +17,7 @@ import {getTotalRewardBagPoints} from '../../helpers/order.helper';
 const Buffer = require('buffer').Buffer;
 export default function ScanRewardBagQR({navigation, route}) {
   const dispatch = useDispatch();
-  const [QRData, setQRData] = useState(''); //WzQsMjc1LDdd
+  const [QRData, setQRData] = useState(''); //WzUsMjc1LDdd
   const userData = useSelector(s => s.user.userData);
   const rewards = useSelector(s => s.user.rewards);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
