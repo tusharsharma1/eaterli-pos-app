@@ -24,6 +24,7 @@ import DateTimePicker from '../../components/Controls/DateTimePicker';
 import {uniqueId} from 'lodash';
 import {getCartItemID} from '../../helpers/order.helper';
 import theme from '../../theme';
+import {ORDER_ITEM_TYPE} from '../../constants/order.constant';
 const Buffer = require('buffer').Buffer;
 let initialFormData = {
   amount: '',
@@ -80,7 +81,13 @@ export default function GiftCardsModal(props) {
   };
 
   const createCardPress = async () => {
-    let id = getCartItemID('giftcard', create_UUID(), {}, [], 0); //idPart.join("-");
+    let id = getCartItemID(
+      ORDER_ITEM_TYPE.giftcard.id,
+      create_UUID(),
+      {},
+      [],
+      0,
+    ); //idPart.join("-");
 
     let added = dispatch(
       orderAction.addToCart(id, {
@@ -173,6 +180,15 @@ export default function GiftCardsModal(props) {
                 setAddValueData('');
                 setQRData('');
                 setView(GIFT_CARD_VIEW.add_value.id);
+
+                // let id = getCartItemID(ORDER_ITEM_TYPE.giftcard_add_balance.id, create_UUID()); //idPart.join("-");
+
+                // let added = dispatch(
+                //   orderAction.addToCart(id, {
+                //     price: parseFloat('45'),
+                //     card_id: 17,
+                //   }),
+                // );
               }}
             />
             <POSButton

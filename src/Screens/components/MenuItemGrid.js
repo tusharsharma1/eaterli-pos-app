@@ -28,7 +28,10 @@ import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import Button from '../../components/Button';
 import Container from '../../components/Container';
 import orderAction from '../../redux/actions/order.action';
-import {PRODUCT_MENU_TYPE} from '../../constants/order.constant';
+import {
+  ORDER_ITEM_TYPE,
+  PRODUCT_MENU_TYPE,
+} from '../../constants/order.constant';
 let col = 4;
 
 let hPadding = 2;
@@ -87,7 +90,7 @@ export default function MenuItemGrid(props) {
       let {price, cutPrice} = getPrice(data.id, '', false);
 
       let id = getCartItemID(
-        'menu',
+        ORDER_ITEM_TYPE.menu.id,
         data.id,
         {},
         [],
@@ -253,7 +256,7 @@ function ItemModal({toggleModal, showModal, data, containerWidth}) {
     let addons = selectedAddons.map(r => addonProductsById[r]);
 
     let id = getCartItemID(
-      'menu',
+      ORDER_ITEM_TYPE.menu.id,
       data.id,
       selectedVar,
       addons,

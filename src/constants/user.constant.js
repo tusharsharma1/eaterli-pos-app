@@ -9,3 +9,5 @@ export const GIFT_CARD_VIEW = {
   balance_inquiry: {id: 'balance_inquiry'},
   add_value: {id: 'add_value'},
 };
+
+

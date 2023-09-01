@@ -19,6 +19,7 @@ import {
   CART_MODAL_VIEW,
   CUSTOMER_DETAIL,
   DEFAULT_TAX_TITLE,
+  ORDER_ITEM_TYPE,
   PAYMENT_METHOD,
 } from '../../constants/order.constant';
 import CashPaymentForm from '../../forms/CashPaymentForm';
@@ -28,10 +29,12 @@ import {
   simpleToast,
 } from '../../helpers/app.helpers';
 import {
+  breakCartItemID,
   getAddonsTotal,
   getCartItem,
   getCartProducts,
   getGrandTotal,
+  getOrderItemDetails,
   getPrice,
 } from '../../helpers/order.helper';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
@@ -154,19 +157,19 @@ function CartRow({id}) {
   if (!data) {
     return null;
   }
-  let [itemtype, itemId, sizeId, addon, productMenuType] = id.split('-');
+
+  let {itemtype, itemId, sizeId, addon, productMenuType} = breakCartItemID(id);
+
   let itemData = menuItems[itemId];
 
   let {price, sizeData} = getPrice(itemId, JSON.parse(sizeId));
-  if (itemtype == 'giftcard') {
-    itemData = {
-      id: itemId,
-      item_name: `Gift Card - ${
-        data.card_type == '1' ? 'eGift Card' : 'Classic Gift Card'
-      }`,
-    };
+  if (!price) {
     price = data.price;
   }
+  if (!itemData) {
+    itemData = getOrderItemDetails(id, data);
+  }
+
   let add_ons = data.add_ons || [];
   let add_onsTotal = getAddonsTotal(add_ons);
   let rate = add_onsTotal + price;
@@ -369,7 +372,7 @@ function CartRow({id}) {
                 flexDirection: 'row',
                 alignItems: 'center',
               }}>
-              {itemtype == 'menu' ? (
+              {itemtype == ORDER_ITEM_TYPE.menu.id ? (
                 <>
                   <View
                     style={{
@@ -697,7 +700,7 @@ function Footer({}) {
     });
 
     let rma = getSplitRemainingAmt(spmts);
-    console.log('sssssss',rma)
+    console.log('sssssss', rma);
     if (rma != 0) {
       let index = spmts.findIndex(r => {
         return !r.paid;
@@ -833,12 +836,13 @@ function Footer({}) {
       diningOption,
 
       split_payments: splitPayment ? JSON.stringify(splitPayments) : '[]',
-
+      gift_card_id: 0,
+      // paymentMethod:PAYMENT_METHOD.gift_card.id,
       ...customerDetail,
     };
 
     console.log(body);
-    // return
+    // return;
     let r = await dispatch(userAction.createOrder(body));
     console.log(r);
     if (r && r.status) {
@@ -959,7 +963,7 @@ function Footer({}) {
     }, 0);
     return _total;
   };
-  const getSplitTotal = (_splitPayments) => {
+  const getSplitTotal = _splitPayments => {
     let _total = _splitPayments.reduce((s, r) => {
       return s + (parseFloat(r.amount) || 0);
     }, 0);
@@ -973,7 +977,7 @@ function Footer({}) {
     return received_amount;
   };
 
-  const getSplitRemainingAmt = (_splitPayments) => {
+  const getSplitRemainingAmt = _splitPayments => {
     let _total = getSplitTotal(_splitPayments);
 
     let remaining_amount = parseFloat(total) - parseFloat(_total);
@@ -2326,7 +2330,8 @@ function SplitCartItem({id, index, data}) {
   if (!data) {
     return null;
   }
-  let [itemtype, itemId, sizeId, addon, productMenuType] = id.split('-');
+  let {itemtype, itemId, sizeId, addon, productMenuType} = breakCartItemID(id);
+
   let itemData = menuItems[itemId];
   let {price, sizeData} = getPrice(itemId, JSON.parse(sizeId));
   let add_ons = data.add_ons || [];

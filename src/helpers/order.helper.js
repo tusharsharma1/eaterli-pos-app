@@ -1,5 +1,5 @@
 import React from 'react';
-import {PRODUCT_MENU_TYPE} from '../constants/order.constant';
+import {ORDER_ITEM_TYPE, PRODUCT_MENU_TYPE} from '../constants/order.constant';
 import orderAction from '../redux/actions/order.action';
 import {simpleToast} from './app.helpers';
 
@@ -110,6 +110,10 @@ export function getCartItemID(
   let id = idPart.join('-');
   return id;
 }
+export function breakCartItemID(id) {
+  let [itemtype, itemId, sizeId, addon, productMenuType] = id.split('-');
+  return {itemtype, itemId, sizeId, addon, productMenuType};
+}
 
 export function getAddonsTotal(data) {
   let total = data.reduce((r, d) => {
@@ -143,15 +147,15 @@ export function getGrandTotal() {
   let Ids = Object.keys(cart);
 
   let total = Ids.reduce((r, id) => {
-    let [itemtype, itemId, sizeId, add_on, productMenuType] = id.split('-');
+    let {itemtype, itemId, sizeId, addon, productMenuType} =
+      breakCartItemID(id);
 
     let {price} = getPrice(
       itemId,
       JSON.parse(sizeId),
       productMenuType == PRODUCT_MENU_TYPE.catering.id,
     );
-
-    if (itemtype == 'giftcard') {
+    if (!price) {
       price = cart[id].price;
     }
 
@@ -197,17 +201,12 @@ export function getCartProducts() {
     .map((id, i) => {
       let cartItem = cart[id];
 
-      let [itemtype, itemId, sizeId, addon, productMenuType] = id.split('-');
+      let {itemtype, itemId, sizeId, addon, productMenuType} =
+        breakCartItemID(id);
       let itemData = menuItems[itemId];
 
-      if (itemtype == 'giftcard') {
-        itemData = {
-          id: itemId,
-          item_name: `Gift Card - ${
-            cartItem.card_type == '1' ? 'eGift Card' : 'Classic Gift Card'
-          }`,
-          ...cartItem,
-        };
+      if (!itemData) {
+        itemData = getOrderItemDetails(id, cartItem);
       }
 
       if (!itemData) {
@@ -221,32 +220,37 @@ export function getCartProducts() {
         JSON.parse(sizeId),
         productMenuType == PRODUCT_MENU_TYPE.catering.id,
       );
-      if (itemtype == 'giftcard') {
+      if (!price) {
         price = cartItem.price;
       }
-      let add_onsTotal = getAddonsTotal(cartItem.add_ons||[]);
+
+      let add_onsTotal = getAddonsTotal(cartItem.add_ons || []);
       let rate = add_onsTotal + price;
       let totalPrice = rate * cartItem.qty;
       // console.log(id,cartItem,itemData,price,sizeData)
+      // if (itemtype == ORDER_ITEM_TYPE.menu.id) {
+        return {
+          ...cartItem,
+          item_type: itemtype,
+          cart_id: id,
+          id: itemData.id,
+          qty: cartItem.qty,
+          price,
+          rate,
+          totalPrice,
+          name: `${itemData.item_name}`,
+          image: itemData.item_image || '',
+          // vid: sizeData ? sizeData.id : "",
+          variants: sizeData || [],
+          add_ons: cartItem.add_ons || [],
+          special_ins: cartItem.special_ins || '',
+          discount: cartItem.discount ?? 0,
+          discount_type: cartItem.discount_type ?? '1',
+        };
+      // }
 
-      return {
-        ...cartItem,
-        item_type: itemtype,
-        cart_id: id,
-        id: itemData.id,
-        qty: cartItem.qty,
-        price,
-        rate,
-        totalPrice,
-        name: `${itemData.item_name}`,
-        image: itemData.item_image||'',
-        // vid: sizeData ? sizeData.id : "",
-        variants: sizeData||[],
-        add_ons: cartItem.add_ons||[],
-        special_ins: cartItem.special_ins||'',
-        discount: cartItem.discount ?? 0,
-        discount_type: cartItem.discount_type ?? '1',
-      };
+     
+
       //return {...r,[i+1]:{id:itemData.id,qty:cartItem.qty,price,name:`${itemData.item_name}${sizeData?` - ${sizeData.variation_option_name}`:''}`}}
     }, {})
     .filter(Boolean);
@@ -276,12 +280,14 @@ export function getCartItem(cart) {
 
   let Ids = Object.keys(cart)
     .map((id, i) => {
-      let [itemtype, itemId, sizeId, addon, productMenuType] = id.split('-');
+      let {itemtype, itemId, sizeId, addon, productMenuType} =
+        breakCartItemID(id);
 
       let itemData = menuItems[itemId];
-      if (itemtype == 'giftcard') {
-        itemData = {id: itemId};
+      if (!itemData) {
+        itemData = getOrderItemDetails(id, {});
       }
+
       if (!itemData) {
         return false;
       }
@@ -338,4 +344,25 @@ export function getTotalRewardBagPoints(rewardBag) {
   return rewardBag.reduce((s, d) => {
     return s + parseInt(d.qty) * parseInt(d.points);
   }, 0);
+}
+
+export function getOrderItemDetails(id, data = {}) {
+  let {itemtype, itemId, sizeId, addon, productMenuType} = breakCartItemID(id);
+  let itemData = null;
+  if (itemtype == ORDER_ITEM_TYPE.giftcard.id) {
+    itemData = {
+      id: itemId,
+      item_name: `Gift Card - ${
+        data.card_type == '1' ? 'eGift Card' : 'Classic Gift Card'
+      }`,
+      ...data,
+    };
+  } else if (itemtype == ORDER_ITEM_TYPE.giftcard_add_balance.id) {
+    itemData = {
+      id: itemId,
+      item_name: `Gift Card - Add Value`,
+      ...data,
+    };
+  }
+  return itemData;
 }

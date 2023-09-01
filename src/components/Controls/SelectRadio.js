@@ -1,9 +1,10 @@
 import React, {PureComponent} from 'react';
-import {Text, TouchableOpacity, View} from 'react-native';
+import {TouchableOpacity, View} from 'react-native';
 import styles from '../../styles';
 import ControlContainer from './ControlContainer';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import theme from '../../theme';
+import Text from '../Text';
 class SelectRadio extends PureComponent {
   render() {
     let {
@@ -56,11 +57,13 @@ class SelectRadio extends PureComponent {
                 />
 
                 <Text
+                  size={theme.hp(2.3)}
+                  ml={theme.wp(1)}
                   style={{
                     flex: 1,
-                    fontSize: theme.hp(2.3),
-                    fontFamily: theme.fonts.Regular,
-                    marginLeft: theme.wp(2),
+                    // fontSize: theme.hp(2.3),
+                    // fontFamily: theme.fonts.Regular,
+                    // marginLeft: theme.wp(2),
                   }}>
                   {v.label}
                 </Text>

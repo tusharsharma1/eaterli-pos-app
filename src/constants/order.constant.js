@@ -37,5 +37,10 @@ export const CUSTOMER_DETAIL = {
   lastName: '',
 };
 
-export const DEFAULT_TAX_TITLE = "Tax Fee";
+export const DEFAULT_TAX_TITLE = 'Tax Fee';
 
+export const ORDER_ITEM_TYPE = {
+  menu: {id: 'menu'},
+  giftcard: {id: 'giftcard'},
+  giftcard_add_balance: {id: 'giftcard_add_balance'},
+};
