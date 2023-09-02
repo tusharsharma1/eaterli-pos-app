@@ -141,6 +141,7 @@ function CartRow({id}) {
   const [note, setNote] = useState('');
   const [showDiscountModal, setShowDiscountModal] = useState(false);
   const [discount, setDiscount] = useState('');
+  const [discountReason, setDiscountReason] = useState('');
   const [discountType, setDiscountType] = useState('1');
   let menuItems = useSelector(s => s.user.menuItems);
   let selectedCartItem = useSelector(s => s.order.selectedCartItem);
@@ -150,6 +151,7 @@ function CartRow({id}) {
     if (data) {
       setNote(data.special_ins);
       setDiscount(data.discount ?? '');
+      setDiscountReason(data.discount_reason ?? '');
       setDiscountType(data.discount_type ?? '1');
     }
   }, [data]);
@@ -250,7 +252,11 @@ function CartRow({id}) {
       orderAction.set({
         _prop: 'cart',
         _subprop: id,
-        values: {discount: discount, discount_type: discountType},
+        values: {
+          discount: discount,
+          discount_type: discountType,
+          discount_reason: discountReason,
+        },
       }),
     );
     toggleDiscountModal();
@@ -553,9 +559,29 @@ function CartRow({id}) {
             value: discount,
             keyboardType: 'numeric',
             autoFocus: true,
+            placeholder: 'Enter Value',
           }}
           textStyle={{
             textAlign: 'left',
+          }}
+        />
+
+        <TextInput
+          title="Discount Reason"
+          textInputProps={{
+            onChangeText: t => {
+              setDiscountReason(t);
+            },
+            value: discountReason,
+            // keyboardType: 'numeric',
+            autoFocus: true,
+            placeholder: 'Reason',
+            multiline: true,
+          }}
+          textStyle={{
+            textAlign: 'left',
+            height: 80,
+            textAlignVertical: 'top',
           }}
         />
         <Button onPress={updateDiscount}> Ok</Button>
@@ -563,6 +589,8 @@ function CartRow({id}) {
     </>
   );
 }
+const TEST_ORDATA = ''; //WzI3NSw3XQ== customer QR
+//WyJnaWZ0LWNhcmQiLDE3LDI3NSw3XQ== //gift card
 
 function Footer({}) {
   const dispatch = useDispatch();
@@ -582,13 +610,17 @@ function Footer({}) {
   const customerDetail = useSelector(s => s.order.customerDetail);
   const payModal = useSelector(s => s.order.payModal);
   const [QRDataScaning, setQRDataScaning] = useState(false); //
-  const [QRData, setQRData] = useState(''); //WzI3NSw3XQ==
+  const [QRData, setQRData] = useState(TEST_ORDATA); //WzI3NSw3XQ==
+  //WyJnaWZ0LWNhcmQiLDE3LDI3NSw3XQ== //gift card
   const [splitNo, setSplitNo] = useState(2);
   const [splitPayments, setSplitPayments] = useState([]);
   const [selectedSplitAmtRow, setSelectedSplitAmtRow] = useState(0);
   const [splitPayment, setSplitPayment] = useState(false);
   const [splitPaymentBy, setSplitPaymentBy] = useState(1);
   const [totalSplitBills, setTotalSplitBills] = useState(2);
+
+  const [giftCardID, setGiftCardId] = useState(0);
+  const [giftCardBalance, setGiftCardBalance] = useState(0);
 
   const splitBills = useSelector(s => s.order.splitBills);
 
@@ -677,6 +709,11 @@ function Footer({}) {
     //   }
     //   return s;
     // }, 0);
+    if (refresh) {
+      paidTotalAmt = 0;
+      paidTotal = 0;
+    }
+    console.log('yyyyy', total, paidTotalAmt, _splitNo, paidTotal);
     let perUser = ((total - paidTotalAmt) / (_splitNo - paidTotal)).toFixed(2);
 
     let spmts = Array.from(Array(_splitNo)).map((r, i) => {
@@ -690,6 +727,7 @@ function Footer({}) {
       }
 
       return {
+        ...(splitPayments[i] ?? {}),
         type: splitPayments[i]?.type || 'cash',
         paid: splitPayments[i]?.paid ?? false,
         amount: splitPayments[i]?.paid
@@ -836,9 +874,12 @@ function Footer({}) {
       diningOption,
 
       split_payments: splitPayment ? JSON.stringify(splitPayments) : '[]',
-      gift_card_id: 0,
+      gift_card_id: giftCardID,
       // paymentMethod:PAYMENT_METHOD.gift_card.id,
       ...customerDetail,
+      discount: 0,
+      discount_type: '1',
+      discount_reason: '',
     };
 
     console.log(body);
@@ -907,6 +948,54 @@ function Footer({}) {
       // setValidating(false);
     }
   };
+
+  const giftCardQRValidating = async () => {
+    if (QRData) {
+      let jsonob = null;
+      // console.log(QRData);
+      try {
+        let json = Buffer.from(QRData, 'base64').toString('utf8');
+
+        console.log(json);
+        jsonob = JSON.parse(json);
+      } catch {
+        jsonob = null;
+      }
+      jsonob = jsonob || [];
+      let [type, card_id, uid, rid] = jsonob;
+      // console.log(id, rid);
+      if (
+        jsonob &&
+        card_id &&
+        rid &&
+        rid == userData.restaurant.id &&
+        type == 'gift-card'
+      ) {
+        // console.log(jsonob);
+        let r = await dispatch(userAction.getGiftCardBalance(rid, card_id));
+        if (r && r.status) {
+          if (!r.data) {
+            simpleToast('Invalid QR Code.');
+            setQRData('');
+            return;
+          }
+          setGiftCardId(card_id);
+          setGiftCardBalance(r.data.total_balance || 0);
+          // console.log(card_id,r.data.total_balance)
+          // setModalView(CART_MODAL_VIEW.customer_phone.id);
+        } else {
+          simpleToast('Invalid QR Code.');
+          setQRData('');
+          // setQRData({error: true, message: 'Invalid QR Code.'});
+        }
+      } else {
+        simpleToast('Invalid QR Code.');
+        setQRData('');
+      }
+      // setValidating(false);
+    }
+  };
+
   const customerDetailNextPress = async () => {
     if (loyalityProgram) {
       let validate = await validateCutomerDetail();
@@ -1218,7 +1307,7 @@ function Footer({}) {
                   // mt={10}
                   onPress={async () => {
                     setQRDataScaning(true);
-                    setQRData('');
+                    setQRData(TEST_ORDATA);
                     setModalView(CART_MODAL_VIEW.scan_qr.id);
                   }}
                   ph={40}
@@ -1289,7 +1378,7 @@ function Footer({}) {
                 caretHidden
                 selectionColor={'#00000000'}
                 autoFocus
-                showSoftInputOnFocus={false}
+                showSoftInputOnFocus={!!TEST_ORDATA}
                 returnKeyType="next"
                 value={QRData}
                 onChangeText={t => {
@@ -1517,8 +1606,11 @@ function Footer({}) {
                 <PayMethodButton
                   text="Gift Card"
                   onPress={() => {
+                    setGiftCardId(0);
+                    setGiftCardBalance(0);
+                    setQRData(TEST_ORDATA);
                     setPaymentMethod(PAYMENT_METHOD.gift_card.id);
-                    // setModalView(CART_MODAL_VIEW.price_calc.id);
+                    setModalView(CART_MODAL_VIEW.scan_gift_card.id);
                   }}
                 />
                 <PayMethodButton
@@ -1531,7 +1623,152 @@ function Footer({}) {
             </View>
           </>
         );
+      case CART_MODAL_VIEW.scan_gift_card.id:
+        //  if (device == null) return null;
+        let gcdebitAmt = splitPayment
+          ? splitPayments[selectedSplitAmtRow]?.amount || 0
+          : total;
+        let lessBalance = parseFloat(giftCardBalance) < parseFloat(total);
+        return (
+          <>
+            <Button
+              mb={10}
+              onPress={() => {
+                if (splitPayment) {
+                  setModalView(CART_MODAL_VIEW.split_payment.id);
+                  return;
+                }
 
+                setModalView(CART_MODAL_VIEW.payment_method.id);
+              }}
+              style={{
+                alignSelf: 'flex-start',
+              }}>
+              Back
+            </Button>
+
+            {giftCardID != 0 ? (
+              <View
+                style={{
+                  width: '60%',
+                  alignItems: 'center',
+                  alignSelf: 'center',
+                  paddingVertical: 20,
+                  // backgroundColor: 'red',
+                }}>
+                <Text mb={10} medium size={22}>
+                  Gift Card No.:{' '}
+                  <Text bold size={22}>
+                    {giftCardID}
+                  </Text>
+                </Text>
+                <Text mb={10} medium size={22}>
+                  Balance:{' '}
+                  <Text bold size={22} color={lessBalance ? 'red' : undefined}>
+                    {parseFloat(giftCardBalance).toFixed(2)}
+                  </Text>
+                </Text>
+                <Text mb={10} medium size={22}>
+                  Total Amount:{' '}
+                  <Text bold size={22}>
+                    {parseFloat(gcdebitAmt).toFixed(2)}
+                  </Text>
+                </Text>
+                {lessBalance && (
+                  <Text bold mb={10} color="red" size={22}>
+                    Insufficient Balance
+                  </Text>
+                )}
+
+                {!splitPayment && lessBalance && (
+                  <Button
+                    mt={20}
+                    width={200}
+                    backgroundColor={theme.colors.primaryColor}
+                    // style={{alignSelf: 'center'}}
+                    // disabled={props.isSubmitting}
+                    onPress={() => {
+                      setSplitPayment(true);
+                      setModalView(CART_MODAL_VIEW.split_payment.id);
+                    }}>
+                    Split Payment
+                  </Button>
+                )}
+                {!lessBalance && (
+                  <Button
+                    mt={20}
+                    width={200}
+                    // style={{alignSelf: 'center'}}
+                    // disabled={props.isSubmitting}
+                    onPress={() => {
+                      if (splitPayment) {
+                        setSplitPayments(_sp => {
+                          let sp = [..._sp];
+                          sp.splice(selectedSplitAmtRow, 1, {
+                            ...sp[selectedSplitAmtRow],
+                            paid: true,
+                            received_amount: parseFloat(gcdebitAmt),
+                            card_id: giftCardID,
+                          });
+                          return sp;
+                        });
+
+                        setModalView(CART_MODAL_VIEW.split_payment.id);
+                      } else {
+                        onCashSubmitSuccess({
+                          received_amount: parseFloat(gcdebitAmt).toFixed(2),
+                        });
+                      }
+                    }}>
+                    {splitPayment ? 'Charge' : 'Pay'}
+                  </Button>
+                )}
+              </View>
+            ) : (
+              <View
+                style={{
+                  width: '100%',
+                  height: getPercentValue(height, 60),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  // paddingVertical: 10,
+                  // backgroundColor: 'red',
+                }}>
+                <View
+                  style={{
+                    position: 'absolute',
+                    zIndex: 1,
+                  }}>
+                  <ActivityIndicator size={'large'} />
+                  <Text>Scanning...</Text>
+                </View>
+                <_TextInput
+                  style={{
+                    backgroundColor: '#000000',
+                    color: '#00000000',
+                    opacity: 0.1,
+                    width: '100%',
+                    height: '100%',
+                    zIndex: 2,
+                    textAlignVertical: 'top',
+                  }}
+                  caretHidden
+                  selectionColor={'#00000000'}
+                  autoFocus
+                  showSoftInputOnFocus={!!TEST_ORDATA}
+                  returnKeyType="next"
+                  value={QRData}
+                  onChangeText={t => {
+                    setQRData(t);
+                  }}
+                  onSubmitEditing={() => {
+                    giftCardQRValidating();
+                  }}
+                />
+              </View>
+            )}
+          </>
+        );
       case CART_MODAL_VIEW.price_calc.id:
         return (
           <>
@@ -1611,7 +1848,12 @@ function Footer({}) {
               }}>
               <Button
                 onPress={() => {
-                  setModalView(CART_MODAL_VIEW.price_calc.id);
+                  if (paymentMethod == PAYMENT_METHOD.gift_card.id) {
+                    setModalView(CART_MODAL_VIEW.payment_method.id);
+                  } else {
+                    setModalView(CART_MODAL_VIEW.price_calc.id);
+                  }
+
                   setSplitPayment(false);
                 }}
                 style={{
@@ -1919,9 +2161,17 @@ function Footer({}) {
                                     return;
                                   }
                                   setSelectedSplitAmtRow(i);
-                                  setModalView(
-                                    CART_MODAL_VIEW.price_calc_split.id,
-                                  );
+                                  if (r.type == 'gift-card') {
+                                    setGiftCardId(0);
+                                    setQRData(TEST_ORDATA);
+                                    setModalView(
+                                      CART_MODAL_VIEW.scan_gift_card.id,
+                                    );
+                                  } else {
+                                    setModalView(
+                                      CART_MODAL_VIEW.price_calc_split.id,
+                                    );
+                                  }
                                 }}
                                 backgroundColor={
                                   remaining_amount != 0
@@ -2313,6 +2563,7 @@ function SplitCartItem({id, index, data}) {
   const [note, setNote] = useState('');
   const [showDiscountModal, setShowDiscountModal] = useState(false);
   const [discount, setDiscount] = useState('');
+  const [discountReason, setDiscountReason] = useState('');
   const [discountType, setDiscountType] = useState('1');
   const splitBills = useSelector(s => s.order.splitBills);
   const cart = useSelector(s => s.order.cart);
@@ -2323,6 +2574,7 @@ function SplitCartItem({id, index, data}) {
     if (data) {
       setNote(data.special_ins);
       setDiscount(data.discount ?? '');
+      setDiscountReason(data.discountReason ?? '');
       setDiscountType(data.discount_type ?? '1');
     }
   }, [data]);
@@ -2726,9 +2978,30 @@ function SplitCartItem({id, index, data}) {
             },
             value: discount,
             keyboardType: 'numeric',
+            autoFocus: true,
+            placeholder: 'Enter Value',
           }}
           textStyle={{
             textAlign: 'left',
+          }}
+        />
+
+        <TextInput
+          title="Discount Reason"
+          textInputProps={{
+            onChangeText: t => {
+              setDiscountReason(t);
+            },
+            value: discountReason,
+            // keyboardType: 'numeric',
+            autoFocus: true,
+            placeholder: 'Reason',
+            multiline: true,
+          }}
+          textStyle={{
+            textAlign: 'left',
+            height: 80,
+            textAlignVertical: 'top',
           }}
         />
         <Button onPress={updateDiscount}> Ok</Button>

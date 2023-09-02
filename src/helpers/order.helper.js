@@ -246,6 +246,7 @@ export function getCartProducts() {
           special_ins: cartItem.special_ins || '',
           discount: cartItem.discount ?? 0,
           discount_type: cartItem.discount_type ?? '1',
+          discount_reason:cartItem.discount_reason ?? '',
         };
       // }
 

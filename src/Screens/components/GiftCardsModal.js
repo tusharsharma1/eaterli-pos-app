@@ -43,6 +43,7 @@ let initialFormData = {
   personalized_message_from: '',
   personalized_message: '',
 };
+const TEST_ORDATA = ''; //WyJnaWZ0LWNhcmQiLDE3LDI3NSw3XQ==
 export default function GiftCardsModal(props) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(true);
@@ -53,10 +54,9 @@ export default function GiftCardsModal(props) {
   const {height, width} = useWindowDimensions();
   const giftCardModal = useSelector(s => s.user.giftCardModal);
   const [balance, setBalanace] = useState('');
+  const [giftCardID, setGiftCardId] = useState('');
 
-  const [addValueData, setAddValueData] = useState('');
-
-  const [QRData, setQRData] = useState(''); //WyJnaWZ0LWNhcmQiLDE1LDI3NSw3XQ==
+  const [QRData, setQRData] = useState(TEST_ORDATA); //WyJnaWZ0LWNhcmQiLDE3LDI3NSw3XQ==
 
   // useEffect(() => {
   //   loadData();
@@ -125,7 +125,6 @@ export default function GiftCardsModal(props) {
       if (
         jsonob &&
         card_id &&
-        id &&
         rid &&
         rid == userData.restaurant.id &&
         type == 'gift-card'
@@ -154,7 +153,50 @@ export default function GiftCardsModal(props) {
     }
   };
   const addValueQRValidating = async () => {
-    setAddValueData(QRData);
+    if (QRData) {
+      let jsonob = null;
+      // console.log(QRData);
+      try {
+        let json = Buffer.from(QRData, 'base64').toString('utf8');
+
+        console.log(json);
+        jsonob = JSON.parse(json);
+      } catch {
+        jsonob = null;
+      }
+      jsonob = jsonob || [];
+      let [type, card_id, uid, rid] = jsonob;
+      // console.log(id, rid);
+      if (
+        jsonob &&
+        card_id &&
+        rid &&
+        rid == userData.restaurant.id &&
+        type == 'gift-card'
+      ) {
+        // console.log(jsonob);
+        let r = await dispatch(userAction.getGiftCardBalance(rid, card_id));
+        if (r && r.status) {
+          if (!r.data) {
+            simpleToast('Invalid QR Code.');
+            setQRData('');
+            return;
+          }
+          setGiftCardId(card_id);
+          setBalanace(r.data.total_balance || 0);
+
+          // setModalView(CART_MODAL_VIEW.customer_phone.id);
+        } else {
+          simpleToast('Invalid QR Code.');
+          setQRData('');
+          // setQRData({error: true, message: 'Invalid QR Code.'});
+        }
+      } else {
+        simpleToast('Invalid QR Code.');
+        setQRData('');
+      }
+      // setValidating(false);
+    }
   };
 
   const renderView = () => {
@@ -177,25 +219,16 @@ export default function GiftCardsModal(props) {
             <POSButton
               text={'Add Value($)'}
               onPress={() => {
-                setAddValueData('');
-                setQRData('');
+                setGiftCardId('');
+                setQRData(TEST_ORDATA);
                 setView(GIFT_CARD_VIEW.add_value.id);
-
-                // let id = getCartItemID(ORDER_ITEM_TYPE.giftcard_add_balance.id, create_UUID()); //idPart.join("-");
-
-                // let added = dispatch(
-                //   orderAction.addToCart(id, {
-                //     price: parseFloat('45'),
-                //     card_id: 17,
-                //   }),
-                // );
               }}
             />
             <POSButton
               text={'Balance Inquiry'}
               onPress={() => {
                 setBalanace('');
-                setQRData('');
+                setQRData(TEST_ORDATA);
                 setView(GIFT_CARD_VIEW.balance_inquiry.id);
               }}
             />
@@ -757,7 +790,7 @@ export default function GiftCardsModal(props) {
                   caretHidden
                   selectionColor={'#00000000'}
                   autoFocus
-                  showSoftInputOnFocus={false}
+                  showSoftInputOnFocus={!!TEST_ORDATA}
                   returnKeyType="next"
                   value={QRData}
                   onChangeText={t => {
@@ -794,11 +827,71 @@ export default function GiftCardsModal(props) {
                 Add Value($)
               </Text>
             </View>
-            {addValueData != '' ? (
-              <View>
-                <Text align="center" semibold mt={30} mb={30} size={22}>
-                  {addValueData}
+            {giftCardID != '' ? (
+              <View
+                style={{
+                  width: 380,
+                  // backgroundColor: 'red',
+                  alignSelf: 'center',
+                  paddingVertical: 10,
+                }}>
+                <Text semibold mt={10} mb={10} size={22}>
+                  Card No.: {giftCardID}
                 </Text>
+                <Text semibold mb={10} size={22}>
+                  Available Balance: {parseFloat(balance).toFixed(2)}
+                </Text>
+                <TextInput
+                  title="Enter Amount ($)"
+                  containerStyle={{
+                    marginBottom: 20,
+                    // flex: 2,
+                    // width: getPercentValue(width, 40),
+                    paddingVertical: 5,
+                    paddingHorizontal: 15,
+                    // backgroundColor: 'red',
+                  }}
+                  textInputProps={{
+                    keyboardType: 'numeric',
+                    placeholder: '$5.00 - $2,000.00',
+                    value: formData.amount,
+                    onChangeText: v => {
+                      setFormData(f => {
+                        return {...f, amount: v};
+                      });
+                    },
+                  }}
+                />
+                <Button
+                  onPress={() => {
+                    if (!formData.amount.trim()) {
+                      simpleToast('Enter amount');
+                      return;
+                    }
+
+                    let amount = parseFloat(formData.amount);
+                    if (!(amount >= 5 && amount <= 2000)) {
+                      simpleToast('Enter Amount between 5-2000');
+                      return;
+                    }
+                    let id = getCartItemID(
+                      ORDER_ITEM_TYPE.giftcard_add_balance.id,
+                      create_UUID(),
+                    ); //idPart.join("-");
+
+                    let added = dispatch(
+                      orderAction.addToCart(id, {
+                        price: parseFloat(amount.toFixed(2)),
+                        card_id: giftCardID,
+                      }),
+                    );
+                    toggleModal();
+                  }}
+                  style={{
+                    alignSelf: 'flex-end',
+                  }}>
+                  Add
+                </Button>
               </View>
             ) : (
               <View
@@ -831,7 +924,7 @@ export default function GiftCardsModal(props) {
                   caretHidden
                   selectionColor={'#00000000'}
                   autoFocus
-                  showSoftInputOnFocus={false}
+                  showSoftInputOnFocus={!!TEST_ORDATA}
                   returnKeyType="next"
                   value={QRData}
                   onChangeText={t => {
