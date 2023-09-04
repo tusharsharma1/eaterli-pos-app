@@ -45,6 +45,7 @@ import theme from '../../theme';
 import Select from '../../components/Controls/Select';
 import {MenuProvider} from 'react-native-popup-menu';
 import SelectRadio from '../../components/Controls/SelectRadio';
+import DiscountModal from './DiscountModal';
 
 const Buffer = require('buffer').Buffer;
 function _CartView({}) {
@@ -140,9 +141,6 @@ function CartRow({id}) {
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [note, setNote] = useState('');
   const [showDiscountModal, setShowDiscountModal] = useState(false);
-  const [discount, setDiscount] = useState('');
-  const [discountReason, setDiscountReason] = useState('');
-  const [discountType, setDiscountType] = useState('1');
   let menuItems = useSelector(s => s.user.menuItems);
   let selectedCartItem = useSelector(s => s.order.selectedCartItem);
   let data = useSelector(s => s.order.cart[id]);
@@ -150,9 +148,6 @@ function CartRow({id}) {
   useEffect(() => {
     if (data) {
       setNote(data.special_ins);
-      setDiscount(data.discount ?? '');
-      setDiscountReason(data.discount_reason ?? '');
-      setDiscountType(data.discount_type ?? '1');
     }
   }, [data]);
 
@@ -182,7 +177,7 @@ function CartRow({id}) {
   if (isNaN(_discount)) {
     _discount = 0;
   }
-  let cutPrice = totalPrice;
+
   if (_discount) {
     if (discount_type == '1') {
       totalPrice = totalPrice - totalPrice * (_discount / 100);
@@ -238,24 +233,13 @@ function CartRow({id}) {
     );
     toggleNoteModal();
   };
-  const updateDiscount = () => {
-    if (discountType == '1' && parseFloat(discount) > 100) {
-      simpleToast('Invalid discount');
-      return;
-    }
-    if (discountType == '2' && parseFloat(discount) > subPrice) {
-      simpleToast('Invalid discount');
-      return;
-    }
-
+  const updateDiscount = discountValues => {
     dispatch(
       orderAction.set({
         _prop: 'cart',
         _subprop: id,
         values: {
-          discount: discount,
-          discount_type: discountType,
-          discount_reason: discountReason,
+          ...discountValues,
         },
       }),
     );
@@ -359,7 +343,7 @@ function CartRow({id}) {
                   textDecorationLine: 'line-through',
                   textDecorationStyle: 'solid',
                 }}>
-                ${parseFloat(cutPrice).toFixed(2)}
+                ${parseFloat(subPrice).toFixed(2)}
               </Text>
             )}
 
@@ -526,66 +510,16 @@ function CartRow({id}) {
         />
         <Button onPress={updateNote}> Ok</Button>
       </ModalContainer>
-      <ModalContainer
-        // hideTitle
-        center
-        // noscroll
-        onRequestClose={toggleDiscountModal}
+
+      <DiscountModal
+        data={data}
+        subPrice={subPrice}
         visible={showDiscountModal}
         title={`Discount`}
-        width={350}>
-        <SelectRadio
-          // disabled={submitted}
-          // error={
-          //   props.errors[data.id] && props.touched[data.id]
-          //     ? props.errors[data.id]
-          //     : ''
-          // }
-          onValueChange={value => {
-            setDiscountType(value);
-          }}
-          value={discountType}
-          data={[
-            {label: 'Discount by percentage', value: '1'},
-            {label: 'Discount by Amount', value: '2'},
-          ]}
-        />
-
-        <TextInput
-          textInputProps={{
-            onChangeText: t => {
-              setDiscount(t);
-            },
-            value: discount,
-            keyboardType: 'numeric',
-            autoFocus: true,
-            placeholder: 'Enter Value',
-          }}
-          textStyle={{
-            textAlign: 'left',
-          }}
-        />
-
-        <TextInput
-          title="Discount Reason"
-          textInputProps={{
-            onChangeText: t => {
-              setDiscountReason(t);
-            },
-            value: discountReason,
-            // keyboardType: 'numeric',
-            autoFocus: true,
-            placeholder: 'Reason',
-            multiline: true,
-          }}
-          textStyle={{
-            textAlign: 'left',
-            height: 80,
-            textAlignVertical: 'top',
-          }}
-        />
-        <Button onPress={updateDiscount}> Ok</Button>
-      </ModalContainer>
+        width={350}
+        onRequestClose={toggleDiscountModal}
+        onUpdatePress={updateDiscount}
+      />
     </>
   );
 }
@@ -621,6 +555,13 @@ function Footer({}) {
 
   const [giftCardID, setGiftCardId] = useState(0);
   const [giftCardBalance, setGiftCardBalance] = useState(0);
+  const [showDiscountModal, setShowDiscountModal] = useState(false);
+
+  const [discountValues, setDiscountValues] = useState({
+    discount: 0,
+    discount_type: '1',
+    discount_reason: '',
+  });
 
   const splitBills = useSelector(s => s.order.splitBills);
 
@@ -632,7 +573,22 @@ function Footer({}) {
 
   let sub_total = getGrandTotal();
   let tax_amt = (sub_total * tax_per) / 100;
-  let total = tax_amt + sub_total;
+  let tax_total = tax_amt + sub_total;
+  let total = tax_total;
+
+  let discount_type = discountValues.discount_type ?? '1';
+  let _discount = parseFloat(discountValues.discount ?? 0);
+  if (isNaN(_discount)) {
+    _discount = 0;
+  }
+
+  if (_discount) {
+    if (discount_type == '1') {
+      total = total - total * (_discount / 100);
+    } else if (discount_type == '2') {
+      total = total - _discount;
+    }
+  }
 
   useEffect(() => {
     if (!payModal.show) {
@@ -877,9 +833,7 @@ function Footer({}) {
       gift_card_id: giftCardID,
       // paymentMethod:PAYMENT_METHOD.gift_card.id,
       ...customerDetail,
-      discount: 0,
-      discount_type: '1',
-      discount_reason: '',
+      ...discountValues,
     };
 
     console.log(body);
@@ -889,6 +843,11 @@ function Footer({}) {
     if (r && r.status) {
       simpleToast(r.message);
       toggleModal();
+      setDiscountValues({
+        discount:0,
+        discount_type:'1',
+        discount_reason:''
+      })
       dispatch(
         orderAction.set({
           cart: {},
@@ -2338,7 +2297,14 @@ function Footer({}) {
         );
     }
   };
+  const toggleDiscountModal = () => {
+    setShowDiscountModal(!showDiscountModal);
+  };
+  const updateDiscount = _discountValues => {
+    setDiscountValues(_discountValues);
 
+    toggleDiscountModal();
+  };
   return (
     <>
       <View
@@ -2352,7 +2318,7 @@ function Footer({}) {
         <View
           style={{
             flexDirection: 'row',
-            marginBottom: 10,
+            marginBottom: 2,
           }}>
           <Text
             style={{
@@ -2367,7 +2333,7 @@ function Footer({}) {
         <View
           style={{
             flexDirection: 'row',
-            marginBottom: 10,
+            marginBottom: 2,
           }}>
           <Text
             style={{
@@ -2380,13 +2346,75 @@ function Footer({}) {
           <Text size={16}>${parseFloat(tax_amt).toFixed(2)}</Text>
         </View>
 
+        {!!_discount && (
+          <View
+            style={{
+              flexDirection: 'row',
+              marginBottom: 2,
+            }}>
+            <Text
+              style={{
+                flex: 1,
+              }}
+              semibold
+              size={16}>
+              Discount
+            </Text>
+            <Text size={16}>
+              {discount_type == '2' && '$'}
+              {_discount}
+              {discount_type == '1' && '%'}
+            </Text>
+          </View>
+        )}
+
+        <View
+          style={{
+            flexDirection: 'row',
+            marginBottom: 4,
+          }}>
+          <Text
+            style={{
+              flex: 1,
+            }}
+            semibold
+            size={16}>
+            Grand Total
+          </Text>
+          {!!_discount && (
+            <Text
+              size={16}
+              mr={5}
+              style={{
+                textDecorationLine: 'line-through',
+                textDecorationStyle: 'solid',
+              }}>
+              ${parseFloat(tax_total).toFixed(2)}
+            </Text>
+          )}
+          <Text bold size={16}>
+            ${parseFloat(total).toFixed(2)}
+          </Text>
+        </View>
+
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Button
             onPress={onDeletePress}
             noShadow
             backgroundColor={theme.colors.dangerColor}
-            mr={5}>
-            Delete
+            mr={5}
+            ph={20}>
+            <FontAwesome5Icon color={'#fff'} size={18} name="trash" />
+          </Button>
+          <Button
+            onPress={() => {
+              toggleDiscountModal();
+            }}
+            noShadow
+            backgroundColor={theme.colors.dangerColor}
+            mr={5}
+            ph={20}>
+            <FontAwesome5Icon name="tag" size={18} />
           </Button>
           <Button
             onPress={onPayPress}
@@ -2407,25 +2435,19 @@ function Footer({}) {
         // widthPerc={60}
         landscapeWidth={
           modalView == CART_MODAL_VIEW.split_payment.id ? '98%' : 720
-        }
-        // width={isPortrait?undefined:720}
-        // height={'98%'}
-        // borderRadius={25}
-        // renderFooter={() => {
-        //   return (
-        //     <View
-        //       style={{
-        //         alignItems: 'flex-end',
-        //       }}>
-        //       <Button ph={30} size={14} onPress={addToCartPress}>
-        //         Add To Cart $ {parseFloat(totalPrice || 0).toFixed(2)}
-        //       </Button>
-        //     </View>
-        //   );
-        // }}
-      >
+        }>
         {renderView()}
       </ModalContainer>
+
+      <DiscountModal
+        data={discountValues}
+        subPrice={total}
+        visible={showDiscountModal}
+        title={`Discount`}
+        width={350}
+        onRequestClose={toggleDiscountModal}
+        onUpdatePress={updateDiscount}
+      />
     </>
   );
 }

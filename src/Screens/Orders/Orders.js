@@ -290,7 +290,7 @@ export default function Orders({navigation, route}) {
                     align: 'right',
                     renderValue: data => {
                       return `${data.discount_type == '2' ? '$' : ''}${
-                        data.discount
+                        data.discount ?? 0
                       }${data.discount_type == '1' ? '%' : ''}`;
                       // return data.rate
                       //   ? `$${parseFloat(data.rate).toFixed(2)}`
@@ -384,6 +384,25 @@ export default function Orders({navigation, route}) {
                 } (${parseFloat(selectedOrder?.tax_per || 0)}%)`}
                 value={`$ ${parseFloat(selectedOrder.tax_amt).toFixed(2)}`}
               />
+
+              {!!selectedOrder.discount && (
+                <>
+                  <InfoRow
+                    title={'Total:'}
+                    value={`$ ${(
+                      parseFloat(selectedOrder.sub_total) +
+                      parseFloat(selectedOrder.tax_amt)
+                    ).toFixed(2)}`}
+                  />
+                  <InfoRow
+                    title={'Discount:'}
+                    value={`${selectedOrder.discount_type == '2' ? '$ ' : ''}${
+                      selectedOrder.discount ?? 0
+                    }${selectedOrder.discount_type == '1' ? '%' : ''}`}
+                  />
+                </>
+              )}
+
               <InfoRow
                 title={'Grand Total:'}
                 value={`$ ${parseFloat(selectedOrder.order_total).toFixed(2)}`}
