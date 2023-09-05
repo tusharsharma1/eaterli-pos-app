@@ -38,7 +38,11 @@ const initialState = {
     addonProductsById: {},
     menuTitles: [],
     selectedMenuTitle: '',
-    orders: [],
+    orders: {
+      totalPage: 1,
+      data: [],
+      currentPage:1
+    },
 
     mobileBuilder: {
       layout: {

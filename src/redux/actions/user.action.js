@@ -38,7 +38,7 @@ export default {
       return userService
         .loginWithPin({
           ...data,
-         device_token: getState().user.deviceToken,
+          device_token: getState().user.deviceToken,
         })
         .then(res => {
           let returnResult = res;
@@ -56,15 +56,15 @@ export default {
         .catch(apiErrorHandler);
     };
   },
-  getMenus(location_id,rest_id, showProgress = true) {
+  getMenus(location_id, rest_id, showProgress = true) {
     return (dispatch, getState) => {
       showProgress && dispatch(appAction.showProgress());
       return userService
-        .getMenus(location_id,rest_id)
+        .getMenus(location_id, rest_id)
         .then(res => {
           let returnResult = res;
           if (res && !res.status) {
-              apiMessageHandler(res);
+            apiMessageHandler(res);
             returnResult = false;
           }
           if (returnResult) {
@@ -412,11 +412,17 @@ export default {
         .catch(apiErrorHandler);
     };
   },
-  getOrders(rest_id,restaurant_location_id, showLoader = true) {
+  getOrders(
+    rest_id,
+    restaurant_location_id,
+    data,
+    refresh = false,
+    showLoader = true,
+  ) {
     return (dispatch, getState) => {
       showLoader && dispatch(appAction.showProgress());
       return userService
-        .getOrders(rest_id,restaurant_location_id)
+        .getOrders(rest_id, restaurant_location_id, data)
         .then(res => {
           let returnResult = res;
 
@@ -425,12 +431,29 @@ export default {
             returnResult = false;
           }
           if (returnResult) {
-            let data = res.data;
-            dispatch(
-              actions.set({
-                orders: data,
-              }),
-            );
+           
+
+            if (refresh) {
+              dispatch(
+                actions.set({
+                  _prop: 'orders',
+                  values: {
+                    totalPage: res.data.last_page,
+                    data: res.data.data,
+                  },
+                }),
+              );
+            } else {
+              dispatch(
+                actions.set({
+                  _prop: 'orders',
+                  values: {
+                    totalPage: res.data.last_page,
+                    data: [...getState().user.orders.data, ...res.data.data],
+                  },
+                }),
+              );
+            }
           }
           showLoader && dispatch(appAction.hideProgress());
           return returnResult;
@@ -442,14 +465,14 @@ export default {
   updateSubCategory(
     data,
     id,
-    config = { isformData: false, method: "PATCH", showLoader: false }
+    config = {isformData: false, method: 'PATCH', showLoader: false},
   ) {
-    let { showLoader = false, isformData = false, method = "PATCH" } = config;
- 
+    let {showLoader = false, isformData = false, method = 'PATCH'} = config;
+
     return (dispatch, getState) => {
       showLoader && dispatch(appAction.showProgress());
       return userService
-      .updateSubCategory(data, id, { isformData, method })
+        .updateSubCategory(data, id, {isformData, method})
         .then(res => {
           let returnResult = res;
           if (res && !res.status) {
@@ -465,11 +488,11 @@ export default {
     };
   },
 
-  getCustomerDetail(restaurant_id,id, showLoader = true) {
+  getCustomerDetail(restaurant_id, id, showLoader = true) {
     return (dispatch, getState) => {
       showLoader && dispatch(appAction.showProgress());
       return userService
-        .getCustomerDetail(restaurant_id,id)
+        .getCustomerDetail(restaurant_id, id)
         .then(res => {
           let returnResult = res;
 
@@ -479,7 +502,6 @@ export default {
           }
           if (returnResult) {
             let data = res.data;
-          
           }
           showLoader && dispatch(appAction.hideProgress());
           return returnResult;
@@ -488,11 +510,11 @@ export default {
     };
   },
 
-  getRewardBag(restaurant_id,id, showLoader = true) {
+  getRewardBag(restaurant_id, id, showLoader = true) {
     return (dispatch, getState) => {
       showLoader && dispatch(appAction.showProgress());
       return userService
-        .getRewardBag(restaurant_id,id)
+        .getRewardBag(restaurant_id, id)
         .then(res => {
           let returnResult = res;
 
@@ -502,7 +524,6 @@ export default {
           }
           if (returnResult) {
             let data = res.data;
-          
           }
           showLoader && dispatch(appAction.hideProgress());
           return returnResult;
@@ -537,7 +558,7 @@ export default {
     };
   },
 
-  createRewardBagOrder(data,showLoader = true) {
+  createRewardBagOrder(data, showLoader = true) {
     return (dispatch, getState) => {
       showLoader && dispatch(appAction.showProgress());
       return userService
@@ -551,7 +572,6 @@ export default {
           }
           if (returnResult) {
             let data = res.data;
-          
           }
           showLoader && dispatch(appAction.hideProgress());
           return returnResult;
@@ -559,11 +579,11 @@ export default {
         .catch(apiErrorHandler);
     };
   },
-  getCustomerDetailPhoneNo(restaurant_id,phone_no, showLoader = true) {
+  getCustomerDetailPhoneNo(restaurant_id, phone_no, showLoader = true) {
     return (dispatch, getState) => {
       showLoader && dispatch(appAction.showProgress());
       return userService
-        .getCustomerDetailPhoneNo(restaurant_id,phone_no)
+        .getCustomerDetailPhoneNo(restaurant_id, phone_no)
         .then(res => {
           let returnResult = res;
 
@@ -573,7 +593,6 @@ export default {
           }
           if (returnResult) {
             let data = res.data;
-          
           }
           showLoader && dispatch(appAction.hideProgress());
           return returnResult;
@@ -582,7 +601,7 @@ export default {
     };
   },
 
-  createGiftCard(data,showLoader = true) {
+  createGiftCard(data, showLoader = true) {
     return (dispatch, getState) => {
       showLoader && dispatch(appAction.showProgress());
       return userService
@@ -596,7 +615,6 @@ export default {
           }
           if (returnResult) {
             //let data = res.data;
-          
           }
           showLoader && dispatch(appAction.hideProgress());
           return returnResult;

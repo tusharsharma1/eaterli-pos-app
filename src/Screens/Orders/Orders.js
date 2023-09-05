@@ -19,6 +19,7 @@ import userAction from '../../redux/actions/user.action';
 import {getAddons, getVariants} from '../../helpers/order.helper';
 import POSModule from '../../helpers/pos.helper';
 import {showToast} from '../../helpers/app.helpers';
+import usePrevious from '../../hooks/usePrevious';
 export default function Orders({navigation, route}) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
@@ -27,16 +28,24 @@ export default function Orders({navigation, route}) {
   const selectedLocation = useSelector(s => s.user.selectedLocation);
   const userData = useSelector(s => s.user.userData);
   const orders = useSelector(s => s.user.orders);
+  const [refresh, setRefresh] = useState(true);
+  let prevCurrentPage = usePrevious(orders.currentPage);
   const toggleModal = () => {
     setShowModal(!showModal);
   };
   useEffect(() => {
-    loadData();
-  }, []);
-  const loadData = async refresh => {
+    loadData(prevCurrentPage >= orders.currentPage);
+  }, [orders.currentPage, refresh]);
+  const loadData = async _refresh => {
     setLoaded(false);
     let r = await dispatch(
-      userAction.getOrders(userData.restaurant.id, selectedLocation, false),
+      userAction.getOrders(
+        userData.restaurant.id,
+        selectedLocation,
+        {page: orders.currentPage,limit:25},
+        _refresh,
+        false,
+      ),
     );
     setLoaded(true);
   };
@@ -372,12 +381,35 @@ export default function Orders({navigation, route}) {
       <Header title={'Orders'} back />
       <Container style={{flex: 1}}>
         <Table
-          data={orders}
+          data={orders.data}
           columns={columns}
           refreshing={!loaded}
           onRefresh={() => {
-            loadData(true);
+            dispatch(
+              userAction.set({
+                _prop: 'orders',
+                values: {
+                  currentPage: 1,
+                },
+              }),
+            );
+            setRefresh(!refresh);
           }}
+          onEndReachedThreshold={0.1}
+          onEndReached={r => {
+            // console.log('onEndReached', r);
+            if (loaded && orders.totalPage > orders.currentPage) {
+              dispatch(
+                userAction.set({
+                  _prop: 'orders',
+                  values: {
+                    currentPage: orders.currentPage + 1,
+                  },
+                }),
+              );
+            }
+          }}
+          progressViewOffset={0}
         />
       </Container>
       <ModalContainer

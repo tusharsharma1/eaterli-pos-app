@@ -51,11 +51,11 @@ export default {
       isformData: false,
     });
   },
-  getOrders(rest_id, restaurant_location_id) {
-    //  let d = getQueryString({restaurant_location_id});
+  getOrders(rest_id, restaurant_location_id, data = {}) {
+    let d = getQueryString(data);
     return callApi(
       'GET',
-      `/api/pos-order/list/${rest_id}/${restaurant_location_id}`,
+      `/api/pos-order/list/${rest_id}/${restaurant_location_id}?${d}`,
     );
   },
   updateSubCategory(data, id, config) {
@@ -69,7 +69,10 @@ export default {
   },
 
   getCustomerDetailPhoneNo(restaurant_id, phone_no) {
-    return callApi('GET', `/api/get-user-details/${restaurant_id}/phone?phone=${phone_no}`);
+    return callApi(
+      'GET',
+      `/api/get-user-details/${restaurant_id}/phone?phone=${phone_no}`,
+    );
   },
 
   getRewardBag(restaurant_id, id) {
@@ -92,7 +95,6 @@ export default {
   },
 
   getGiftCardBalance(res_id, card_id) {
- 
     return callApi(
       'GET',
       `/api/restaurant/${res_id}/egift-cards/${card_id}/balance`,
