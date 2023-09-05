@@ -55,6 +55,7 @@ import com.zcs.sdk.util.StringUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
@@ -196,16 +197,112 @@ public class POSModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void textPrint(ReadableMap data, Callback callBack) {
-        Log.d(getName(), "testPrint "+data.getString(("name")));
-     String res=printText();
+    public void textPrint(ReadableArray data, Callback callBack) {
+        Log.d(getName(), "testPrint start");
+     String res=printText(data);
 
         WritableMap map = new WritableNativeMap();
+       // SimpleDateFormat formatter = new SimpleDateFormat("dd MMM, yyyy hh:mm T");
+      //  String formattedDate = formatter.format(data.getString("created_at"));
+
+
         map.putString("res",res);
 
         callBack.invoke(map);
 
     }
+    private String printText(ReadableArray data) {
+        int printStatus = mPrinter.getPrinterStatus();
+        if (printStatus == SdkResult.SDK_PRN_STATUS_PAPEROUT) {
+            return "Out of paper";
+            //out of paper
+            // Toast.makeText(getActivity(), "Out of paper", Toast.LENGTH_SHORT).show();
+        } else {
+
+
+//            int order_no =   data.getInt("id");
+
+            AssetManager asm = context.getAssets();
+            InputStream inputStream = null;
+            try {
+                inputStream = asm.open("logo.bmp");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Drawable d = Drawable.createFromStream(inputStream, null);
+            Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+            mPrinter.setPrintAppendBitmap(bitmap, Layout.Alignment.ALIGN_CENTER);
+
+            PrnStrFormat format = new PrnStrFormat();
+            format.setFont(PrnTextFont.SANS_SERIF);
+            int l=   data.size();
+            for (int i = 0; i < l; i++) {
+                ReadableMap   ob = data.getMap(i);
+                Layout.Alignment alignment=Layout.Alignment.ALIGN_NORMAL;
+                String align=ob.getString("align");
+                if(align.equals("center")){
+                    alignment=Layout.Alignment.ALIGN_CENTER;
+                }else  if(align.equals("right")){
+                    alignment=Layout.Alignment.ALIGN_OPPOSITE;
+                }
+                PrnTextStyle textStyle=PrnTextStyle.NORMAL;
+                String style=ob.getString("style");
+                if(style.equals("bold")){
+                    textStyle=PrnTextStyle.BOLD;
+                }
+                else  if(style.equals("italic")){
+                    textStyle=PrnTextStyle.ITALIC;
+                }else  if(style.equals("bold_italic")){
+                    textStyle=PrnTextStyle.BOLD_ITALIC;
+                }
+                int size=   ob.getInt("size");
+                format.setTextSize(size);
+                format.setAli(alignment);
+                format.setStyle(textStyle);
+                mPrinter.setPrintAppendString(ob.getString("text"), format);
+
+                Log.d(getName(), "testPrint Text:-> "+ob.getString("text")+" | "+alignment+" | "+textStyle+" | "+size);
+            }
+
+
+
+//            format.setTextSize(30);
+//            format.setAli(Layout.Alignment.ALIGN_CENTER);
+//            format.setStyle(PrnTextStyle.BOLD);
+            //format.setFont(PrnTextFont.CUSTOM);
+            //format.setPath(Environment.getExternalStorageDirectory() + "/fonts/simsun.ttf");
+//            format.setFont(PrnTextFont.SANS_SERIF);
+//            mPrinter.setPrintAppendString("FISH N FRY", format);
+//            format.setTextSize(25);
+//            format.setStyle(PrnTextStyle.NORMAL);
+//            format.setAli(Layout.Alignment.ALIGN_NORMAL);
+//            mPrinter.setPrintAppendString(" ", format);
+//            mPrinter.setPrintAppendString("ORDER NO.: #" +order_no, format);
+//            mPrinter.setPrintAppendString("MERCHANT NO:" + " 123456789012345 ", format);
+//            mPrinter.setPrintAppendString("TERMINAL NAME:" + " 12345678 ", format);
+//            mPrinter.setPrintAppendString("OPERATOR NO:" + " 01 ", format);
+//            mPrinter.setPrintAppendString("CARD NO: ", format);
+//            format.setAli(Layout.Alignment.ALIGN_CENTER);
+//            format.setTextSize(30);
+//            format.setStyle(PrnTextStyle.BOLD);
+//            mPrinter.setPrintAppendString("6214 44** **** **** 7816", format);
+//            format.setAli(Layout.Alignment.ALIGN_NORMAL);
+//            format.setStyle(PrnTextStyle.NORMAL);
+//            format.setTextSize(25);
+            mPrinter.setPrintAppendString(" -----------------------------", format);
+//
+            mPrinter.setPrintAppendQRCode("123456789012345", 200, 200, Layout.Alignment.ALIGN_CENTER);
+
+            mPrinter.setPrintAppendString(" ", format);
+            mPrinter.setPrintAppendString(" ", format);
+            mPrinter.setPrintAppendString(" ", format);
+            mPrinter.setPrintAppendString(" ", format);
+
+            printStatus = mPrinter.setPrintStart();
+        }
+        return "Success";
+    }
+
     @ReactMethod
     public void scanQRCode() {
         Intent mIntent = new Intent(context, CaptureActivity.class);
@@ -359,61 +456,6 @@ public class POSModule extends ReactContextBaseJavaModule {
             sb.append("ERROR:\t"+e.getMessage() +"\n"+e.toString());
         }
          return sb.toString();
-    }
-    private String printText() {
-        int printStatus = mPrinter.getPrinterStatus();
-        if (printStatus == SdkResult.SDK_PRN_STATUS_PAPEROUT) {
-            return "Out of paper";
-            //out of paper
-           // Toast.makeText(getActivity(), "Out of paper", Toast.LENGTH_SHORT).show();
-        } else {
-            AssetManager asm = context.getAssets();
-            InputStream inputStream = null;
-            try {
-                inputStream = asm.open("logo.bmp");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            Drawable d = Drawable.createFromStream(inputStream, null);
-            Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-            mPrinter.setPrintAppendBitmap(bitmap, Layout.Alignment.ALIGN_CENTER);
-
-            PrnStrFormat format = new PrnStrFormat();
-            format.setTextSize(30);
-            format.setAli(Layout.Alignment.ALIGN_CENTER);
-            format.setStyle(PrnTextStyle.BOLD);
-            //format.setFont(PrnTextFont.CUSTOM);
-            //format.setPath(Environment.getExternalStorageDirectory() + "/fonts/simsun.ttf");
-            format.setFont(PrnTextFont.SANS_SERIF);
-            mPrinter.setPrintAppendString("POS SALES SLIP", format);
-            format.setTextSize(25);
-            format.setStyle(PrnTextStyle.NORMAL);
-            format.setAli(Layout.Alignment.ALIGN_NORMAL);
-            mPrinter.setPrintAppendString(" ", format);
-            mPrinter.setPrintAppendString("MERCHANGT NAME:" + " Test ", format);
-            mPrinter.setPrintAppendString("MERCHANT NO:" + " 123456789012345 ", format);
-            mPrinter.setPrintAppendString("TERMINAL NAME:" + " 12345678 ", format);
-            mPrinter.setPrintAppendString("OPERATOR NO:" + " 01 ", format);
-            mPrinter.setPrintAppendString("CARD NO: ", format);
-            format.setAli(Layout.Alignment.ALIGN_CENTER);
-            format.setTextSize(30);
-            format.setStyle(PrnTextStyle.BOLD);
-            mPrinter.setPrintAppendString("6214 44** **** **** 7816", format);
-            format.setAli(Layout.Alignment.ALIGN_NORMAL);
-            format.setStyle(PrnTextStyle.NORMAL);
-            format.setTextSize(25);
-            mPrinter.setPrintAppendString(" -----------------------------", format);
-
-            mPrinter.setPrintAppendQRCode("AAKASH-123456789012345", 200, 200, Layout.Alignment.ALIGN_CENTER);
-
-            mPrinter.setPrintAppendString(" ", format);
-            mPrinter.setPrintAppendString(" ", format);
-            mPrinter.setPrintAppendString(" ", format);
-            mPrinter.setPrintAppendString(" ", format);
-
-            printStatus = mPrinter.setPrintStart();
-        }
-        return "Success";
     }
 
     private void cutPaper() {

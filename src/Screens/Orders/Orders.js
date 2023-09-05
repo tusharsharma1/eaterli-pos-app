@@ -17,6 +17,8 @@ import {
 import {dummyImage} from '../../assets';
 import userAction from '../../redux/actions/user.action';
 import {getAddons, getVariants} from '../../helpers/order.helper';
+import POSModule from '../../helpers/pos.helper';
+import {showToast} from '../../helpers/app.helpers';
 export default function Orders({navigation, route}) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
@@ -72,7 +74,10 @@ export default function Orders({navigation, route}) {
         title: 'Action',
         renderCell: data => {
           return (
-            <View>
+            <View
+              style={{
+                flexDirection: 'row',
+              }}>
               {/* <TouchableOpacity>
           <FontAwesome5Icon name="pen" />
         </TouchableOpacity> */}
@@ -84,8 +89,270 @@ export default function Orders({navigation, route}) {
                 style={{
                   // backgroundColor:'red',
                   padding: 4,
+                  marginRight: 10,
                 }}>
                 <FontAwesome5Icon name="eye" color={'#212121'} size={22} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  let fontSize = 25;
+                  let headingFontSize = 25;
+                  let newLineData = {
+                    size: fontSize,
+                    align: 'left',
+                    style: 'normal',
+                    text: ` `,
+                  };
+                  let printData = [
+                    {
+                      size: 35,
+                      align: 'center',
+                      style: 'bold',
+                      text: 'Fish N Fry',
+                    },
+                    {
+                      size: fontSize,
+                      align: 'left',
+                      style: 'normal',
+                      text: `Order No.: #${data.id}`,
+                    },
+                    {
+                      size: fontSize,
+                      align: 'left',
+                      style: 'normal',
+                      text: `Order Date:  ${moment(data.created_at).format(
+                        'DD MMM, YYYY hh:mm A',
+                      )}`,
+                    },
+                    {
+                      size: fontSize,
+                      align: 'left',
+                      style: 'normal',
+                      text: `Payment Method: ${data.payment_method || ''}`,
+                    },
+                  ];
+                  printData.push(newLineData);
+
+                  printData.push({
+                    size: headingFontSize,
+                    align: 'left',
+                    style: 'normal',
+                    text: `Payment Details`,
+                  });
+
+                  printData.push({
+                    size: fontSize,
+                    align: 'left',
+                    style: 'normal',
+                    text: `Payment ID: ${'PAY_2332hhj34x'}`,
+                  });
+
+                  printData.push({
+                    size: fontSize,
+                    align: 'left',
+                    style: 'normal',
+                    text: `Card No.: ${'**** **** **** 4141'}`,
+                  });
+
+                  if (
+                    data.point_transactions &&
+                    !!data.point_transactions.length
+                  ) {
+                    printData.push(newLineData);
+                    printData.push({
+                      size: headingFontSize,
+                      align: 'left',
+                      style: 'normal',
+                      text: `Reward Points`,
+                    });
+                    data.point_transactions.forEach(d => {
+                      printData.push({
+                        size: fontSize,
+                        align: 'left',
+                        style: 'normal',
+                        text: `Description: ${d.description}`,
+                      });
+                      printData.push({
+                        size: fontSize,
+                        align: 'left',
+                        style: 'normal',
+                        text: `Point: ${d.point}`,
+                      });
+                    });
+                  }
+
+                  printData.push(newLineData);
+                  printData.push({
+                    size: headingFontSize,
+                    align: 'left',
+                    style: 'normal',
+                    text: `Products`,
+                  });
+
+                  data.order_items.forEach(d => {
+                    let variants = getVariants(d);
+                    let add_ons = getAddons(d);
+                    let discount_type = d.discount_type ?? '1';
+
+                    let _discount = parseFloat(d.discount ?? 0);
+                    let totalPrice = d.total_price;
+                    if (_discount) {
+                      if (discount_type == '1') {
+                        totalPrice =
+                          totalPrice - totalPrice * (_discount / 100);
+                      } else if (discount_type == '2') {
+                        totalPrice = totalPrice - _discount;
+                      }
+                    }
+                    printData.push({
+                      size: fontSize,
+                      align: 'left',
+                      style: 'normal',
+                      text: `${d.item_name} ${
+                        variants.length
+                          ? variants.map(r => r.title).join(', ')
+                          : ''
+                      } ${
+                        add_ons.length
+                          ? add_ons.map(r => r.product_name).join(', ')
+                          : ''
+                      } - (${d.quantity} @ ${parseFloat(d.rate || '0').toFixed(
+                        2,
+                      )})   ${parseFloat(totalPrice).toFixed(2)}`,
+                    });
+                  });
+
+                  if (
+                    [PAYMENT_METHOD.split_payment.id].includes(
+                      data.payment_method,
+                    )
+                  ) {
+                    printData.push(newLineData);
+                    printData.push({
+                      size: headingFontSize,
+                      align: 'left',
+                      style: 'normal',
+                      text: `Split Payment`,
+                    });
+
+                    data.order_split_payments.forEach((d, i) => {
+                      printData.push({
+                        size: fontSize,
+                        align: 'left',
+                        style: 'normal',
+                        text: `${i + 1}. ${d.type}`,
+                      });
+                      printData.push({
+                        size: fontSize,
+                        align: 'left',
+                        style: 'normal',
+                        text: `Amount: ${parseFloat(d.amount || '0').toFixed(
+                          2,
+                        )}`,
+                      });
+                      printData.push({
+                        size: fontSize,
+                        align: 'left',
+                        style: 'normal',
+                        text: `Received Amount: ${parseFloat(
+                          d.received_amount || '0',
+                        ).toFixed(2)}`,
+                      });
+                    });
+                  }
+
+                  printData.push(newLineData);
+                  printData.push({
+                    size: fontSize,
+                    align: 'right',
+                    style: 'normal',
+                    text: `Sub Total: ${parseFloat(
+                      data.sub_total || '0',
+                    ).toFixed(2)}`,
+                  });
+                  printData.push({
+                    size: fontSize,
+                    align: 'right',
+                    style: 'normal',
+                    text: `${
+                      data?.tax_title || DEFAULT_TAX_TITLE
+                    } (${parseFloat(data?.tax_per || 0)}%): ${parseFloat(
+                      data.tax_amt,
+                    ).toFixed(2)}`,
+                  });
+                  if (!!data.discount) {
+                    printData.push({
+                      size: fontSize,
+                      align: 'right',
+                      style: 'normal',
+                      text: `Total: ${(
+                        parseFloat(data.sub_total || 0) +
+                        parseFloat(data.tax_amt || 0)
+                      ).toFixed(2)}`,
+                    });
+
+                    printData.push({
+                      size: fontSize,
+                      align: 'right',
+                      style: 'normal',
+                      text: `Discount: ${
+                        data.discount_type == '2' ? '$ ' : ''
+                      }${data.discount ?? 0}${
+                        data.discount_type == '1' ? '%' : ''
+                      }`,
+                    });
+                  }
+
+                  printData.push({
+                    size: fontSize,
+                    align: 'right',
+                    style: 'normal',
+                    text: `Grand Total: ${parseFloat(data.order_total).toFixed(
+                      2,
+                    )}`,
+                  });
+
+                  if (
+                    [
+                      PAYMENT_METHOD.cash.id,
+                      PAYMENT_METHOD.split_payment.id,
+                    ].includes(data.payment_method)
+                  ) {
+                    printData.push({
+                      size: fontSize,
+                      align: 'right',
+                      style: 'normal',
+                      text: `Received Amount: ${parseFloat(
+                        data.received_amount,
+                      ).toFixed(2)}`,
+                    });
+                    let remaining_amount =
+                      parseFloat(data?.order_total) -
+                      parseFloat(data?.received_amount);
+                    if (!isFinite(remaining_amount)) {
+                      remaining_amount = 0;
+                    }
+                    printData.push({
+                      size: fontSize,
+                      align: 'right',
+                      style: 'normal',
+                      text: `Remaining Amount: ${parseFloat(
+                        remaining_amount,
+                      ).toFixed(2)}`,
+                    });
+                  }
+                  POSModule.textPrint(printData, res => {
+                    console.log('[textPrint]', res);
+                    showToast(res.res);
+                    // alert(JSON.stringify(res));
+                  });
+                }}
+                style={{
+                  // backgroundColor:'red',
+                  padding: 4,
+                }}>
+                <FontAwesome5Icon name="print" color={'#212121'} size={22} />
               </TouchableOpacity>
             </View>
           );

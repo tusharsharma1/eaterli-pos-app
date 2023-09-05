@@ -185,13 +185,14 @@ export default function Home(props) {
               text="Print"
               iconName="print"
               onPress={() => {
-                POSModule.textPrint(
-                  {id: 22, name: 'aakash', active: true},
-                  res => {
-                    console.log('[textPrint]', res);
-                    // alert(JSON.stringify(res));
-                  },
-                );
+                props.navigation.navigate('TestingPOS');
+                // POSModule.textPrint(
+                //   {id: 22, name: 'aakash', active: true},
+                //   res => {
+                //     console.log('[textPrint]', res);
+                //     // alert(JSON.stringify(res));
+                //   },
+                // );
               }}
             />
             <IconBtn
