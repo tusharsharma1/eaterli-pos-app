@@ -20,6 +20,19 @@ import {getAddons, getVariants} from '../../helpers/order.helper';
 import POSModule from '../../helpers/pos.helper';
 import {showToast} from '../../helpers/app.helpers';
 import usePrevious from '../../hooks/usePrevious';
+import { useNonInitialEffect } from '../../hooks/useNonInitialEffect';
+
+function ensureLength(input = '', requiredLength = 3, padRight = true) {
+  input = input.toString();
+  if (input.length > requiredLength) return input.substring(0, requiredLength);
+  if (input.length == requiredLength) return input;
+  if (padRight) {
+    return input.padEnd(requiredLength);
+  } else {
+    return input.padStart(requiredLength);
+  }
+}
+
 export default function Orders({navigation, route}) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
@@ -34,6 +47,18 @@ export default function Orders({navigation, route}) {
     setShowModal(!showModal);
   };
   useEffect(() => {
+    dispatch(
+      userAction.set({
+        _prop: 'orders',
+        values: {
+          currentPage: 1,
+        },
+      }),
+    );
+
+    loadData(true);
+  }, []);
+  useNonInitialEffect(() => {
     loadData(prevCurrentPage >= orders.currentPage);
   }, [orders.currentPage, refresh]);
   const loadData = async _refresh => {
@@ -42,7 +67,7 @@ export default function Orders({navigation, route}) {
       userAction.getOrders(
         userData.restaurant.id,
         selectedLocation,
-        {page: orders.currentPage,limit:25},
+        {page: orders.currentPage, limit: 25},
         _refresh,
         false,
       ),
@@ -105,7 +130,9 @@ export default function Orders({navigation, route}) {
 
               <TouchableOpacity
                 onPress={() => {
-                  let fontSize = 25;
+                  let pageWidthLength = 40;
+                  let AmountWidthLength = 8;
+                  let fontSize = 20;
                   let headingFontSize = 25;
                   let newLineData = {
                     size: fontSize,
@@ -124,21 +151,43 @@ export default function Orders({navigation, route}) {
                       size: fontSize,
                       align: 'left',
                       style: 'normal',
-                      text: `Order No.: #${data.id}`,
-                    },
-                    {
-                      size: fontSize,
-                      align: 'left',
-                      style: 'normal',
-                      text: `Order Date:  ${moment(data.created_at).format(
-                        'DD MMM, YYYY hh:mm A',
+                      text: `${ensureLength(
+                        `Order No.:`,
+                        14,
+                        true,
+                      )}${ensureLength(
+                        `#${data.id}`,
+                        pageWidthLength - 14,
+                        false,
                       )}`,
                     },
                     {
                       size: fontSize,
                       align: 'left',
                       style: 'normal',
-                      text: `Payment Method: ${data.payment_method || ''}`,
+                      text: `${ensureLength(
+                        `Order Date:`,
+                        14,
+                        true,
+                      )}${ensureLength(
+                        moment(data.created_at).format('DD MMM, YYYY hh:mm A'),
+                        pageWidthLength - 14,
+                        false,
+                      )}`,
+                    },
+                    {
+                      size: fontSize,
+                      align: 'left',
+                      style: 'normal',
+                      text: `${ensureLength(
+                        `Payment Method:`,
+                        16,
+                        true,
+                      )}${ensureLength(
+                        data.payment_method || '',
+                        pageWidthLength - 16,
+                        false,
+                      )}`,
                     },
                   ];
                   printData.push(newLineData);
@@ -154,14 +203,26 @@ export default function Orders({navigation, route}) {
                     size: fontSize,
                     align: 'left',
                     style: 'normal',
-                    text: `Payment ID: ${'PAY_2332hhj34x'}`,
+                    text: `${ensureLength(
+                      `Payment ID:`,
+                      14,
+                      true,
+                    )}${ensureLength(
+                      'PAY_2332hhj34x',
+                      pageWidthLength - 14,
+                      false,
+                    )}`,
                   });
 
                   printData.push({
                     size: fontSize,
                     align: 'left',
                     style: 'normal',
-                    text: `Card No.: ${'**** **** **** 4141'}`,
+                    text: `${ensureLength(`Card No.:`, 14, true)}${ensureLength(
+                      '**** **** **** 4141',
+                      pageWidthLength - 14,
+                      false,
+                    )}`,
                   });
 
                   if (
@@ -180,23 +241,60 @@ export default function Orders({navigation, route}) {
                         size: fontSize,
                         align: 'left',
                         style: 'normal',
-                        text: `Description: ${d.description}`,
+                        text: `${ensureLength(
+                          `Description:`,
+                          14,
+                          true,
+                        )}${ensureLength(
+                          d.description,
+                          pageWidthLength - 14,
+                          false,
+                        )}`,
                       });
                       printData.push({
                         size: fontSize,
                         align: 'left',
                         style: 'normal',
-                        text: `Point: ${d.point}`,
+                        text: `${ensureLength(
+                          `Point:`,
+                          15,
+                          true,
+                        )}${ensureLength(
+                          d.point,
+                          pageWidthLength - 15,
+                          false,
+                        )}`,
                       });
                     });
                   }
-
+                  /////Products//////
                   printData.push(newLineData);
                   printData.push({
                     size: headingFontSize,
                     align: 'left',
                     style: 'normal',
                     text: `Products`,
+                  });
+                  printData.push({
+                    size: fontSize,
+                    align: 'left',
+                    style: 'normal',
+                    text: `${ensureLength(
+                      'Product',
+                      pageWidthLength -
+                        AmountWidthLength -
+                        4 -
+                        AmountWidthLength,
+                      true,
+                    )}${ensureLength("Qty.", 4, false)}${ensureLength(
+                     'Rate',
+                      AmountWidthLength,
+                      false,
+                    )}${ensureLength(
+                      'Total',
+                      AmountWidthLength,
+                      false,
+                    )}`,
                   });
 
                   data.order_items.forEach(d => {
@@ -214,21 +312,38 @@ export default function Orders({navigation, route}) {
                         totalPrice = totalPrice - _discount;
                       }
                     }
+                    let item_name = `${d.item_name} ${
+                      variants.length
+                        ? variants.map(r => r.title).join(', ')
+                        : ''
+                    }${
+                      add_ons.length
+                        ? add_ons.map(r => r.product_name).join(', ')
+                        : ''
+                    }`;
+                    //  - (${d.quantity} @ ${parseFloat(d.rate || '0').toFixed(
+                    //   2,
+                    // )})`;
                     printData.push({
                       size: fontSize,
                       align: 'left',
                       style: 'normal',
-                      text: `${d.item_name} ${
-                        variants.length
-                          ? variants.map(r => r.title).join(', ')
-                          : ''
-                      } ${
-                        add_ons.length
-                          ? add_ons.map(r => r.product_name).join(', ')
-                          : ''
-                      } - (${d.quantity} @ ${parseFloat(d.rate || '0').toFixed(
-                        2,
-                      )})   ${parseFloat(totalPrice).toFixed(2)}`,
+                      text: `${ensureLength(
+                        item_name,
+                        pageWidthLength -
+                          AmountWidthLength -
+                          4 -
+                          AmountWidthLength,
+                        true,
+                      )}${ensureLength(d.quantity, 4, false)}${ensureLength(
+                        parseFloat(d.rate || '0').toFixed(2),
+                        AmountWidthLength,
+                        false,
+                      )}${ensureLength(
+                        parseFloat(totalPrice).toFixed(2),
+                        AmountWidthLength,
+                        false,
+                      )}`,
                     });
                   });
 
@@ -256,17 +371,29 @@ export default function Orders({navigation, route}) {
                         size: fontSize,
                         align: 'left',
                         style: 'normal',
-                        text: `Amount: ${parseFloat(d.amount || '0').toFixed(
-                          2,
+                        text: `${ensureLength(
+                          `Amount:`,
+                          pageWidthLength - AmountWidthLength,
+                          true,
+                        )}${ensureLength(
+                          parseFloat(d.amount || '0').toFixed(2),
+                          AmountWidthLength,
+                          false,
                         )}`,
                       });
                       printData.push({
                         size: fontSize,
                         align: 'left',
                         style: 'normal',
-                        text: `Received Amount: ${parseFloat(
-                          d.received_amount || '0',
-                        ).toFixed(2)}`,
+                        text: `${ensureLength(
+                          `Received Amount:`,
+                          pageWidthLength - AmountWidthLength,
+                          true,
+                        )}${ensureLength(
+                          parseFloat(d.received_amount || '0').toFixed(2),
+                          AmountWidthLength,
+                          false,
+                        )}`,
                       });
                     });
                   }
@@ -274,51 +401,83 @@ export default function Orders({navigation, route}) {
                   printData.push(newLineData);
                   printData.push({
                     size: fontSize,
-                    align: 'right',
+                    align: 'left',
                     style: 'normal',
-                    text: `Sub Total: ${parseFloat(
-                      data.sub_total || '0',
-                    ).toFixed(2)}`,
+                    text: `${ensureLength(
+                      `Sub Total:`,
+                      pageWidthLength - AmountWidthLength,
+                      true,
+                    )}${ensureLength(
+                      parseFloat(data.sub_total || '0').toFixed(2),
+                      AmountWidthLength,
+                      false,
+                    )}`,
                   });
                   printData.push({
                     size: fontSize,
-                    align: 'right',
+                    align: 'left',
                     style: 'normal',
-                    text: `${
-                      data?.tax_title || DEFAULT_TAX_TITLE
-                    } (${parseFloat(data?.tax_per || 0)}%): ${parseFloat(
-                      data.tax_amt,
-                    ).toFixed(2)}`,
+                    text: `${ensureLength(
+                      `${data?.tax_title || DEFAULT_TAX_TITLE} (${parseFloat(
+                        data?.tax_per || 0,
+                      )}%):`,
+                      pageWidthLength - AmountWidthLength,
+                      true,
+                    )}${ensureLength(
+                      parseFloat(data.tax_amt).toFixed(2),
+                      AmountWidthLength,
+                      false,
+                    )}`,
                   });
                   if (!!data.discount) {
                     printData.push({
                       size: fontSize,
-                      align: 'right',
+                      align: 'left',
                       style: 'normal',
-                      text: `Total: ${(
-                        parseFloat(data.sub_total || 0) +
-                        parseFloat(data.tax_amt || 0)
-                      ).toFixed(2)}`,
+                      text: `${ensureLength(
+                        `Total:`,
+                        pageWidthLength - AmountWidthLength,
+                        true,
+                      )}${ensureLength(
+                        (
+                          parseFloat(data.sub_total || 0) +
+                          parseFloat(data.tax_amt || 0)
+                        ).toFixed(2),
+                        AmountWidthLength,
+                        false,
+                      )}`,
                     });
 
                     printData.push({
                       size: fontSize,
-                      align: 'right',
+                      align: 'left',
                       style: 'normal',
-                      text: `Discount: ${
-                        data.discount_type == '2' ? '$ ' : ''
-                      }${data.discount ?? 0}${
-                        data.discount_type == '1' ? '%' : ''
-                      }`,
+                      text: `${ensureLength(
+                        `Discount:`,
+                        pageWidthLength - AmountWidthLength,
+                        true,
+                      )}${ensureLength(
+                        `${data.discount_type == '2' ? '$ ' : ''}${
+                          data.discount ?? 0
+                        }${data.discount_type == '1' ? '%' : ''}`,
+                        AmountWidthLength,
+                        false,
+                      )}`,
                     });
                   }
 
                   printData.push({
                     size: fontSize,
-                    align: 'right',
+                    align: 'left',
                     style: 'normal',
-                    text: `Grand Total: ${parseFloat(data.order_total).toFixed(
-                      2,
+                    text: `${ensureLength(
+                      `Grand Total:`,
+                      pageWidthLength - AmountWidthLength,
+                      true,
+                    )}${ensureLength(
+                      parseFloat(data.order_total).toFixed(2),
+                      AmountWidthLength,
+                      false,
                     )}`,
                   });
 
@@ -330,11 +489,17 @@ export default function Orders({navigation, route}) {
                   ) {
                     printData.push({
                       size: fontSize,
-                      align: 'right',
+                      align: 'left',
                       style: 'normal',
-                      text: `Received Amount: ${parseFloat(
-                        data.received_amount,
-                      ).toFixed(2)}`,
+                      text: `${ensureLength(
+                        `Received Amount:`,
+                        pageWidthLength - AmountWidthLength,
+                        true,
+                      )}${ensureLength(
+                        parseFloat(data.received_amount).toFixed(2),
+                        AmountWidthLength,
+                        false,
+                      )}`,
                     });
                     let remaining_amount =
                       parseFloat(data?.order_total) -
@@ -344,11 +509,17 @@ export default function Orders({navigation, route}) {
                     }
                     printData.push({
                       size: fontSize,
-                      align: 'right',
+                      align: 'left',
                       style: 'normal',
-                      text: `Remaining Amount: ${parseFloat(
-                        remaining_amount,
-                      ).toFixed(2)}`,
+                      text: `${ensureLength(
+                        `Remaining Amount:`,
+                        pageWidthLength - AmountWidthLength,
+                        true,
+                      )}${ensureLength(
+                        parseFloat(remaining_amount).toFixed(2),
+                        AmountWidthLength,
+                        false,
+                      )}`,
                     });
                   }
                   POSModule.textPrint(printData, res => {
