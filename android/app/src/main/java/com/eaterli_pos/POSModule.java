@@ -8,8 +8,14 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
+import android.print.PrintAttributes;
+import android.print.PrintDocumentAdapter;
+import android.print.PrintJob;
+import android.print.PrintManager;
 import android.text.Layout;
 import android.util.Log;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -197,9 +203,9 @@ public class POSModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void textPrint(ReadableArray data, Callback callBack) {
-        Log.d(getName(), "testPrint start");
-     String res=printText(data);
+    public void printByAllInOnePOS(ReadableArray data, Callback callBack) {
+        Log.d(getName(), "printByAllInOnePOS start");
+     String res=printByAllInOnePOS(data);
 
         WritableMap map = new WritableNativeMap();
        // SimpleDateFormat formatter = new SimpleDateFormat("dd MMM, yyyy hh:mm T");
@@ -211,7 +217,7 @@ public class POSModule extends ReactContextBaseJavaModule {
         callBack.invoke(map);
 
     }
-    private String printText(ReadableArray data) {
+    private String printByAllInOnePOS(ReadableArray data) {
         int printStatus = mPrinter.getPrinterStatus();
         if (printStatus == SdkResult.SDK_PRN_STATUS_PAPEROUT) {
             return "Out of paper";
@@ -261,7 +267,7 @@ public class POSModule extends ReactContextBaseJavaModule {
                 format.setStyle(textStyle);
                 mPrinter.setPrintAppendString(ob.getString("text"), format);
 
-                Log.d(getName(), "testPrint Text:-> "+ob.getString("text")+" | "+alignment+" | "+textStyle+" | "+size);
+                Log.d(getName(), "printByAllInOnePOS Text:-> "+ob.getString("text")+" | "+alignment+" | "+textStyle+" | "+size);
             }
 
 
@@ -470,5 +476,62 @@ public class POSModule extends ReactContextBaseJavaModule {
             }
         });
     }
+    private WebView mWebView;
+    @ReactMethod
+    public void printByNativeCode(ReadableMap data, Callback callBack) {
+        Log.d(getName(), "printByNativeCode "+data.getString(("name")));
+        // Create a WebView object specifically for printing
+        WebView webView = new WebView(this.getCurrentActivity());
+        webView.setWebViewClient(new WebViewClient() {
+
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return false;
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                Log.i(TAG, "page finished loading " + url);
+                createWebPrintJob(view);
+                mWebView = null;
+            }
+        });
+
+        // Generate an HTML document on the fly:
+        String htmlDocument = "<html><body><h1>Test Content</h1><p>Testing, " +
+                "testing, testing...</p></body></html>";
+        webView.loadDataWithBaseURL(null, htmlDocument, "text/HTML", "UTF-8", null);
+
+        // Keep a reference to WebView object until you pass the PrintDocumentAdapter
+        // to the PrintManager
+        mWebView = webView;
+        WritableMap map = new WritableNativeMap();
+
+
+
+        callBack.invoke(map);
+
+    }
+
+    private void createWebPrintJob(WebView webView) {
+
+        // Get a PrintManager instance
+        PrintManager printManager = (PrintManager) this.getCurrentActivity()
+                .getSystemService(Context.PRINT_SERVICE);
+
+        String jobName = "Eaterli POS Document";
+
+        // Get a print adapter instance
+        PrintDocumentAdapter printAdapter = webView.createPrintDocumentAdapter(jobName);
+
+
+        PrintAttributes printAttributes=    new PrintAttributes.Builder().setMediaSize(PrintAttributes.MediaSize.ISO_A4).build();
+
+        // Create a print job with name and adapter instance
+        PrintJob printJob = printManager.print(jobName,printAdapter, printAttributes);
+
+        // Save the job object for later status checking
+//        printJobs.add(printJob);
+    }
+
 }
 

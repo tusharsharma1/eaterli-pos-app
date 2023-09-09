@@ -17,41 +17,42 @@ import {getAddons, getVariants} from '../../helpers/order.helper';
 import POSModule from '../../helpers/pos.helper';
 import Button from '../../components/Button';
 import appAction from '../../redux/actions/app.action';
+import {showToast} from '../../helpers/app.helpers';
+import RNPrint from 'react-native-print';
 export default function TestingPOS({navigation, route}) {
   const dispatch = useDispatch();
 
   useEffect(() => {
     POSModule.initSDK();
 
-
-   loadData();
-
-
+    loadData();
   }, []);
 
-const loadData=async()=>{
-  try {
-    const granted = await PermissionsAndroid.requestMultiple([
-      PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,PermissionsAndroid.PERMISSIONS.BLUETOOTH_ADVERTISE],
-      {
-        title: 'Camera Permission',
-        message:
-          'Needs access to your camera ' +
-          'so you can take pictures.',
-        buttonNeutral: 'Ask Me Later',
-        buttonNegative: 'Cancel',
-        buttonPositive: 'OK',
-      },
-    );
-    // if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-    //   console.log('You can use the camera');
-    // } else {
-    //   console.log('Camera permission denied');
-    // }
-  } catch (err) {
-    console.warn(err);
-  }
-}
+  const loadData = async () => {
+    try {
+      const granted = await PermissionsAndroid.requestMultiple(
+        [
+          PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+          PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+          PermissionsAndroid.PERMISSIONS.BLUETOOTH_ADVERTISE,
+        ],
+        {
+          title: 'Camera Permission',
+          message: 'Needs access to your camera ' + 'so you can take pictures.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      // if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      //   console.log('You can use the camera');
+      // } else {
+      //   console.log('Camera permission denied');
+      // }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
 
   const readCard = type => {
     dispatch(appAction.showProgress('Searching...'));
@@ -101,14 +102,67 @@ const loadData=async()=>{
         <Button
           mr={10}
           mb={10}
-          onPress={() => {
-            POSModule.textPrint({id: 22, name: 'aakash', active: true}, res => {
-              console.log('[textPrint]', res);
-              alert(JSON.stringify(res));
+          onPress={async () => {
+            let r = await RNPrint.print({
+              html: `
+              <style>
+              @page {
+                size:57mm 297mm;
+                margin: 0;
+              }
+              @media print {
+                html, body {
+                  width: 57mm;
+              
+                }
+                
+              }
+              
+              .page{
+                width: 57mm;
+              }
+              </style>
+              <div class="page" style="height:297mm;background-color:yellow;">
+              <h1 class="red">Heading 1</h1><h2>Heading 2</h2><h3>Heading 3</h3>
+              </div>
+              `,
+            }).catch(e => {
+              console.log('print error', e);
             });
+            console.log('print result', r);
+            showToast('Success');
+            // POSModule.printByNativeCode(
+            //   {id: 22, name: 'aakash', active: true},
+            //   res => {
+            //     console.log('[printByNativeCode]', res);
+            //     // alert(JSON.stringify(res));
+            //     showToast('Success')
+            //   },
+            // );
+
+            // POSModule.printByAllInOnePOS({id: 22, name: 'aakash', active: true}, res => {
+            //   console.log('[printByAllInOnePOS]', res);
+            //   alert(JSON.stringify(res));
+            // });
           }}>
           Test Printer
         </Button>
+
+        <Button
+          mr={10}
+          mb={10}
+          onPress={() => {
+            POSModule.scanHQRCode(
+              {id: 22, name: 'aakash', active: true},
+              res => {
+                console.log('[scanHQRCode]', res);
+                alert(JSON.stringify(res));
+              },
+            );
+          }}>
+          Scan QR Code
+        </Button>
+
         <Button
           mr={10}
           mb={10}

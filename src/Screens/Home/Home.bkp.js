@@ -246,10 +246,7 @@ export default function Home(props) {
                   // color="#212121"
                   // mr={10}
                   onPress={() => {
-                    POSModule.testPrint({id:22,name:"aakash",active:true},(res)=>{
-                      console.log('[testPrint]',res)
-                      alert(JSON.stringify(res))
-                    });
+                   
                     
                   }}>
                  Test Print

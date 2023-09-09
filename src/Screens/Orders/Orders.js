@@ -20,16 +20,21 @@ import {getAddons, getVariants} from '../../helpers/order.helper';
 import POSModule from '../../helpers/pos.helper';
 import {showToast} from '../../helpers/app.helpers';
 import usePrevious from '../../hooks/usePrevious';
-import { useNonInitialEffect } from '../../hooks/useNonInitialEffect';
-
-function ensureLength(input = '', requiredLength = 3, padRight = true) {
+import {useNonInitialEffect} from '../../hooks/useNonInitialEffect';
+import RNPrint from 'react-native-print';
+function ensureLength(
+  input = '',
+  requiredLength = 3,
+  padRight = true,
+  padChar = ' ',
+) {
   input = input.toString();
   if (input.length > requiredLength) return input.substring(0, requiredLength);
   if (input.length == requiredLength) return input;
   if (padRight) {
-    return input.padEnd(requiredLength);
+    return input.padEnd(requiredLength, padChar);
   } else {
-    return input.padStart(requiredLength);
+    return input.padStart(requiredLength, padChar);
   }
 }
 
@@ -129,8 +134,9 @@ export default function Orders({navigation, route}) {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => {
-                  let pageWidthLength = 40;
+                onPress={async () => {
+                  let pageWidthLength = 40
+                  ;
                   let AmountWidthLength = 8;
                   let fontSize = 20;
                   let headingFontSize = 25;
@@ -147,6 +153,7 @@ export default function Orders({navigation, route}) {
                       style: 'bold',
                       text: 'Fish N Fry',
                     },
+                    newLineData,
                     {
                       size: fontSize,
                       align: 'left',
@@ -286,15 +293,11 @@ export default function Orders({navigation, route}) {
                         4 -
                         AmountWidthLength,
                       true,
-                    )}${ensureLength("Qty.", 4, false)}${ensureLength(
-                     'Rate',
+                    )}${ensureLength('Qty.', 4, false)}${ensureLength(
+                      'Rate',
                       AmountWidthLength,
                       false,
-                    )}${ensureLength(
-                      'Total',
-                      AmountWidthLength,
-                      false,
-                    )}`,
+                    )}${ensureLength('Total', AmountWidthLength, false)}`,
                   });
 
                   data.order_items.forEach(d => {
@@ -522,11 +525,100 @@ export default function Orders({navigation, route}) {
                       )}`,
                     });
                   }
-                  POSModule.textPrint(printData, res => {
-                    console.log('[textPrint]', res);
-                    showToast(res.res);
-                    // alert(JSON.stringify(res));
+                  let fonts = {
+                    35: 'var(--sh)',
+                    25: 'var(--wh)',
+                    20: 'var(--wp)',
+                  };
+                  let htmlData = printData
+                    .map(p => {
+                      console.log(p.text);
+                      return `<p class="para" style="color:black;text-align:${
+                        p.align
+                      };font-weight:${p.style};font-size:${fonts[p.size]}">${
+                        p.text
+                      }</p>`;
+                    })
+                    .join('');
+
+                  htmlData = `
+                    <!DOCTYPE html>
+                   <html>
+                    <head>
+                      <title>Page Title</title>
+                  
+                      <style>
+                      :root {
+                        --sh:20px;
+                        --wp: 12px;
+                        --wh: 16px;
+                    }
+                        @page {
+                          margin: 0;
+                        }
+                  
+                        body{
+                          margin: 0;
+                          padding: 0;
+                      }
+                            .para {
+                               white-space: pre-wrap;
+                               font-family: monospace;
+                               margin: 0;
+                               padding: 0;
+                            }
+                            .page{
+                              width: 77mm;
+                              background-color:#fff;
+                              margin:auto
+                            }
+                      </style>
+                    </head>
+                    <body>
+                    <div class="page">
+                      ${htmlData}
+                      </div>
+                    </body>
+                  </html>
+                  `;
+                  console.log('print printData', printData, htmlData);
+
+                  let r = await RNPrint.print({
+                    html: `
+                    
+                    ${htmlData}`,
+                    // html: `
+                    // <style>
+                    // @page {
+                    //   size:57mm 297mm;
+                    //   margin: 0;
+                    // }
+                    // @media print {
+                    //   html, body {
+                    //     width: 57mm;
+
+                    //   }
+
+                    // }
+                    // .page{
+                    //   width: 57mm;
+                    // }
+                    // </style>
+                    // <div class="page" style="height:297mm;background-color:yellow;">
+                    // <h1 class="red">Heading 1</h1><h2>Heading 2</h2><h3>Heading 3</h3>
+                    // </div>
+                    // `,
+                  }).catch(e => {
+                    console.log('print error', e);
                   });
+                  console.log('print result', r);
+                  // showToast('Success');
+
+                  // POSModule.printByAllInOnePOS(printData, res => {
+                  //   console.log('[printByAllInOnePOS]', res);
+                  //   showToast(res.res);
+                  //   // alert(JSON.stringify(res));
+                  // });
                 }}
                 style={{
                   // backgroundColor:'red',

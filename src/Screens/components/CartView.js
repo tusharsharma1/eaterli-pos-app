@@ -1124,7 +1124,7 @@ function Footer({}) {
                       //ref: r => (this.emailInput = r),
                       type: 'custom',
                       options: {
-                        mask: '(999) 999 9999',
+                        mask: '(999) 999-9999',
                       },
                     }}
                     // error={
@@ -1245,7 +1245,7 @@ function Footer({}) {
                       //ref: r => (this.emailInput = r),
                       type: 'custom',
                       options: {
-                        mask: '(999) 999 9999',
+                        mask: '(999) 999-9999',
                       },
                     }}
                     // error={

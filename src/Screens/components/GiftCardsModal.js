@@ -368,7 +368,7 @@ export default function GiftCardsModal(props) {
 
                 type: 'custom',
                 options: {
-                  mask: '(999) 999 9999',
+                  mask: '(999) 999-9999',
                 },
 
                 keyboardType: 'numeric',
@@ -577,7 +577,7 @@ export default function GiftCardsModal(props) {
 
                 type: 'custom',
                 options: {
-                  mask: '(999) 999 9999',
+                  mask: '(999) 999-9999',
                 },
 
                 keyboardType: 'numeric',

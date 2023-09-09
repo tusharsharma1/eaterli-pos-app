@@ -186,10 +186,10 @@ export default function Home(props) {
               iconName="print"
               onPress={() => {
                 props.navigation.navigate('TestingPOS');
-                // POSModule.textPrint(
+                // POSModule.printByAllInOnePOS(
                 //   {id: 22, name: 'aakash', active: true},
                 //   res => {
-                //     console.log('[textPrint]', res);
+                //     console.log('[printByAllInOnePOS]', res);
                 //     // alert(JSON.stringify(res));
                 //   },
                 // );
