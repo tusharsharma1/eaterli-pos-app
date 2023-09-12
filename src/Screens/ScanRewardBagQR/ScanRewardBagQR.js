@@ -93,6 +93,7 @@ export default function ScanRewardBagQR({navigation, route}) {
       dining_option: diningOption,
       restaurant_id: userData.restaurant.id,
       restaurant_location_id: selectedLocation,
+      staff_id: userData.user_id,
     };
     let r = await dispatch(userAction.createRewardBagOrder(body));
     if (r && r.status) {
