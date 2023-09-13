@@ -27,6 +27,7 @@ import ModalContainer from '../../components/ModalContainer';
 import orderAction from '../../redux/actions/order.action';
 import {DINING_OPTION} from '../../constants/order.constant';
 import GiftCardsModal from '../components/GiftCardsModal';
+import ScanOfferModal from '../components/ScanOfferModal';
 
 export default function Home(props) {
   const dispatch = useDispatch();
@@ -170,6 +171,17 @@ export default function Home(props) {
                 props.navigation.navigate('Orders');
               }}
             />
+             <IconBtn
+              text="Scan Offer"
+              iconName="star"
+              onPress={() => {
+                dispatch(
+                  userAction.set({
+                    scanOfferModal: {show: true, ref: ''},
+                  }),
+                );
+              }}
+            />
             <IconBtn
               text="Gift Cards"
               iconName="id-card"
@@ -295,6 +307,7 @@ export default function Home(props) {
         </ModalContainer>
 
         <GiftCardsModal />
+        <ScanOfferModal />
 
         {!loaded && <AppLoader message={'Loading'} />}
       </View>

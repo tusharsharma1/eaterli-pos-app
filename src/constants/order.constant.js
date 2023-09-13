@@ -44,4 +44,5 @@ export const ORDER_ITEM_TYPE = {
   menu: {id: 'menu'},
   giftcard: {id: 'giftcard'},
   giftcard_add_balance: {id: 'giftcard_add_balance'},
+  offer: {id: 'offer'},
 };

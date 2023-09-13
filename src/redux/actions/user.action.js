@@ -642,4 +642,24 @@ export default {
         .catch(apiErrorHandler);
     };
   },
+
+  getOfferDetail(res_id, offer_id, showProgress = true) {
+    return (dispatch, getState) => {
+      showProgress && dispatch(appAction.showProgress());
+      return userService
+        .getOfferDetail(res_id, offer_id)
+        .then(res => {
+          let returnResult = res;
+          if (res && !res.status) {
+            apiMessageHandler(res);
+            returnResult = false;
+          }
+          if (returnResult) {
+          }
+          showProgress && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
 };

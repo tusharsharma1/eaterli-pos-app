@@ -229,28 +229,26 @@ export function getCartProducts() {
       let totalPrice = rate * cartItem.qty;
       // console.log(id,cartItem,itemData,price,sizeData)
       // if (itemtype == ORDER_ITEM_TYPE.menu.id) {
-        return {
-          ...cartItem,
-          item_type: itemtype,
-          cart_id: id,
-          id: itemData.id,
-          qty: cartItem.qty,
-          price,
-          rate,
-          totalPrice,
-          name: `${itemData.item_name}`,
-          image: itemData.item_image || '',
-          // vid: sizeData ? sizeData.id : "",
-          variants: sizeData || [],
-          add_ons: cartItem.add_ons || [],
-          special_ins: cartItem.special_ins || '',
-          discount: cartItem.discount ?? 0,
-          discount_type: cartItem.discount_type ?? '1',
-          discount_reason:cartItem.discount_reason ?? '',
-        };
+      return {
+        ...cartItem,
+        item_type: itemtype,
+        cart_id: id,
+        id: itemData.id,
+        qty: cartItem.qty,
+        price,
+        rate,
+        totalPrice,
+        name: `${itemData.item_name}`,
+        image: itemData.item_image || '',
+        // vid: sizeData ? sizeData.id : "",
+        variants: sizeData || [],
+        add_ons: cartItem.add_ons || [],
+        special_ins: cartItem.special_ins || '',
+        discount: cartItem.discount ?? 0,
+        discount_type: cartItem.discount_type ?? '1',
+        discount_reason: cartItem.discount_reason ?? '',
+      };
       // }
-
-     
 
       //return {...r,[i+1]:{id:itemData.id,qty:cartItem.qty,price,name:`${itemData.item_name}${sizeData?` - ${sizeData.variation_option_name}`:''}`}}
     }, {})
@@ -362,6 +360,15 @@ export function getOrderItemDetails(id, data = {}) {
     itemData = {
       id: itemId,
       item_name: `Gift Card - Add Value`,
+      ...data,
+    };
+  } else if (
+    itemtype == ORDER_ITEM_TYPE.offer.id &&
+    data?.offerData?.offer_type != '0'
+  ) {
+    itemData = {
+      id: itemId,
+      item_name: `Offer - ${data.offerData?.title || ''}`,
       ...data,
     };
   }

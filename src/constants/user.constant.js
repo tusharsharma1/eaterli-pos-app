@@ -10,4 +10,9 @@ export const GIFT_CARD_VIEW = {
   add_value: {id: 'add_value'},
 };
 
+export const SCAN_OFFER_VIEW = {
+  scan_offer: {id: 'scan_offer'},
+
+};
+
 

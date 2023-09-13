@@ -68,6 +68,7 @@ const initialState = {
     rewards:[],
 
     giftCardModal:{show: false, ref: ''},
+    scanOfferModal:{show: false, ref: ''},
   },
   order: {
     cart: {},
