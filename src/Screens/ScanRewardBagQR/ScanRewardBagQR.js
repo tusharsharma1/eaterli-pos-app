@@ -47,9 +47,9 @@ export default function ScanRewardBagQR({navigation, route}) {
         jsonob = null;
       }
       jsonob = jsonob || [];
-      let [id, uid, rid] = jsonob;
+      let [type,id, uid, rid] = jsonob;
       // console.log(id, rid);
-      if (jsonob && id && uid && rid && rid == userData.restaurant.id) {
+      if (jsonob && type=='reward'&& id && uid && rid && rid == userData.restaurant.id) {
         // console.log(jsonob);
         //   let u = await dispatch(userAction.getCustomerDetail(rid, uid));
         //  if(u && u.status){

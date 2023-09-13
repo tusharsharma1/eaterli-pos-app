@@ -871,9 +871,9 @@ function Footer({}) {
         jsonob = null;
       }
       jsonob = jsonob || [];
-      let [id, rid] = jsonob;
+      let [type,id, rid] = jsonob;
       // console.log(id, rid);
-      if (jsonob && id && rid && rid == userData.restaurant.id) {
+      if (jsonob &&type=='my-qr'&& id && rid && rid == userData.restaurant.id) {
         // console.log(jsonob);
         let r = await dispatch(userAction.getCustomerDetail(rid, id));
         if (r && r.status) {
