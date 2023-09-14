@@ -17,10 +17,26 @@ import {getAddons, getVariants} from '../../helpers/order.helper';
 import POSModule from '../../helpers/pos.helper';
 import Button from '../../components/Button';
 import appAction from '../../redux/actions/app.action';
-import {showToast} from '../../helpers/app.helpers';
+import {showToast, simpleToast} from '../../helpers/app.helpers';
 import RNPrint from 'react-native-print';
+function ensureLength(
+  input = '',
+  requiredLength = 3,
+  padRight = true,
+  padChar = ' ',
+) {
+  input = input.toString();
+  if (input.length > requiredLength) return input.substring(0, requiredLength);
+  if (input.length == requiredLength) return input;
+  if (padRight) {
+    return input.padEnd(requiredLength, padChar);
+  } else {
+    return input.padStart(requiredLength, padChar);
+  }
+}
 export default function TestingPOS({navigation, route}) {
   const dispatch = useDispatch();
+  const [printers, setPrinters] = useState(['AA GG JJ', 'sadas ad', 'cwcwe']);
 
   useEffect(() => {
     POSModule.initSDK();
@@ -67,7 +83,7 @@ export default function TestingPOS({navigation, route}) {
       <Header title={'Testing POS'} back />
       <Container
         style={{
-          flex: 1,
+          // flex: 1,
           flexDirection: 'row',
           alignItems: 'flex-start',
           padding: 20,
@@ -99,7 +115,7 @@ export default function TestingPOS({navigation, route}) {
           }}>
           Cut paper
         </Button>
-        <Button
+        {/* <Button
           mr={10}
           mb={10}
           onPress={async () => {
@@ -146,7 +162,7 @@ export default function TestingPOS({navigation, route}) {
             // });
           }}>
           Test Printer
-        </Button>
+        </Button> */}
 
         <Button
           mr={10}
@@ -206,7 +222,129 @@ export default function TestingPOS({navigation, route}) {
           }}>
           Init Finix Payment SDK
         </Button>
+
+        <Button
+          mr={10}
+          mb={10}
+          onPress={() => {
+            POSModule.getUSBGPrinters({}, res => {
+              console.log('[getUSBGPrinters]', res);
+              setPrinters(res.devices);
+              if (!res.devices.length) {
+                simpleToast('No Device Connected.');
+              }
+            });
+          }}>
+          USB Printers
+        </Button>
+        <Button
+          backgroundColor={theme.colors.primaryColor}
+          mr={10}
+          mb={10}
+          onPress={() => {
+            let pageWidthLength = 40;
+            let AmountWidthLength = 8;
+            let fontSize = 20;
+            let headingFontSize = 25;
+            let newLineData = {
+              size: fontSize,
+              align: 'left',
+              style: 'normal',
+              text: ` `,
+            };
+            let printData = [
+              {
+                size: 35,
+                align: 'center',
+                style: 'bold',
+                text: 'Fish N Fry',
+              },
+              newLineData,
+              {
+                size: fontSize,
+                align: 'left',
+                style: 'normal',
+                text: `${ensureLength(`Order No.:`, 14, true)}${ensureLength(
+                  `#22`,
+                  pageWidthLength - 14,
+                  false,
+                )}`,
+              },
+              {
+                size: fontSize,
+                align: 'left',
+                style: 'normal',
+                text: `${ensureLength(`Order Date:`, 14, true)}${ensureLength(
+                  moment().format('DD MMM, YYYY hh:mm A'),
+                  pageWidthLength - 14,
+                  false,
+                )}`,
+              },
+              {
+                size: fontSize,
+                align: 'left',
+                style: 'normal',
+                text: `${ensureLength(
+                  `Payment Method:`,
+                  16,
+                  true,
+                )}${ensureLength('CASH', pageWidthLength - 16, false)}`,
+              },
+            ];
+            printData.push(newLineData);
+
+            console.log(printData);
+
+            POSModule.printUSBGPrinter(printData, res => {
+              console.log('[printUSBGPrinter]', res);
+              if (res.error) {
+                simpleToast(res.error);
+              }
+            });
+          }}>
+          Test Print
+        </Button>
       </Container>
+
+      <View
+        style={{
+          // flex: 1,
+
+          padding: 20,
+          paddingVertical: 0,
+        }}>
+        <Text size={20} bold mb={10}>
+          Connected Printers
+        </Text>
+        <Container
+          style={{
+            // flex: 1,
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+
+            flexWrap: 'wrap',
+          }}>
+          {printers.map((pname, i) => {
+            return (
+              <Button
+                backgroundColor={theme.colors.primaryColor}
+                key={i}
+                mr={10}
+                mb={10}
+                onPress={() => {
+                  POSModule.getConnectUSBGPrinter({pname}, res => {
+                    console.log('[getConnectUSBGPrinter]', res);
+                    if (res.error) {
+                      simpleToast(res.error);
+                    }
+                  });
+                }}>
+                {pname}
+              </Button>
+            );
+          })}
+        </Container>
+      </View>
     </>
   );
 }

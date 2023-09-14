@@ -6,7 +6,7 @@
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA"/>
   <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <!-- Needed only if your app makes the device discoverable to Bluetooth
          devices. -->
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
@@ -17,7 +17,9 @@
 
 <uses-feature android:name="android.hardware.camera" />
 <uses-feature android:name="android.hardware.camera.autofocus"/>
-
+    <uses-feature
+        android:name="android.hardware.usb.host"
+        android:required="true" />
     <application
   
       android:name=".MainApplication"

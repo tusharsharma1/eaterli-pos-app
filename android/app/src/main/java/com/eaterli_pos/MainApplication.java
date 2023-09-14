@@ -14,6 +14,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 public class MainApplication extends Application implements ReactApplication {
+    private static Context mContext;
+    public static Context getContext() {
+        return mContext;
+    }
 
   private final ReactNativeHost mReactNativeHost =
       new ReactNativeHost(this) {
@@ -56,6 +60,8 @@ public class MainApplication extends Application implements ReactApplication {
     ReactFeatureFlags.useTurboModules = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED;
     SoLoader.init(this, /* native exopackage */ false);
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+
+      mContext = getApplicationContext();
   }
 
   /**

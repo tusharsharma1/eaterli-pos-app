@@ -525,6 +525,15 @@ export default function Orders({navigation, route}) {
                       )}`,
                     });
                   }
+
+                  POSModule.printUSBGPrinter(printData, res => {
+                    console.log('[printUSBGPrinter]', res);
+                    if (res.error) {
+                      simpleToast(res.error);
+                    }
+                  });
+
+return
                   let fonts = {
                     35: 'var(--sh)',
                     25: 'var(--wh)',
