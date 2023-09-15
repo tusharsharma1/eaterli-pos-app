@@ -228,8 +228,8 @@ export function getCartProducts() {
       let rate = add_onsTotal + price;
       let totalPrice = rate * cartItem.qty;
       // console.log(id,cartItem,itemData,price,sizeData)
-      // if (itemtype == ORDER_ITEM_TYPE.menu.id) {
-      return {
+
+      let obj = {
         ...cartItem,
         item_type: itemtype,
         cart_id: id,
@@ -248,6 +248,17 @@ export function getCartProducts() {
         discount_type: cartItem.discount_type ?? '1',
         discount_reason: cartItem.discount_reason ?? '',
       };
+      
+      if (itemtype == ORDER_ITEM_TYPE.offer.id) {
+        delete obj.offerData;
+        return {
+          ...obj,
+          discount: cartItem?.offerData?.discount ?? 0,
+          discount_type: cartItem?.offerData?.discount_type ?? '1',
+          offer_type: cartItem?.offerData?.offer_type ?? '1',
+        };
+      }
+      return obj;
       // }
 
       //return {...r,[i+1]:{id:itemData.id,qty:cartItem.qty,price,name:`${itemData.item_name}${sizeData?` - ${sizeData.variation_option_name}`:''}`}}
@@ -362,10 +373,7 @@ export function getOrderItemDetails(id, data = {}) {
       item_name: `Gift Card - Add Value`,
       ...data,
     };
-  } else if (
-    itemtype == ORDER_ITEM_TYPE.offer.id &&
-    data?.offerData?.offer_type != '0'
-  ) {
+  } else if (itemtype == ORDER_ITEM_TYPE.offer.id) {
     itemData = {
       id: itemId,
       item_name: `Offer - ${data.offerData?.title || ''}`,

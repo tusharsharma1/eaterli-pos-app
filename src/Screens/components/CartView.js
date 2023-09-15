@@ -252,11 +252,18 @@ function CartRow({id}) {
   const toggleDiscountModal = () => {
     setShowDiscountModal(!showDiscountModal);
   };
-  console.log('cccccc', itemData, data);
+  console.log('cccccc', itemtype,itemData, data,);
   if (!itemData) {
     return null;
   }
   if (itemData.out_of_stock == '1') return null;
+  if (
+    itemtype == ORDER_ITEM_TYPE.offer.id &&
+    data?.offerData?.offer_type != '1'
+  ) {
+    return null;
+  }
+
   let selected = selectedCartItem == id;
   let size = 12;
   return (
@@ -567,6 +574,20 @@ function Footer({}) {
 
   const location = userData.locations.find(s => s.id == selectedLocation);
 
+  let offerDiscount = useMemo(() => {
+    let findId = Object.keys(cart).find(d => {
+      let {itemtype, itemId, sizeId, addon, productMenuType} =
+        breakCartItemID(d);
+
+      return (
+        itemtype == ORDER_ITEM_TYPE.offer.id &&
+        cart[d]?.offerData?.offer_type == '0'
+      );
+    });
+
+    return cart[findId];
+  }, [cart]);
+
   let tax_title = location?.tax_title || DEFAULT_TAX_TITLE;
 
   let tax_per = location?.tax ? parseFloat(location.tax) : 0;
@@ -587,6 +608,20 @@ function Footer({}) {
       total = total - total * (_discount / 100);
     } else if (discount_type == '2') {
       total = total - _discount;
+    }
+  }
+
+  let offer_discount_type = offerDiscount?.offerData?.discount_type ?? '1';
+  let _offer_discount = parseFloat(offerDiscount?.offerData?.discount ?? 0);
+  if (isNaN(_offer_discount)) {
+    _offer_discount = 0;
+  }
+
+  if (_offer_discount) {
+    if (offer_discount_type == '1') {
+      total = total - total * (_offer_discount / 100);
+    } else if (offer_discount_type == '2') {
+      total = total - _offer_discount;
     }
   }
 
@@ -842,19 +877,19 @@ function Footer({}) {
     console.log(r);
     if (r && r.status) {
       simpleToast(r.message);
-      toggleModal();
-      setDiscountValues({
-        discount:0,
-        discount_type:'1',
-        discount_reason:''
-      })
-      dispatch(
-        orderAction.set({
-          cart: {},
-          diningOption: '',
-          customerDetail: CUSTOMER_DETAIL,
-        }),
-      );
+      // toggleModal();
+      // setDiscountValues({
+      //   discount: 0,
+      //   discount_type: '1',
+      //   discount_reason: '',
+      // });
+      // dispatch(
+      //   orderAction.set({
+      //     cart: {},
+      //     diningOption: '',
+      //     customerDetail: CUSTOMER_DETAIL,
+      //   }),
+      // );
     }
   };
 
@@ -871,9 +906,15 @@ function Footer({}) {
         jsonob = null;
       }
       jsonob = jsonob || [];
-      let [type,id, rid] = jsonob;
+      let [type, id, rid] = jsonob;
       // console.log(id, rid);
-      if (jsonob &&type=='my-qr'&& id && rid && rid == userData.restaurant.id) {
+      if (
+        jsonob &&
+        type == 'my-qr' &&
+        id &&
+        rid &&
+        rid == userData.restaurant.id
+      ) {
         // console.log(jsonob);
         let r = await dispatch(userAction.getCustomerDetail(rid, id));
         if (r && r.status) {
@@ -2345,6 +2386,28 @@ function Footer({}) {
           </Text>
           <Text size={16}>${parseFloat(tax_amt).toFixed(2)}</Text>
         </View>
+
+        {!!offerDiscount && (
+          <View
+            style={{
+              flexDirection: 'row',
+              marginBottom: 2,
+            }}>
+            <Text
+              style={{
+                flex: 1,
+              }}
+              semibold
+              size={16}>
+              Offer Discount
+            </Text>
+            <Text size={16}>
+              {offer_discount_type == '2' && '$'}
+              {_offer_discount}
+              {offer_discount_type == '1' && '%'}
+            </Text>
+          </View>
+        )}
 
         {!!_discount && (
           <View

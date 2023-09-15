@@ -36,7 +36,7 @@ function ensureLength(
 }
 export default function TestingPOS({navigation, route}) {
   const dispatch = useDispatch();
-  const [printers, setPrinters] = useState(['AA GG JJ', 'sadas ad', 'cwcwe']);
+  const [printers, setPrinters] = useState([]);
 
   useEffect(() => {
     POSModule.initSDK();

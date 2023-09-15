@@ -18,7 +18,7 @@ import orderAction from '../../redux/actions/order.action';
 import userAction from '../../redux/actions/user.action';
 const Buffer = require('buffer').Buffer;
 
-const TEST_ORDATA = Buffer.from('["offer",4,332,7]').toString('base64');
+const TEST_ORDATA = ''//Buffer.from('["offer",4,332,7]').toString('base64');
 export default function ScanOfferModal(props) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(true);
