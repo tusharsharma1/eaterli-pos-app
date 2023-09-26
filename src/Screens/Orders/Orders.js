@@ -140,7 +140,12 @@ export default function Orders({navigation, route}) {
                   let AmountWidthLength = 8;
                   let fontSize = 20;
                   let headingFontSize = 25;
+
+                  let charSize = 1;
+                  let headingCharSize = 1;
+
                   let newLineData = {
+                    charSize,
                     size: fontSize,
                     align: 'left',
                     style: 'normal',
@@ -148,6 +153,7 @@ export default function Orders({navigation, route}) {
                   };
                   let printData = [
                     {
+                      charSize:2,
                       size: 35,
                       align: 'center',
                       style: 'bold',
@@ -155,6 +161,7 @@ export default function Orders({navigation, route}) {
                     },
                     newLineData,
                     {
+                      charSize,
                       size: fontSize,
                       align: 'left',
                       style: 'normal',
@@ -169,6 +176,7 @@ export default function Orders({navigation, route}) {
                       )}`,
                     },
                     {
+                      charSize,
                       size: fontSize,
                       align: 'left',
                       style: 'normal',
@@ -183,6 +191,7 @@ export default function Orders({navigation, route}) {
                       )}`,
                     },
                     {
+                      charSize,
                       size: fontSize,
                       align: 'left',
                       style: 'normal',
@@ -200,13 +209,15 @@ export default function Orders({navigation, route}) {
                   printData.push(newLineData);
 
                   printData.push({
+                    charSize:headingCharSize,
                     size: headingFontSize,
                     align: 'left',
-                    style: 'normal',
+                    style: 'bold',
                     text: `Payment Details`,
                   });
 
                   printData.push({
+                    charSize,
                     size: fontSize,
                     align: 'left',
                     style: 'normal',
@@ -222,6 +233,7 @@ export default function Orders({navigation, route}) {
                   });
 
                   printData.push({
+                    charSize,
                     size: fontSize,
                     align: 'left',
                     style: 'normal',
@@ -238,13 +250,15 @@ export default function Orders({navigation, route}) {
                   ) {
                     printData.push(newLineData);
                     printData.push({
+                      charSize:headingCharSize,
                       size: headingFontSize,
                       align: 'left',
-                      style: 'normal',
+                      style: 'bold',
                       text: `Reward Points`,
                     });
                     data.point_transactions.forEach(d => {
                       printData.push({
+                        charSize,
                         size: fontSize,
                         align: 'left',
                         style: 'normal',
@@ -259,6 +273,7 @@ export default function Orders({navigation, route}) {
                         )}`,
                       });
                       printData.push({
+                        charSize,
                         size: fontSize,
                         align: 'left',
                         style: 'normal',
@@ -277,15 +292,17 @@ export default function Orders({navigation, route}) {
                   /////Products//////
                   printData.push(newLineData);
                   printData.push({
+                    charSize:headingCharSize,
                     size: headingFontSize,
                     align: 'left',
-                    style: 'normal',
+                    style: 'bold',
                     text: `Products`,
                   });
                   printData.push({
+                    charSize,
                     size: fontSize,
                     align: 'left',
-                    style: 'normal',
+                    style: 'bold',
                     text: `${ensureLength(
                       'Product',
                       pageWidthLength -
@@ -328,6 +345,7 @@ export default function Orders({navigation, route}) {
                     //   2,
                     // )})`;
                     printData.push({
+                      charSize,
                       size: fontSize,
                       align: 'left',
                       style: 'normal',
@@ -357,20 +375,23 @@ export default function Orders({navigation, route}) {
                   ) {
                     printData.push(newLineData);
                     printData.push({
+                      charSize:headingCharSize,
                       size: headingFontSize,
                       align: 'left',
-                      style: 'normal',
+                      style: 'bold',
                       text: `Split Payment`,
                     });
 
                     data.order_split_payments.forEach((d, i) => {
                       printData.push({
+                        charSize,
                         size: fontSize,
                         align: 'left',
                         style: 'normal',
                         text: `${i + 1}. ${d.type}`,
                       });
                       printData.push({
+                        charSize,
                         size: fontSize,
                         align: 'left',
                         style: 'normal',
@@ -385,6 +406,7 @@ export default function Orders({navigation, route}) {
                         )}`,
                       });
                       printData.push({
+                        charSize,
                         size: fontSize,
                         align: 'left',
                         style: 'normal',
@@ -403,6 +425,7 @@ export default function Orders({navigation, route}) {
 
                   printData.push(newLineData);
                   printData.push({
+                    charSize,
                     size: fontSize,
                     align: 'left',
                     style: 'normal',
@@ -417,6 +440,7 @@ export default function Orders({navigation, route}) {
                     )}`,
                   });
                   printData.push({
+                    charSize,
                     size: fontSize,
                     align: 'left',
                     style: 'normal',
@@ -434,6 +458,7 @@ export default function Orders({navigation, route}) {
                   });
                   if (!!data.discount) {
                     printData.push({
+                      charSize,
                       size: fontSize,
                       align: 'left',
                       style: 'normal',
@@ -452,6 +477,7 @@ export default function Orders({navigation, route}) {
                     });
 
                     printData.push({
+                      charSize,
                       size: fontSize,
                       align: 'left',
                       style: 'normal',
@@ -470,6 +496,7 @@ export default function Orders({navigation, route}) {
                   }
 
                   printData.push({
+                    charSize,
                     size: fontSize,
                     align: 'left',
                     style: 'normal',
@@ -491,6 +518,7 @@ export default function Orders({navigation, route}) {
                     ].includes(data.payment_method)
                   ) {
                     printData.push({
+                      charSize,
                       size: fontSize,
                       align: 'left',
                       style: 'normal',
@@ -511,6 +539,7 @@ export default function Orders({navigation, route}) {
                       remaining_amount = 0;
                     }
                     printData.push({
+                      charSize,
                       size: fontSize,
                       align: 'left',
                       style: 'normal',

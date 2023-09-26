@@ -246,7 +246,10 @@ export default function TestingPOS({navigation, route}) {
             let AmountWidthLength = 8;
             let fontSize = 20;
             let headingFontSize = 25;
+            let charSize = 1;
+            let headingCharSize = 2;
             let newLineData = {
+              charSize,
               size: fontSize,
               align: 'left',
               style: 'normal',
@@ -254,6 +257,7 @@ export default function TestingPOS({navigation, route}) {
             };
             let printData = [
               {
+                charSize,
                 size: 35,
                 align: 'center',
                 style: 'bold',
@@ -261,6 +265,7 @@ export default function TestingPOS({navigation, route}) {
               },
               newLineData,
               {
+                charSize,
                 size: fontSize,
                 align: 'left',
                 style: 'normal',
@@ -271,6 +276,7 @@ export default function TestingPOS({navigation, route}) {
                 )}`,
               },
               {
+                charSize,
                 size: fontSize,
                 align: 'left',
                 style: 'normal',
@@ -281,6 +287,7 @@ export default function TestingPOS({navigation, route}) {
                 )}`,
               },
               {
+                charSize,
                 size: fontSize,
                 align: 'left',
                 style: 'normal',
@@ -290,7 +297,128 @@ export default function TestingPOS({navigation, route}) {
                   true,
                 )}${ensureLength('CASH', pageWidthLength - 16, false)}`,
               },
+
+              {
+                charSize: 1,
+                size: fontSize,
+                align: 'left',
+                style: 'normal',
+                text: `Abcd - ${1}`,
+              },
+              {
+                charSize: 1,
+                size: fontSize,
+                align: 'left',
+                style: 'bold',
+                text: `Abcd - ${1}`,
+              },
+
+              {
+                charSize: 2,
+                size: fontSize,
+                align: 'left',
+                style: 'normal',
+                text: `Abcd - ${2}`,
+              },
+              {
+                charSize: 2,
+                size: fontSize,
+                align: 'left',
+                style: 'bold',
+                text: `Abcd - ${2}`,
+              },
+
+              {
+                charSize: 3,
+                size: fontSize,
+                align: 'left',
+                style: 'normal',
+                text: `Abcd - ${3}`,
+              },
+              {
+                charSize: 3,
+                size: fontSize,
+                align: 'left',
+                style: 'bold',
+                text: `Abcd - ${3}`,
+              },
+
+              {
+                charSize: 4,
+                size: fontSize,
+                align: 'left',
+                style: 'normal',
+                text: `Abcd - ${4}`,
+              },
+              {
+                charSize: 4,
+                size: fontSize,
+                align: 'left',
+                style: 'bold',
+                text: `Abcd - ${4}`,
+              },
+
+              {
+                charSize: 5,
+                size: fontSize,
+                align: 'left',
+                style: 'normal',
+                text: `Abcd - ${5}`,
+              },
+              {
+                charSize: 5,
+                size: fontSize,
+                align: 'left',
+                style: 'bold',
+                text: `Abcd - ${5}`,
+              },
+
+              {
+                charSize: 6,
+                size: fontSize,
+                align: 'left',
+                style: 'normal',
+                text: `Abcd - ${6}`,
+              },
+              {
+                charSize: 6,
+                size: fontSize,
+                align: 'left',
+                style: 'bold',
+                text: `Abcd - ${6}`,
+              },
+
+              {
+                charSize: 7,
+                size: fontSize,
+                align: 'left',
+                style: 'normal',
+                text: `Abcd - ${7}`,
+              },
+              {
+                charSize: 7,
+                size: fontSize,
+                align: 'left',
+                style: 'bold',
+                text: `Abcd - ${7}`,
+              },
+
+              {
+                charSize: 8,
+                size: fontSize,
+                align: 'left',
+                style: 'normal',
+                text: `Abcd - ${8}`,
+              },
+              {
+                charSize: 8,
+                size: fontSize,
+                align: 'left',
+                style: 'bold',
+                text: `Abcd - ${8}`,
+              },
             ];
+
             printData.push(newLineData);
 
             console.log(printData);
@@ -336,6 +464,8 @@ export default function TestingPOS({navigation, route}) {
                     console.log('[getConnectUSBGPrinter]', res);
                     if (res.error) {
                       simpleToast(res.error);
+                    }else{
+                      simpleToast('Connected');
                     }
                   });
                 }}>

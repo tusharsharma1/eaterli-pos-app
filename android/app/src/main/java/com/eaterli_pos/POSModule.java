@@ -655,9 +655,11 @@ public class POSModule extends ReactContextBaseJavaModule {
         Bitmap b = BitmapFactory.decodeResource( this.context.getResources(),
                 R.drawable.logo );
 
-        esc.addRastBitImage( b, 380, 0 );
+    //    esc.addSetAbsolutePrintPosition((short)90);
+        esc.addRastBitImage( b, 570, 0 );
 
                 esc.addPrintAndLineFeed();
+    //    esc.addSetAbsolutePrintPosition((short)0);
         int l=   data.size();
         for (int i = 0; i < l; i++) {
             ReadableMap   ob = data.getMap(i);
@@ -667,6 +669,7 @@ public class POSModule extends ReactContextBaseJavaModule {
 
             String align=ob.getString("align");
             String style=ob.getString("style");
+            int charSize=   ob.getInt("charSize");
             int size=   ob.getInt("size");
             String text=ob.getString("text");
             if(align.equals("center")){
@@ -680,10 +683,48 @@ public class POSModule extends ReactContextBaseJavaModule {
                 isBold=EscCommand.ENABLE.ON;
             }
 
-            esc.addSelectJustification( alignment);
+
+            EscCommand.WIDTH_ZOOM cW =    EscCommand.WIDTH_ZOOM.MUL_1;
+            EscCommand.HEIGHT_ZOOM cH =    EscCommand.HEIGHT_ZOOM.MUL_1;
+
+            switch (charSize){
+                case 2:
+                    cW =    EscCommand.WIDTH_ZOOM.MUL_2;
+                    cH =    EscCommand.HEIGHT_ZOOM.MUL_2;
+                   break;
+                case 3:
+                    cW =    EscCommand.WIDTH_ZOOM.MUL_3;
+                    cH =    EscCommand.HEIGHT_ZOOM.MUL_3;
+                    break;
+                case 4:
+                    cW =    EscCommand.WIDTH_ZOOM.MUL_4;
+                    cH =    EscCommand.HEIGHT_ZOOM.MUL_4;
+                    break;
+                case 5:
+                    cW =    EscCommand.WIDTH_ZOOM.MUL_5;
+                    cH =    EscCommand.HEIGHT_ZOOM.MUL_5;
+                    break;
+                case 6:
+                    cW =    EscCommand.WIDTH_ZOOM.MUL_6;
+                    cH =    EscCommand.HEIGHT_ZOOM.MUL_6;
+                   break;
+                case 7:
+                    cW =    EscCommand.WIDTH_ZOOM.MUL_7;
+                    cH =    EscCommand.HEIGHT_ZOOM.MUL_7;
+                    break;
+                case 8:
+                    cW =    EscCommand.WIDTH_ZOOM.MUL_8;
+                    cH =    EscCommand.HEIGHT_ZOOM.MUL_8;
+                    break;
+            }
+
+
+            
+           
             esc.addSelectPrintModes( EscCommand.FONT.FONTA, isBold, EscCommand.ENABLE.ON, EscCommand.ENABLE.ON, EscCommand.ENABLE.OFF );
-//
-            esc.addText( text );
+            esc.addSetCharcterSize(cW,cH);
+            esc.addSelectJustification( alignment);
+            esc.addText( text+"\n" );
 
 //            format.setTextSize(size);
 //            format.setAli(alignment);
