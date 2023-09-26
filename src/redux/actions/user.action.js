@@ -431,8 +431,6 @@ export default {
             returnResult = false;
           }
           if (returnResult) {
-           
-
             if (refresh) {
               dispatch(
                 actions.set({
@@ -657,6 +655,48 @@ export default {
           if (returnResult) {
           }
           showProgress && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+
+  validateCheckInPasscode(restaurant_id, data, showLoader = true) {
+    return (dispatch, getState) => {
+      showLoader && dispatch(appAction.showProgress());
+      return userService
+        .validateCheckInPasscode(restaurant_id, data)
+        .then(res => {
+          let returnResult = res;
+
+          if (res && !res.status) {
+            // apiMessageHandler(res.message);
+            // returnResult = false;
+          }
+          if (returnResult) {
+          }
+          showLoader && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+
+  updateCheckInStatus(restaurant_id, staff_id, data, showLoader = true) {
+    return (dispatch, getState) => {
+      showLoader && dispatch(appAction.showProgress());
+      return userService
+        .updateCheckInStatus(restaurant_id, staff_id, data)
+        .then(res => {
+          let returnResult = res;
+
+          if (res && !res.status) {
+            // apiMessageHandler(res.message);
+            // returnResult = false;
+          }
+          if (returnResult) {
+          }
+          showLoader && dispatch(appAction.hideProgress());
           return returnResult;
         })
         .catch(apiErrorHandler);

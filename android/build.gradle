@@ -27,18 +27,25 @@ buildscript {
 
         }
     }
+
     dependencies {
         classpath("com.android.tools.build:gradle:7.2.1")
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("de.undercouch:gradle-download-task:5.0.1")
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
-       classpath "io.realm:realm-gradle-plugin:10.11.1"
+//       classpath "io.realm:realm-gradle-plugin:10.11.1"
+        classpath "io.realm:realm-gradle-plugin:4.2.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
-
+//plugins {
+//
+//    id 'project-report'
+//
+//}
 allprojects {
+
     repositories {
         maven {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
@@ -54,8 +61,17 @@ allprojects {
             content {
                 excludeGroup "com.facebook.react"
             }
+            allowInsecureProtocol = true
         }
         google()
         maven { url 'https://www.jitpack.io' }
     }
 }
+
+//htmlDependencyReport {
+//
+//    projects = project.allprojects
+//
+//}
+
+

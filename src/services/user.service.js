@@ -102,9 +102,19 @@ export default {
   },
 
   getOfferDetail(res_id, offer_id) {
+    return callApi('GET', `/api/restaurant/${res_id}/offers/${offer_id}`);
+  },
+
+  validateCheckInPasscode(res_id, data) {
     return callApi(
-      'GET',
-      `/api/restaurant/${res_id}/offers/${offer_id}`,
+      'POST',
+      `/api/restaurant/${res_id}/staff/code/validate`,data
+    );
+  },
+  updateCheckInStatus(res_id,staff_id, data) {
+    return callApi(
+      'POST',
+      `/api/restaurant/${res_id}/staff/${staff_id}/check/status`,data
     );
   },
 };

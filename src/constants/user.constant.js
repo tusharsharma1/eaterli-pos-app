@@ -16,3 +16,17 @@ export const SCAN_OFFER_VIEW = {
 };
 
 
+export const CHECK_IN_OUT_VIEW = {
+  passcode: {id: 'passcode'},
+  check_in: {id: 'check_in'},
+  check_out: {id: 'check_out'},
+  success: {id: 'success'},
+};
+
+export const CHECK_IN_OUT_STATUS = {
+  check_out: {id: 'check_out'},
+  check_in: {id: 'check_in'},
+ 
+};
+
+

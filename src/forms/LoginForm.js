@@ -64,6 +64,7 @@ const LoginForm = ({email, password, onSubmitSuccess}) => {
       console.log('password', password);
 
       await storageHelper.storeData('email', values.email);
+      await storageHelper.storeData('rest_id', data?.restaurant?.id);
 
       // Store the credentials
       // await Keychain.setGenericPassword(values.email, password);

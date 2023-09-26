@@ -117,12 +117,21 @@ function Navigator() {
             require('../Screens/AddFinixDevice/AddFinixDevice').default
           }
         />
+        
         <Stack.Screen
           name="ScanRewardBagQR"
           getComponent={() =>
             require('../Screens/ScanRewardBagQR/ScanRewardBagQR').default
           }
         />
+
+        <Stack.Screen
+          name="CheckInOut"
+          getComponent={() =>
+            require('../Screens/CheckInOut/CheckInOut').default
+          }
+        />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

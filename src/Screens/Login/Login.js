@@ -28,8 +28,10 @@ export default function Login(props) {
 
   const loadData = async () => {
     let email = await storageHelper.getData('email');
+    let rest_id = await storageHelper.getData('rest_id');
+   
     console.log('email', email);
-    if (email) {
+    if (email && rest_id) {
       setLoginTab(2);
     }
     setLoaded(true);
@@ -44,12 +46,15 @@ export default function Login(props) {
 //     props.navigation.navigate('TestingPOS');
 // return
     let email = await storageHelper.getData('email');
+    let rest_id = await storageHelper.getData('rest_id');
+   
     console.log('email', email);
-    if (email) {
+    if (email && rest_id) {
       let r = await dispatch(
         userAction.loginWithPin({
           email: email,
           passcode: pin,
+          restaurant_id:rest_id
         }),
       );
       if (r && r.status) {

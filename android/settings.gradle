@@ -1,7 +1,48 @@
+
+
+//pluginManagement {
+//
+//    repositories {
+//
+//        google()
+//
+//        mavenCentral(){
+//
+//            allowInsecureProtocol = true
+//
+//        }
+//
+//        gradlePluginPortal()
+//
+//    }
+//
+//}
+
+
+//dependencyResolutionManagement {
+//
+//    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+//
+//    repositories {
+//
+//        google()
+
+//        mavenCentral(){
+//
+//            allowInsecureProtocol = true
+//
+//        }
+
+
+
+//    }
+
+//}
 rootProject.name = 'eaterli_pos'
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
 include ':app'
 includeBuild('../node_modules/react-native-gradle-plugin')
+
 
 if (settings.hasProperty("newArchEnabled") && settings.newArchEnabled == "true") {
     include(":ReactAndroid")
@@ -10,3 +51,5 @@ if (settings.hasProperty("newArchEnabled") && settings.newArchEnabled == "true")
     project(":ReactAndroid:hermes-engine").projectDir = file('../node_modules/react-native/ReactAndroid/hermes-engine')
 }
 include ':zxing'
+
+

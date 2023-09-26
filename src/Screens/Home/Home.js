@@ -193,8 +193,15 @@ export default function Home(props) {
                 );
               }}
             />
+             <IconBtn
+              text="Clock In/Out"
+              iconName="clock"
+              onPress={() => {
+                props.navigation.navigate('CheckInOut');
+              }}
+            />
             <IconBtn
-              text="Print"
+              text="Testing"
               iconName="print"
               onPress={() => {
                 props.navigation.navigate('TestingPOS');
