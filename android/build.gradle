@@ -39,11 +39,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
-//plugins {
-//
-//    id 'project-report'
-//
-//}
+
 allprojects {
 
     repositories {
@@ -63,15 +59,14 @@ allprojects {
             }
             allowInsecureProtocol = true
         }
+        flatDir {
+
+            dirs '../libs'
+
+        }
         google()
         maven { url 'https://www.jitpack.io' }
     }
 }
-
-//htmlDependencyReport {
-//
-//    projects = project.allprojects
-//
-//}
 
 
