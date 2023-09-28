@@ -2,8 +2,10 @@ import React, {memo, useEffect, useState} from 'react';
 import {Text as TextReact, TouchableOpacity, View} from 'react-native';
 import theme, {getFont} from '../theme';
 import Text from './Text';
-import CloseIcon from '../assets/close-icon.svg';
-import BSIcon from '../assets/backspace.svg';
+
+import BSIcon from '../assets/BSIcon';
+import CloseIcon from '../assets/CloseIcon';
+
 function _PinKeyBoard({length = 4, onCompleted,getRef}) {
   const [pin, setPin] = useState([]);
   useEffect(() => {

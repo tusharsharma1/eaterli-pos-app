@@ -54,7 +54,7 @@ import com.zcs.sdk.listener.OnSearchCardListener;
 import com.zcs.sdk.print.PrnStrFormat;
 import com.zcs.sdk.print.PrnTextFont;
 import com.zcs.sdk.print.PrnTextStyle;
-import com.google.zxing.client.android.CaptureActivity;
+//import com.google.zxing.client.android.CaptureActivity;
 import com.zcs.sdk.util.StringUtils;
 
 import java.io.IOException;
@@ -309,10 +309,10 @@ public class POSModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void scanQRCode() {
-        Intent mIntent = new Intent(context, CaptureActivity.class);
-         mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//          mIntent.setClass(getApplicationContext(), CaptureActivity.class);
-        context.startActivity(mIntent);
+//        Intent mIntent = new Intent(context, CaptureActivity.class);
+//         mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+////          mIntent.setClass(getApplicationContext(), CaptureActivity.class);
+//        context.startActivity(mIntent);
 
 
     }
