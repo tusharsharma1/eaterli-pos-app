@@ -1,30 +1,20 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {Image, PermissionsAndroid, TouchableOpacity, View} from 'react-native';
-import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
+import moment from 'moment';
+import React, {useEffect, useState} from 'react';
+import {View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
+import Button from '../../components/Button';
 import Container from '../../components/Container';
 import Header from '../../components/Header';
-import Table from '../../components/Table';
-import moment from 'moment';
-import ModalContainer from '../../components/ModalContainer';
-import ProgressImage from '../../components/react-native-image-progress';
-import Text from '../../components/Text';
-import theme from '../../theme';
-import {PAYMENT_METHOD} from '../../constants/order.constant';
-import {dummyImage} from '../../assets';
-import userAction from '../../redux/actions/user.action';
-import {getAddons, getVariants} from '../../helpers/order.helper';
-import POSModule from '../../helpers/pos.helper';
-import Button from '../../components/Button';
-import appAction from '../../redux/actions/app.action';
-import {showToast, simpleToast} from '../../helpers/app.helpers';
-import RNPrint from 'react-native-print';
 import PinKeyBoard from '../../components/PinKeyBoard';
-import useWindowDimensions from '../../hooks/useWindowDimensions';
+import Text from '../../components/Text';
 import {
   CHECK_IN_OUT_STATUS,
   CHECK_IN_OUT_VIEW,
 } from '../../constants/user.constant';
+import {dateToTimeFormat, showToast} from '../../helpers/app.helpers';
+import useWindowDimensions from '../../hooks/useWindowDimensions';
+import userAction from '../../redux/actions/user.action';
+import theme from '../../theme';
 let contentH = 550;
 let initH = false;
 export default function CheckInOut({navigation, route}) {
@@ -42,7 +32,7 @@ export default function CheckInOut({navigation, route}) {
   useEffect(() => {
     loadData();
     return () => {
-      setView(CHECK_IN_OUT_VIEW.passcode.id);
+      // setView(CHECK_IN_OUT_VIEW.passcode.id);
     };
   }, []);
 
@@ -98,7 +88,6 @@ export default function CheckInOut({navigation, route}) {
       }),
     );
     if (r && r.status) {
-     
       !!r.message && showToast(r.message);
       navigation.goBack();
     } else {
@@ -121,7 +110,7 @@ export default function CheckInOut({navigation, route}) {
               paddingHorizontal: 80,
               transform: [
                 {scale: bH / contentH},
-                // {translateY: (bH - contentH) / 2},
+                {translateY: (bH - contentH) / 4},
               ],
             }}>
             <PinKeyBoard
@@ -142,11 +131,23 @@ export default function CheckInOut({navigation, route}) {
             <Text align="center" bold size={24} mb={10}>
               {staffData?.first_name} {staffData?.last_name}
             </Text>
+            <Text align="center" color="#555" bold size={22} mb={0}>
+              {moment().format('hh:mm A')}
+            </Text>
+            <Text align="center" color="#555" medium size={20} mb={10}>
+              {moment().format('dddd MMMM DD, YYYY')}
+            </Text>
             <Button onPress={checkInPress}>Clock In</Button>
           </View>
         );
 
       case CHECK_IN_OUT_VIEW.check_out.id:
+        let date = staffData?.check_in_out_last_status?.created_at
+          ? new Date(staffData?.check_in_out_last_status?.created_at)
+          : new Date();
+
+        let timeData = dateToTimeFormat(date);
+        console.log('timeData --', timeData);
         return (
           <View
             style={{
@@ -154,6 +155,18 @@ export default function CheckInOut({navigation, route}) {
             }}>
             <Text align="center" bold size={24} mb={10}>
               {staffData?.first_name} {staffData?.last_name}
+            </Text>
+            <Text align="center" color="#555" bold size={22} mb={0}>
+              {moment().format('hh:mm A')}
+            </Text>
+            <Text align="center" color="#555" medium size={20} mb={10}>
+              {moment().format('dddd MMMM DD, YYYY')}
+            </Text>
+
+            <Text align="center" color="#555" size={18} mb={10}>
+              {timeData.hours ? `${timeData.hours} hrs` : ''}{' '}
+              {timeData.minutes ? `${timeData.minutes} mins` : ''} worked so far
+              today
             </Text>
             <Button onPress={checkOutPress}>Clock Out</Button>
           </View>
@@ -167,8 +180,11 @@ export default function CheckInOut({navigation, route}) {
             <Text align="center" bold size={24} mb={10}>
               {staffData?.first_name} {staffData?.last_name}
             </Text>
-            <Text align="center" semibold size={24} mb={10}>
+            <Text align="center" color="#555" bold size={22} mb={0}>
               {moment().format('hh:mm A')}
+            </Text>
+            <Text align="center" color="#555" medium size={20} mb={10}>
+              {moment().format('dddd MMMM DD, YYYY')}
             </Text>
             <Text align="center" size={24} mb={10}>
               Clocked In

@@ -131,3 +131,35 @@ export function create_UUID() {
   });
   return uuid;
 }
+
+export function dateToTimeFormat(date) {
+  let date_now = new Date();
+  // console.log('timeData --',date, date_now,date.getTime() , date_now.getTime());
+  // if (date.getTime() <= date_now.getTime()) {
+  //   return false;
+  // }
+  // get total seconds between the times
+  let delta = Math.abs(date - date_now) / 1000;
+
+  // calculate (and subtract) whole days
+  let days = Math.floor(delta / 86400);
+  delta -= days * 86400;
+
+  // calculate (and subtract) whole hours
+  let hours = Math.floor(delta / 3600) % 24;
+  delta -= hours * 3600;
+
+  // calculate (and subtract) whole minutes
+  let minutes = Math.floor(delta / 60) % 60;
+  delta -= minutes * 60;
+
+  // what's left is seconds
+  let seconds = delta % 60;
+
+  return {
+    days: Math.ceil(days),//.toString().padStart(2, '0'),
+    hours: Math.ceil(hours),//.toString().padStart(2, '0'),
+    minutes: Math.ceil(minutes),//.toString().padStart(2, '0'),
+    seconds: parseInt(seconds),//.toString().padStart(2, '0'),
+  };
+}
