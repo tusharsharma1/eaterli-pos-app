@@ -21,13 +21,17 @@ import android.util.Log;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import androidx.annotation.Nullable;
+
 import com.eaterli_pos.gprintlib.DeviceConnFactoryManager;
 import com.eaterli_pos.gprintlib.PrinterCommand;
 import com.eaterli_pos.gprintlib.ThreadPool;
 import com.eaterli_pos.gprintlib.UsbDeviceList;
 import com.eaterli_pos.gprintlib.Utils;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
@@ -35,12 +39,23 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.finix.sdk.FinixMobileSDK;
 import com.finix.sdk.exceptions.FinixException;
+import com.finix.sdk.listeners.FinixTransferListener;
 import com.finix.sdk.models.EnvironmentType;
+import com.finix.sdk.models.SupportedTransactionType;
+import com.finix.sdk.models.external.FinixTransferError;
+import com.finix.sdk.models.internal.FinixReceiptDetails;
+import com.finix.sdk.models.internal.FinixTransferResponse;
+import com.finix.sdk.requests.TransactionDetails;
 import com.gprinter.command.EscCommand;
 import com.hcd.hcdpos.cashbox.Cashbox;
 import com.hcd.hcdpos.printer.PrinterManager;
+import com.vantiv.triposmobilesdk.DeviceInteractionListener;
+import com.vantiv.triposmobilesdk.enums.AmountConfirmationType;
+import com.vantiv.triposmobilesdk.enums.NumericInputType;
+import com.vantiv.triposmobilesdk.enums.SelectionType;
 import com.zcs.sdk.DriverManager;
 import com.zcs.sdk.HQrsanner;
 import com.zcs.sdk.Printer;
@@ -59,6 +74,10 @@ import com.zcs.sdk.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 //import io.realm.annotations.RealmModule;
@@ -73,7 +92,9 @@ import java.util.concurrent.ExecutorService;
 //import io.realm.internal.RealmProxyMediator;
 //import io.realm.
 public class POSModule extends ReactContextBaseJavaModule {
-     Context context;
+    FinixMobileSDK SDK;
+    private ReactContext mReactContext;
+    Context context;
     private static final String KEY_PRINT_TEXT = "print_text_key";
     private static final String KEY_PRINT_QRCODE = "print_qrcode_key";
     private static final String KEY_PRINT_BARCODE = "print_barcode_key";
@@ -85,6 +106,7 @@ public class POSModule extends ReactContextBaseJavaModule {
     private static final String KEY_CONNECT_BLUETOOTH = "connect_bluetooth";
     private static final String KEY_PRINT_TEXT_WITH_BLUETOOTH = "print_text_with_bluetooth_key";
     private static final String TAG = "PrintFragment";
+    private static final String POS_MESSAGE_EVENT = "onMessage";
 
     private DriverManager mDriverManager;
     private Printer mPrinter;
@@ -98,6 +120,7 @@ public class POSModule extends ReactContextBaseJavaModule {
     POSModule(ReactApplicationContext context) {
         super(context);
          this.context=context;
+        this.mReactContext=context;
     }
 
 
@@ -106,10 +129,36 @@ public class POSModule extends ReactContextBaseJavaModule {
         return "POSModule";
     }
 
+    private void sendEvent(
+            String eventName,
+            @Nullable WritableMap params) {
+
+
+        mReactContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit(eventName, params);
+    }
+    private WritableMap createEventMessage(
+            String eventName,
+            @Nullable  WritableMap dataParams   ) {
+
+
+        WritableMap params =  new WritableNativeMap();
+        params.putString("event",eventName);
+
+
+        params.putMap("data",dataParams);
+
+        return params;
+    }
+
+
+
+
     @ReactMethod
     public void initFinixSDK(ReadableMap data, Callback callBack) {
         Log.d(getName(), "initFinixSDK "+data.getString("env"));
-        FinixMobileSDK SDK = FinixMobileSDK.client(
+         SDK = FinixMobileSDK.client(
                 data.getString("env").equals("sandbox")? EnvironmentType.SANDBOX:EnvironmentType.PRODUCTION,
                 data.getString("username"),
                data.getString("password"),
@@ -130,6 +179,140 @@ public class POSModule extends ReactContextBaseJavaModule {
 
 
         map.putString("env",data.getString("env"));
+
+        callBack.invoke(map);
+    }
+
+    @ReactMethod
+    public void createFinixSDKTransaction(ReadableMap data, Callback callBack)   {
+        Log.d("createFinixSDKTransaction", " start----");
+
+        WritableMap map = new WritableNativeMap();
+if(SDK==null){
+    return;
+}
+        try{
+
+            Map<String, Object> tags = new HashMap<String, Object>();
+            tags.put("foo", "bar");
+
+
+            TransactionDetails td=new TransactionDetails(new BigDecimal("100"),new BigDecimal("50"),new BigDecimal("20"),new BigDecimal("10"), SupportedTransactionType.CARD_PRESENT_DEBIT,tags);
+            SDK.createFinixTransfer(td, new DeviceInteractionListener() {
+                @Override
+                public void onAmountConfirmation(AmountConfirmationType amountConfirmationType, BigDecimal bigDecimal, ConfirmAmountListener confirmAmountListener) {
+                    Log.d("createFinixSDKTransaction", " onAmountConfirmation ");
+                    WritableMap dataParams =  new WritableNativeMap();
+                    dataParams.putString("message","");
+                    dataParams.putString("amountConfirmationType",amountConfirmationType.toString());
+                    dataParams.putString("amount",bigDecimal.toPlainString());
+                    WritableMap params = createEventMessage("onAmountConfirmation",dataParams);
+                    sendEvent( POS_MESSAGE_EVENT, params);
+                }
+
+                @Override
+                public void onChoiceSelections(String[] strings, SelectionType selectionType, SelectChoiceListener selectChoiceListener) {
+                    Log.d("createFinixSDKTransaction", " onChoiceSelections ");
+                    WritableMap dataParams =  new WritableNativeMap();
+                    dataParams.putString("message","");
+                    dataParams.putArray("choices",ArrayUtil.toWritableArray(strings));
+                    dataParams.putString("selectionType",selectionType.toString());
+                    WritableMap params = createEventMessage("onChoiceSelections",dataParams);
+                    sendEvent( POS_MESSAGE_EVENT, params);
+                }
+
+                @Override
+                public void onNumericInput(NumericInputType numericInputType, NumericInputListener numericInputListener) {
+                    Log.d("createFinixSDKTransaction", " onNumericInput ");
+                    WritableMap dataParams =  new WritableNativeMap();
+                    dataParams.putString("message","");
+                    dataParams.putString("numericInputType",numericInputType.toString());
+                    WritableMap params = createEventMessage("onNumericInput",dataParams);
+                    sendEvent( POS_MESSAGE_EVENT, params);
+                }
+
+                @Override
+                public void onSelectApplication(String[] strings, SelectChoiceListener selectChoiceListener) {
+                    Log.d("createFinixSDKTransaction", " onSelectApplication ");
+                    WritableMap dataParams =  new WritableNativeMap();
+                    dataParams.putString("message","");
+                    dataParams.putArray("apps",ArrayUtil.toWritableArray(strings));
+                    WritableMap params = createEventMessage("onSelectApplication",dataParams);
+                    sendEvent( POS_MESSAGE_EVENT, params);
+                }
+
+                @Override
+                public void onPromptUserForCard(String s) {
+                    Log.d("createFinixSDKTransaction", " onPromptUserForCard ");
+                    WritableMap dataParams =  new WritableNativeMap();
+                    dataParams.putString("message",s);
+                    WritableMap params = createEventMessage("onPromptUserForCard",dataParams);
+                    sendEvent( POS_MESSAGE_EVENT, params);
+                }
+
+                @Override
+                public void onDisplayText(String s) {
+                    Log.d("createFinixSDKTransaction", " onDisplayText ");
+                    WritableMap dataParams =  new WritableNativeMap();
+                    dataParams.putString("message",s);
+                    WritableMap params = createEventMessage("onDisplayText",dataParams);
+                    sendEvent( POS_MESSAGE_EVENT, params);
+                }
+
+                @Override
+                public void onRemoveCard() {
+                    Log.d("createFinixSDKTransaction", " onRemoveCard ");
+                    WritableMap dataParams =  new WritableNativeMap();
+                    dataParams.putString("message","");
+                    WritableMap params = createEventMessage("onRemoveCard",dataParams);
+                    sendEvent( POS_MESSAGE_EVENT, params);
+                }
+
+                @Override
+                public void onCardRemoved() {
+                    Log.d("createFinixSDKTransaction", " onCardRemoved ");
+                    WritableMap dataParams =  new WritableNativeMap();
+                    dataParams.putString("message","");
+                    WritableMap params = createEventMessage("onCardRemoved",dataParams);
+                    sendEvent( POS_MESSAGE_EVENT, params);
+                }
+            }, new FinixTransferListener() {
+                @Override
+                public void onTransferCompleted(FinixTransferResponse finixTransferResponse, FinixReceiptDetails finixReceiptDetails) {
+                    Log.d("createFinixSDKTransaction", " onTransferCompleted ");
+                    WritableMap dataParams =  new WritableNativeMap();
+                    dataParams.putString("message","");
+                    dataParams.putString("transactionId",finixReceiptDetails.getTransactionId());
+                    WritableMap params = createEventMessage("onTransferCompleted",dataParams);
+                    sendEvent( POS_MESSAGE_EVENT, params);
+                }
+
+                @Override
+                public void onTransferError(FinixTransferError finixTransferError) {
+                    Log.d("createFinixSDKTransaction", " onTransferError "+finixTransferError);
+
+                    WritableMap dataParams =  new WritableNativeMap();
+                    dataParams.putString("message","");
+                    WritableMap params = createEventMessage("onTransferError",dataParams);
+                    sendEvent( POS_MESSAGE_EVENT, params);
+
+                      }
+            });
+            Log.d("createFinixSDKTransaction", " success ");
+            map.putString("success","true");
+        }
+        catch(FinixException finixException){
+            Log.d("createFinixSDKTransaction", "finixException error "+finixException.getMessage());
+            map.putString("error",finixException.getMessage());
+
+            WritableMap dataParams =  new WritableNativeMap();
+            dataParams.putString("message",finixException.getMessage());
+            WritableMap params = createEventMessage("FinixException",dataParams);
+            sendEvent( POS_MESSAGE_EVENT, params);
+        }
+
+
+        map.putString("result","success");
 
         callBack.invoke(map);
     }

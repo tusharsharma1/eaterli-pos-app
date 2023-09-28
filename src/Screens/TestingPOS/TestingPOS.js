@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import {PermissionsAndroid, TouchableOpacity, View} from 'react-native';
+import {PermissionsAndroid, ScrollView, TouchableOpacity, View} from 'react-native';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import {useDispatch, useSelector} from 'react-redux';
 import Container from '../../components/Container';
@@ -14,7 +14,7 @@ import {PAYMENT_METHOD} from '../../constants/order.constant';
 import {dummyImage} from '../../assets';
 import userAction from '../../redux/actions/user.action';
 import {getAddons, getVariants} from '../../helpers/order.helper';
-import POSModule from '../../helpers/pos.helper';
+import POSModule, {POSModuleEventEmitter} from '../../helpers/pos.helper';
 import Button from '../../components/Button';
 import appAction from '../../redux/actions/app.action';
 import {showToast, simpleToast} from '../../helpers/app.helpers';
@@ -37,11 +37,19 @@ function ensureLength(
 export default function TestingPOS({navigation, route}) {
   const dispatch = useDispatch();
   const [printers, setPrinters] = useState([]);
-
+  const [logs, setLogs] = useState([]);
   useEffect(() => {
     POSModule.initSDK();
 
     loadData();
+
+    let eventListener = POSModuleEventEmitter.addListener(
+      'onMessage',
+      onPOSModuleMessage,
+    );
+    return () => {
+      eventListener.remove();
+    };
   }, []);
 
   const loadData = async () => {
@@ -69,6 +77,11 @@ export default function TestingPOS({navigation, route}) {
       console.warn(err);
     }
   };
+  const onPOSModuleMessage = message => {
+    console.log('POSModuleEventEmitter', message);
+    setLogs(_logs => [..._logs, message.event, JSON.stringify( message.data),"------------"]);
+
+  };
 
   const readCard = type => {
     dispatch(appAction.showProgress('Searching...'));
@@ -81,6 +94,7 @@ export default function TestingPOS({navigation, route}) {
   return (
     <>
       <Header title={'Testing POS'} back />
+      <Container scroll>
       <Container
         style={{
           // flex: 1,
@@ -102,7 +116,7 @@ export default function TestingPOS({navigation, route}) {
           }}>
           Open Cashbox
         </Button>
-        <Button
+        {/* <Button
           // style={{}}
           // backgroundColor="#00000000"
           noShadow
@@ -114,7 +128,7 @@ export default function TestingPOS({navigation, route}) {
             POSModule.cutPaperPrint();
           }}>
           Cut paper
-        </Button>
+        </Button> */}
         {/* <Button
           mr={10}
           mb={10}
@@ -178,21 +192,6 @@ export default function TestingPOS({navigation, route}) {
           }}>
           Scan QR Code
         </Button>
-
-        <Button
-          mr={10}
-          mb={10}
-          onPress={() => {
-            POSModule.scanHQRCode(
-              {id: 22, name: 'aakash', active: true},
-              res => {
-                console.log('[scanHQRCode]', res);
-                alert(JSON.stringify(res));
-              },
-            );
-          }}>
-          Scan QR Code
-        </Button>
         <Button
           mr={10}
           mb={10}
@@ -221,6 +220,30 @@ export default function TestingPOS({navigation, route}) {
             );
           }}>
           Init Finix Payment SDK
+        </Button>
+
+        <Button
+          mr={10}
+          mb={10}
+          onPress={() => {
+            setLogs(_logs => [..._logs,`••••••••••••••${moment().format('DD MMM, YYYY hh:mm:ss A')}••••••••••••••`]);
+
+            POSModule.createFinixSDKTransaction(
+              {
+                env: 'sandbox',
+                username: 'USss1r5jqUXgpndmp5vyEuBK',
+                password: '5433ee5f-2c8b-4289-b5aa-0e2394144703',
+                merchantId: 'MUeCcC7PToWcsgexGaERJ7jC',
+                deviceId: 'DVtTMarXFnyVU6NmiMLTmvzb',
+                deviceIdentifier: '3011087727539064',
+              },
+              res => {
+                console.log('[createFinixSDKTransaction]', res);
+                // alert(JSON.stringify(res));
+              },
+            );
+          }}>
+          Create Finix Payment Transaction
         </Button>
 
         <Button
@@ -464,7 +487,7 @@ export default function TestingPOS({navigation, route}) {
                     console.log('[getConnectUSBGPrinter]', res);
                     if (res.error) {
                       simpleToast(res.error);
-                    }else{
+                    } else {
                       simpleToast('Connected');
                     }
                   });
@@ -475,6 +498,31 @@ export default function TestingPOS({navigation, route}) {
           })}
         </Container>
       </View>
+      
+      <ScrollView
+        nestedScrollEnabled={true}
+        style={{
+          width:"90%",
+          height: 300,
+          backgroundColor: '#fff',
+          borderColor: '#f00',
+          borderWidth: 1,
+          marginTop: 10,
+          marginHorizontal:20
+          // position:'absolute',
+          // bottom:0,
+          // left:0
+        }}>
+        {logs.map((l, i) => {
+          return (
+            <Text key={i} selectable>
+              {l}
+            </Text>
+          );
+        })}
+      </ScrollView>
+      
+      </Container>
     </>
   );
 }
