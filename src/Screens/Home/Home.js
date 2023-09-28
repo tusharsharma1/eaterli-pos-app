@@ -28,7 +28,13 @@ import orderAction from '../../redux/actions/order.action';
 import {DINING_OPTION} from '../../constants/order.constant';
 import GiftCardsModal from '../components/GiftCardsModal';
 import ScanOfferModal from '../components/ScanOfferModal';
-
+import {
+  check,
+  request,
+  PERMISSIONS,
+  RESULTS,
+  requestMultiple,
+} from 'react-native-permissions';
 export default function Home(props) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
@@ -119,6 +125,16 @@ export default function Home(props) {
     toggleModal();
 
     setLoaded(true);
+
+    let r = await requestMultiple([
+      PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
+      PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
+      PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
+      PERMISSIONS.ANDROID.CAMERA,
+    ]).catch(error => {
+      console.log('requestMultiple error', error);
+    });
+    console.log('requestMultiple result', r);
   };
   //
   const toggleModal = () => {
@@ -171,7 +187,7 @@ export default function Home(props) {
                 props.navigation.navigate('Orders');
               }}
             />
-             <IconBtn
+            <IconBtn
               text="Scan Offer"
               iconName="star"
               onPress={() => {
@@ -193,7 +209,7 @@ export default function Home(props) {
                 );
               }}
             />
-             <IconBtn
+            <IconBtn
               text="Clock In/Out"
               iconName="clock"
               onPress={() => {
@@ -221,7 +237,11 @@ export default function Home(props) {
                 POSModule.doOpenCashBox();
               }}
             />
-            <IconBtn text="Adjust Float" iconName="retweet" />
+            <IconBtn
+              text="Adjust Float"
+              // onPress={}
+              iconName="retweet"
+            />
             <IconBtn
               text="Dining Option"
               subText={DINING_OPTION[diningOption]?.text}
@@ -319,7 +339,7 @@ export default function Home(props) {
         {!loaded && <AppLoader message={'Loading'} />}
       </View>
     </>
-  );
+  )
 }
 
 function IconBtn({
