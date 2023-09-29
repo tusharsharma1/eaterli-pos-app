@@ -4,11 +4,10 @@ import React, {useEffect, useState} from 'react';
 import SplashView from '../components/SplashView';
 import {loginFromKeyChain} from '../helpers/user.helper';
 
-import theme from '../theme';
 import {getUniqueId} from 'react-native-device-info';
 import {useDispatch} from 'react-redux';
 import userAction from '../redux/actions/user.action';
-import {YEAR_OPTIONS} from '../helpers/payment.helper';
+import theme from '../theme';
 // import {fcmService} from '../firebase/FCMService';
 // import {loginFromKeyChain} from '../helpers/user.helper';
 // import userAction from '../redux/actions/user.action';
@@ -117,7 +116,7 @@ function Navigator() {
             require('../Screens/AddFinixDevice/AddFinixDevice').default
           }
         />
-        
+
         <Stack.Screen
           name="ScanRewardBagQR"
           getComponent={() =>
@@ -132,6 +131,12 @@ function Navigator() {
           }
         />
 
+        <Stack.Screen
+          name="Statistics"
+          getComponent={() =>
+            require('../Screens/Statistics/Statistics').default
+          }
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

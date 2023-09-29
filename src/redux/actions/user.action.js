@@ -702,4 +702,25 @@ export default {
         .catch(apiErrorHandler);
     };
   },
+
+  getOrderStatistics(restaurant_id, location_id, params={}, showLoader = true) {
+    return (dispatch, getState) => {
+      showLoader && dispatch(appAction.showProgress());
+      return userService
+        .getOrderStatistics(restaurant_id, location_id, params)
+        .then(res => {
+          let returnResult = res;
+
+          if (res && !res.status) {
+            // apiMessageHandler(res.message);
+            // returnResult = false;
+          }
+          if (returnResult) {
+          }
+          showLoader && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
 };

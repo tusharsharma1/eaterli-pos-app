@@ -1,20 +1,13 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import React, { useEffect, useState } from 'react';
-import { Linking, TouchableOpacity, View } from 'react-native';
-import * as Keychain from 'react-native-keychain';
+import React, { useState } from 'react';
+import { TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 // import Dropoff from '../screens/Pickup/Dropoff';
 // import Pickup from '../screens/Pickup/Pickup';
 // import LookingDriver from '../screens/Pickup/LookingDriver';
 import Color from 'color';
 import Text from '../components/Text';
-import AppConfig from '../config';
-import { localNotificationService } from '../firebase/LocalNotificationService';
-import {
-  registerPushNotification,
-  unRegisterPushNotification
-} from '../helpers/firebase-notification.helper';
-import { resetReduxState, userResetReduxState } from '../redux/actions';
+import { resetReduxState } from '../redux/actions';
 const Drawer = createDrawerNavigator();
 
 function HomeNavigator() {
@@ -220,6 +213,13 @@ function DrawerContent({navigation}) {
           // subTitle="USD 0"
           onPress={drawerItemPress}
           screenName="ScanRewardBagQR"
+        />
+         <DrawerItem
+          // icon={WalletIcon}
+          title="Statistics"
+          // subTitle="USD 0"
+          onPress={drawerItemPress}
+          screenName="Statistics"
         />
         <DrawerItem
           //  icon={PreviousRideIcon}
