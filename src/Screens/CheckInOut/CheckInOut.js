@@ -1,6 +1,6 @@
 import moment from 'moment';
 import React, {useEffect, useState} from 'react';
-import {View} from 'react-native';
+import {Image, View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import Button from '../../components/Button';
 import Container from '../../components/Container';
@@ -11,7 +11,11 @@ import {
   CHECK_IN_OUT_STATUS,
   CHECK_IN_OUT_VIEW,
 } from '../../constants/user.constant';
-import {dateToTimeFormat, showToast} from '../../helpers/app.helpers';
+import {
+  dateToTimeFormat,
+  getPercentValue,
+  showToast,
+} from '../../helpers/app.helpers';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
 import userAction from '../../redux/actions/user.action';
 import theme from '../../theme';
@@ -100,25 +104,59 @@ export default function CheckInOut({navigation, route}) {
         return (
           <View
             style={{
-              backgroundColor: theme.colors.primaryColor,
-              width: 500,
-              height: 500,
-              borderRadius: 300,
-              // alignItems: 'center',
-
-              justifyContent: 'center',
-              paddingHorizontal: 80,
-              transform: [
-                {scale: bH / contentH},
-                {translateY: (bH - contentH) / 4},
-              ],
+              flexDirection: 'row',
+              flex: 1,
+              // height: bH,
             }}>
-            <PinKeyBoard
-              getRef={ref => {
-                setPinKBRef(ref);
-              }}
-              onCompleted={onCompleted}
-            />
+            <View
+              style={{
+                // backgroundColor: 'yellow',
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <Image
+                style={{
+                  width: getPercentValue(width, 35),
+                  height: getPercentValue(width, 30),
+                  resizeMode: 'contain',
+                  // backgroundColor: 'red',
+                  marginBottom: 21,
+                }}
+                source={require('../../assets/images/logo.png')}
+              />
+            </View>
+            <View
+              style={{
+                // backgroundColor: 'blue',
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View
+                style={{
+                  backgroundColor: theme.colors.primaryColor,
+                  width: getPercentValue(width, 40),
+                  height: getPercentValue(width, 40),
+                  borderRadius: getPercentValue(width, 35),
+                  // alignItems: 'center',
+
+                  justifyContent: 'center',
+                  paddingHorizontal: getPercentValue(width, 4),
+                  // transform: [
+                  //   {scale: bH / contentH},
+                  //   {translateY: (bH - contentH) / 4},
+                  // ],
+                }}>
+                <PinKeyBoard
+                  scale={getPercentValue(width, 40) / 450}
+                  getRef={ref => {
+                    setPinKBRef(ref);
+                  }}
+                  onCompleted={onCompleted}
+                />
+              </View>
+            </View>
           </View>
         );
 
@@ -213,10 +251,10 @@ export default function CheckInOut({navigation, route}) {
           // flexWrap: 'wrap',
         }}
         onLayout={e => {
-          if (!isPortrait) {
-            setBH(e.nativeEvent.layout.height);
-            console.log('isPortrait');
-          }
+          // if (!isPortrait) {
+          //   setBH(e.nativeEvent.layout.height);
+          //   console.log('isPortrait');
+          // }
           if (!initH) {
             setBH(e.nativeEvent.layout.height);
             initH = true;

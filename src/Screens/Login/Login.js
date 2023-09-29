@@ -7,7 +7,7 @@ import PinKeyBoard from '../../components/PinKeyBoard';
 import SplashView from '../../components/SplashView';
 import Text from '../../components/Text';
 import LoginForm from '../../forms/LoginForm';
-import {showToast} from '../../helpers/app.helpers';
+import {getPercentValue, showToast} from '../../helpers/app.helpers';
 import storageHelper from '../../helpers/storage.helper';
 import userAction from '../../redux/actions/user.action';
 import theme from '../../theme';
@@ -29,7 +29,7 @@ export default function Login(props) {
   const loadData = async () => {
     let email = await storageHelper.getData('email');
     let rest_id = await storageHelper.getData('rest_id');
-   
+
     console.log('email', email);
     if (email && rest_id) {
       setLoginTab(2);
@@ -42,19 +42,18 @@ export default function Login(props) {
   };
 
   const onCompleted = async pin => {
-
-//     props.navigation.navigate('TestingPOS');
-// return
+    //     props.navigation.navigate('TestingPOS');
+    // return
     let email = await storageHelper.getData('email');
     let rest_id = await storageHelper.getData('rest_id');
-   
+
     console.log('email', email);
     if (email && rest_id) {
       let r = await dispatch(
         userAction.loginWithPin({
           email: email,
           passcode: pin,
-          restaurant_id:rest_id
+          restaurant_id: rest_id,
         }),
       );
       if (r && r.status) {
@@ -120,82 +119,108 @@ export default function Login(props) {
   if (!loaded) {
     return <SplashView />;
   }
+
   return (
-    <>
-      <Container
-        onLayout={e => {
-          if(!isPortrait){
-            setBH(e.nativeEvent.layout.height);
-            console.log('isPortrait')
-          }
-          if (!initH) {
-            setBH(e.nativeEvent.layout.height);
-            initH = true;
-            console.log('init')
-          }
-          // console.log('body',
-          //   e.nativeEvent.layout,
-          //   theme.screenHeight,
-          //   theme.screenHeight / 725,
-          // );
-        }}
-        style={{flex: 1}}>
+    <Container
+      onLayout={e => {
+        // if (!isPortrait) {
+        //   setBH(e.nativeEvent.layout.height);
+        //   console.log('isPortrait');
+        // }
+        if (!initH) {
+          setBH(e.nativeEvent.layout.height);
+          initH = true;
+          // console.log('init');
+        }
+        // console.log('body',
+        //   e.nativeEvent.layout,
+        //   theme.screenHeight,
+        //   theme.screenHeight / 725,
+        // );
+      }}
+      scroll
+      style={
+        {
+          // backgroundColor: 'red',
+        }
+      }
+      contentContainerStyle={
+        {
+          // alignItems: 'center',
+          // paddingVertical: 25,
+          // paddingHorizontal: 25,
+          // flex: 1,
+        }
+      }>
+      <View
+        style={{
+          flexDirection: 'row',
+          flex: 1,
+          height: bH,
+        }}>
         <View
-          // onLayout={e => {
-          //   console.log(
-          //     e.nativeEvent.layout,
-          //     theme.screenHeight,
-          //     theme.screenHeight / 725,
-          //   );
-          // }}
           style={{
+            // backgroundColor: 'yellow',
             flex: 1,
-            // backgroundColor: 'red',
             alignItems: 'center',
-            paddingVertical: 25,
-            paddingHorizontal: 25,
-            transform: [
-              {scale: bH / contentH},
-              {translateY: (bH - contentH) / 2},
-            ],
+            justifyContent: 'center',
           }}>
           <Image
             style={{
-              width: 300,
-              height: 82,
+              width: getPercentValue(width, 35),
+              height: getPercentValue(width, 30),
               resizeMode: 'contain',
-              // backgroundColor:'red'
+              // backgroundColor: 'red',
               marginBottom: 21,
             }}
             source={require('../../assets/images/logo.png')}
           />
+        </View>
+        <View
+          style={{
+            // backgroundColor: 'blue',
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
           <View
             style={{
               backgroundColor: theme.colors.primaryColor,
-              width: 500,
-              height: 500,
-              borderRadius: 300,
+              width: getPercentValue(width, 40),
+              height: getPercentValue(width, 40),
+              borderRadius: getPercentValue(width, 35),
               // alignItems: 'center',
 
               justifyContent: 'center',
-              paddingHorizontal: 80,
+              paddingHorizontal: getPercentValue(width, 4),
             }}>
             {loginTab == 1 ? (
               <>
-                <Text
-                  style={{alignSelf: 'center'}}
-                  mb={35}
-                  size={20}
-                  bold
-                  color="#ffffffaa">
-                  USER LOGIN
-                </Text>
+                <View
+                  style={{
+                    transform: [
+                      {scale: getPercentValue(width, 40) / 350},
+                      // {translateY: (bH - contentH) / 2},
+                    ],
+                  }}>
+                  <Text
+                    style={{alignSelf: 'center'}}
+                    mb={35}
+                    size={20}
+                    bold
+                    color="#ffffffaa">
+                    USER LOGIN
+                  </Text>
 
-                <LoginForm onSubmitSuccess={onSubmit} />
+                  <LoginForm onSubmitSuccess={onSubmit} />
+                </View>
               </>
             ) : (
               <>
-                <PinKeyBoard onCompleted={onCompleted} />
+                <PinKeyBoard
+                  scale={getPercentValue(width, 40) / 450}
+                  onCompleted={onCompleted}
+                />
               </>
             )}
           </View>
@@ -203,6 +228,10 @@ export default function Login(props) {
             style={{
               flexDirection: 'row',
               marginTop: 25,
+              transform: [
+                {scale: getPercentValue(width, 40) / 350},
+                // {translateY: 0},
+              ],
             }}>
             <Button
               onPress={() => {
@@ -234,7 +263,7 @@ export default function Login(props) {
             </Button>
           </View>
         </View>
-      </Container>
-    </>
+      </View>
+    </Container>
   );
 }

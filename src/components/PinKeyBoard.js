@@ -6,7 +6,7 @@ import Text from './Text';
 import BSIcon from '../assets/BSIcon';
 import CloseIcon from '../assets/CloseIcon';
 
-function _PinKeyBoard({length = 4, onCompleted,getRef}) {
+function _PinKeyBoard({length = 4,scale=1, onCompleted,getRef}) {
   const [pin, setPin] = useState([]);
   useEffect(() => {
     getRef && getRef({setPin})
@@ -45,6 +45,10 @@ function _PinKeyBoard({length = 4, onCompleted,getRef}) {
         // backgroundColor: 'red',
         // paddingTop:40
         justifyContent: 'center',
+        transform: [
+          {scale: scale},
+          // {translateY: (bH - contentH) / 2},
+        ],
       }}>
       <View
         style={{

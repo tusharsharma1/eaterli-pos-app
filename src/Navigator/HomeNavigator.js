@@ -221,6 +221,13 @@ function DrawerContent({navigation}) {
           onPress={drawerItemPress}
           screenName="Statistics"
         />
+         <DrawerItem
+          // icon={WalletIcon}
+          title="Control Center"
+          // subTitle="USD 0"
+          // onPress={drawerItemPress}
+          screenName="Statistics"
+        />
         <DrawerItem
           //  icon={PreviousRideIcon}
           title="Logout"
