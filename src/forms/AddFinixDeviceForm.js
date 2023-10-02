@@ -29,10 +29,12 @@ const validationSchema = yup.object({
   serial_number: yup.string().required('Required'),
 });
 const _initialValues = {
-  name: 'Finix device1',
-  description: 'My First Test Finix Device',
-  model: 'LANE_3000',
-  serial_number: '3011087727539064',
+  name: 'Finix BBPOS_Chipper_2X',
+  description: 'BBPOS_Chipper_2X Finix Device',
+  //Field: model;  Should be one of ANDROID, BBPOS, IPP320, IPP350, ISC250, ISC480, ISMP4, LANE_3000, LINK_2500, LANE_5000, LANE_7000, LANE_8000, DESK_3500, DESK_5000, MOVE_5000, MX915, MX925, PAX_A30, PAX_A35, PAX_A60, PAX_A77, PAX_A920PRO, PAX_ARIES6, PAX_ARIES8, PAX_IM30.
+  model: 'BBPOS', //'LANE_3000',
+
+  serial_number: 'CHB206132000590', //'3011087727539064',
 };
 
 const AddFinixDeviceForm = ({email, password, onSubmitSuccess}) => {
@@ -77,10 +79,17 @@ const AddFinixDeviceForm = ({email, password, onSubmitSuccess}) => {
         name: values.name,
         serial_number: values.serial_number,
       },
-      userData.restaurant?.merchant_information, //sandbox
+      // 'MUeCcC7PToWcsgexGaERJ7jC', //userData.restaurant?.merchant_information, //sandbox
+      'MU6TcvvdfqdwzFETGVmTMKmS', //sandbox
+      //MU6TcvvdfqdwzFETGVmTMKmS sandbox- VANTIV_V1  TRIPOS_MOBILE_V1
+
+      //MUxkDBSgV75KmkcJouExs8q5 sandbox- VANTIV_V1
+      //MU3cyktGdpeNqJXtfCzhCj61 sandbox- VANTIV_V1 TRIPOS_MOBILE_V1
       // "MUgFUeHEHVfufshKjbipcwLG" //live
       live,
     );
+
+    //
     setLogs(_logs => [..._logs, 'created device....', JSON.stringify(r.id)]);
 
     if (r && r.id) {
@@ -110,6 +119,7 @@ const AddFinixDeviceForm = ({email, password, onSubmitSuccess}) => {
     let r1 = await paymentService.activateDevice(
       {
         action: 'ACTIVATE',
+        activation_code: '123456',
       },
       deviceid, //sandbox
       // "MUgFUeHEHVfufshKjbipcwLG" //live
@@ -134,8 +144,12 @@ const AddFinixDeviceForm = ({email, password, onSubmitSuccess}) => {
   };
 
   const SetDevicePress = async () => {
-    await storageHelper.storeData('deviceid', 'DVtTMarXFnyVU6NmiMLTmvzb');
-    setDeviceId('DVtTMarXFnyVU6NmiMLTmvzb');
+    // 'DV5SSgSRhYJY6s3Gmi24Y3cU'  bbpos Device
+    await storageHelper.storeData('deviceid', 'DV5SSgSRhYJY6s3Gmi24Y3cU');
+    setDeviceId('DV5SSgSRhYJY6s3Gmi24Y3cU');
+
+    // await storageHelper.storeData('deviceid', 'DVtTMarXFnyVU6NmiMLTmvzb');
+    // setDeviceId('DVtTMarXFnyVU6NmiMLTmvzb');
   };
 
   const payPress = async () => {

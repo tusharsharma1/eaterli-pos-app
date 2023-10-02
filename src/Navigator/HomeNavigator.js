@@ -1,13 +1,14 @@
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import React, { useState } from 'react';
-import { TouchableOpacity, View } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import {createDrawerNavigator} from '@react-navigation/drawer';
+import React, {useState} from 'react';
+import {TouchableOpacity, View} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
 // import Dropoff from '../screens/Pickup/Dropoff';
 // import Pickup from '../screens/Pickup/Pickup';
 // import LookingDriver from '../screens/Pickup/LookingDriver';
 import Color from 'color';
 import Text from '../components/Text';
-import { resetReduxState } from '../redux/actions';
+import {resetReduxState} from '../redux/actions';
+import Container from '../components/Container';
 const Drawer = createDrawerNavigator();
 
 function HomeNavigator() {
@@ -132,14 +133,12 @@ function DrawerContent({navigation}) {
     navigation.navigate(screenName);
   };
   const logoutPress = async () => {
-  
     navigation.reset({
       index: 0,
-      routes: [{name: 'Login' }],
+      routes: [{name: 'Login'}],
     });
-  
-      dispatch(resetReduxState());
-  
+
+    dispatch(resetReduxState());
   };
 
   let {sidebar_bg, sidebar_text, sidebar_accent} = mobileBuilder.layout;
@@ -153,14 +152,18 @@ function DrawerContent({navigation}) {
       }}>
       <View
         style={{
-          height: 100,
+          height: 20,
         }}></View>
-      <View
+      <Container
+        scroll
         style={{
+          flex: 1,
           // height: 166,
           //  backgroundColor:'yellow',
-          borderBottomColor: text_color.alpha(0.15).toString(),
-          borderBottomWidth: 1,
+          // borderBottomColor: text_color.alpha(0.15).toString(),
+          // borderBottomWidth: 1,
+        }}
+        contentContainerStyle={{
           paddingHorizontal: 25,
           paddingTop: 15,
           paddingBottom: 5,
@@ -179,21 +182,21 @@ function DrawerContent({navigation}) {
           onPress={drawerItemPress}
           screenName="ProductMenu"
         /> */}
-         <DrawerItem
+        <DrawerItem
           // icon={WalletIcon}
           title="Add Finix Device"
           // subTitle="USD 0"
           onPress={drawerItemPress}
           screenName="AddFinixDevice"
         />
-         <DrawerItem
+        <DrawerItem
           // icon={WalletIcon}
           title="Testing POS"
           // subTitle="USD 0"
           onPress={drawerItemPress}
           screenName="TestingPOS"
         />
-         <DrawerItem
+        <DrawerItem
           // icon={WalletIcon}
           title="Product Menu"
           // subTitle="USD 0"
@@ -207,26 +210,33 @@ function DrawerContent({navigation}) {
           onPress={drawerItemPress}
           screenName="Orders"
         />
-         <DrawerItem
+        <DrawerItem
           // icon={WalletIcon}
           title="Scan Reward Bag QR"
           // subTitle="USD 0"
           onPress={drawerItemPress}
           screenName="ScanRewardBagQR"
         />
-         <DrawerItem
+        <DrawerItem
           // icon={WalletIcon}
           title="Statistics"
           // subTitle="USD 0"
           onPress={drawerItemPress}
           screenName="Statistics"
         />
-         <DrawerItem
+        <DrawerItem
           // icon={WalletIcon}
           title="Control Center"
           // subTitle="USD 0"
-          // onPress={drawerItemPress}
-          screenName="Statistics"
+          onPress={drawerItemPress}
+          screenName="ControlCenter"
+        />
+        <DrawerItem
+          // icon={WalletIcon}
+          title="Cash Drawer"
+          // subTitle="USD 0"
+          onPress={drawerItemPress}
+          screenName="CashDrawer"
         />
         <DrawerItem
           //  icon={PreviousRideIcon}
@@ -234,7 +244,7 @@ function DrawerContent({navigation}) {
           onPress={logoutPress}
           // screenName="PreviousRides"
         />
-      </View>
+      </Container>
     </View>
   );
 }

@@ -137,6 +137,19 @@ function Navigator() {
             require('../Screens/Statistics/Statistics').default
           }
         />
+
+        <Stack.Screen
+          name="ControlCenter"
+          getComponent={() =>
+            require('../Screens/ControlCenter/ControlCenter').default
+          }
+        />
+         <Stack.Screen
+          name="CashDrawer"
+          getComponent={() =>
+            require('../Screens/CashDrawer/CashDrawer').default
+          }
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
