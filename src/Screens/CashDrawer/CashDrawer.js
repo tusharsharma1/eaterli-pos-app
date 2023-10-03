@@ -8,46 +8,76 @@ import {formatGridData, getPercentValue} from '../../helpers/app.helpers';
 import useProducts from '../../hooks/useProducts';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
 import userAction from '../../redux/actions/user.action';
+import OptionButton from '../components/OptionButton';
+import AddCashDrawerButton from './AddCashDrawerButton';
+import OpenCashDrawerButton from './OpenCashDrawerButton';
+import theme from '../../theme';
 let col = 3;
 let hPadding = 2;
 
 export default function CashDrawer({navigation, route}) {
   const dispatch = useDispatch();
-
+  const [balance, setBalance] = useState(0);
   const userData = useSelector(s => s.user.userData);
+  const deviceId = useSelector(s => s.user.deviceId);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
   useEffect(() => {
     loadData();
   }, []);
-  const loadData = async () => {};
+  const loadData = async () => {
+    let r = await dispatch(
+      userAction.getCashDrawerBalance(
+        {
+          location_id: selectedLocation,
+          device_id: deviceId,
+        },
+        userData.restaurant.id,
+      ),
+    );
+    if (r && r.status) {
+      let data = r.data?.[0];
+      setBalance(parseFloat(data?.totalAmount ?? 0));
+    }
+  };
   //  console.log(route.params)
 
   return (
     <>
-      <Header title={'Control Center'} back />
-
-      <Container style={{flex: 1, paddingHorizontal: 2, paddingVertical: 4}}>
-        <Text ml={4} size={18} semibold>
-          Quick actions
+      <Header title={'Cash Drawer'} back />
+      <View style={{paddingHorizontal: 2, paddingVertical: 4}}>
+        <Text size={18} semibold>
+          Available Total Amount:{'  '}
+          <Text color={theme.colors.secondaryColor} size={18} semibold>
+            ${balance.toFixed(2)}
+          </Text>
         </Text>
+      </View>
+      <Container style={{flex: 1, paddingHorizontal: 2, paddingVertical: 4}}>
         <View
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
-          <Item data={{title: 'Add Cash'}} />
-          <Item data={{title: 'Remove Cash'}} />
-          <Item data={{title: 'Open Drawer'}} />
+          <AddCashDrawerButton type="1" title="Add Cash" onSuccess={loadData}/>
+          <AddCashDrawerButton type="2" title="Remove Cash" onSuccess={loadData}/>
+          <OpenCashDrawerButton />
         </View>
-        <Text ml={4} size={18} semibold>
+        {/* <Text ml={4} size={18} semibold>
           End of day actions
-        </Text>
+        </Text> */}
         <View
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
           <Item data={{title: 'Close Drawer'}} />
+          <Item
+            data={{title: 'View Transactions'}}
+            onPress={() => {
+              navigation.navigate('CashDrawerTransactions');
+            }}
+          />
+          <Item data={{empty: true}} />
         </View>
       </Container>
     </>
@@ -93,7 +123,7 @@ function _Item({data, onPress}) {
   return (
     <TouchableOpacity
       onPress={() => {
-        onPress && onPress(_data);
+        onPress && onPress();
       }}
       activeOpacity={0.7}
       style={{

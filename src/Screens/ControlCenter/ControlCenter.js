@@ -8,6 +8,8 @@ import {formatGridData, getPercentValue} from '../../helpers/app.helpers';
 import useProducts from '../../hooks/useProducts';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
 import userAction from '../../redux/actions/user.action';
+import AddCashDrawerButton from '../CashDrawer/AddCashDrawerButton';
+import OpenCashDrawerButton from '../CashDrawer/OpenCashDrawerButton';
 let col = 3;
 let hPadding = 2;
 
@@ -33,9 +35,9 @@ export default function ControlCenter({navigation, route}) {
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
-          <Item data={{title: 'Add Cash'}} />
-          <Item data={{title: 'Remove Cash'}} />
-          <Item data={{title: 'Open Drawer'}} />
+          <AddCashDrawerButton type="1" title="Add Cash" />
+          <AddCashDrawerButton type="2" title="Remove Cash" />
+          <OpenCashDrawerButton/>
         </View>
       </Container>
     </>

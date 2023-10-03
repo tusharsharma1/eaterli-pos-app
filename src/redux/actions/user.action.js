@@ -703,7 +703,12 @@ export default {
     };
   },
 
-  getOrderStatistics(restaurant_id, location_id, params={}, showLoader = true) {
+  getOrderStatistics(
+    restaurant_id,
+    location_id,
+    params = {},
+    showLoader = true,
+  ) {
     return (dispatch, getState) => {
       showLoader && dispatch(appAction.showProgress());
       return userService
@@ -716,6 +721,88 @@ export default {
             // returnResult = false;
           }
           if (returnResult) {
+          }
+          showLoader && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+  addCashDrawer(data, restaurant_id, showProgress = true) {
+    return (dispatch, getState) => {
+      showProgress && dispatch(appAction.showProgress());
+      return userService
+        .addCashDrawer(data, restaurant_id)
+        .then(res => {
+          let returnResult = res;
+          if (res && !res.status) {
+            showAlert && apiMessageHandler(res);
+            returnResult = false;
+          }
+          if (returnResult) {
+          }
+          showProgress && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+  getCashDrawerBalance(data, restaurant_id, showProgress = true) {
+    return (dispatch, getState) => {
+      showProgress && dispatch(appAction.showProgress());
+      return userService
+        .getCashDrawerBalance(data, restaurant_id)
+        .then(res => {
+          let returnResult = res;
+          if (res && !res.status) {
+            showAlert && apiMessageHandler(res);
+            returnResult = false;
+          }
+          if (returnResult) {
+          }
+          showProgress && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+  getCashDrawerTrasactions(data, rest_id, refresh = false, showLoader = true) {
+    return (dispatch, getState) => {
+      showLoader && dispatch(appAction.showProgress());
+      return userService
+        .getCashDrawerTrasactions(data, rest_id)
+        .then(res => {
+          let returnResult = res;
+
+          if (res && !res.status) {
+            // apiMessageHandler(res.message);
+            returnResult = false;
+          }
+          if (returnResult) {
+            if (refresh) {
+              dispatch(
+                actions.set({
+                  _prop: 'cashDrawerTrasactions',
+                  values: {
+                    totalPage: res.data.last_page,
+                    data: res.data.data,
+                  },
+                }),
+              );
+            } else {
+              dispatch(
+                actions.set({
+                  _prop: 'cashDrawerTrasactions',
+                  values: {
+                    totalPage: res.data.last_page,
+                    data: [
+                      ...getState().user.cashDrawerTrasactions.data,
+                      ...res.data.data,
+                    ],
+                  },
+                }),
+              );
+            }
           }
           showLoader && dispatch(appAction.hideProgress());
           return returnResult;

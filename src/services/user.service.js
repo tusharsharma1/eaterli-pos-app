@@ -108,22 +108,47 @@ export default {
   validateCheckInPasscode(res_id, data) {
     return callApi(
       'POST',
-      `/api/restaurant/${res_id}/staff/code/validate`,data
+      `/api/restaurant/${res_id}/staff/code/validate`,
+      data,
     );
   },
-  updateCheckInStatus(res_id,staff_id, data) {
+  updateCheckInStatus(res_id, staff_id, data) {
     return callApi(
       'POST',
-      `/api/restaurant/${res_id}/staff/${staff_id}/check/status`,data
+      `/api/restaurant/${res_id}/staff/${staff_id}/check/status`,
+      data,
     );
   },
 
-  getOrderStatistics(res_id,loc_id, data) {
+  getOrderStatistics(res_id, loc_id, data) {
     let d = getQueryString(data);
     return callApi(
       'GET',
-      `/api/restaurant/${res_id}/location/${loc_id}/orders/statistics?${d}`
+      `/api/restaurant/${res_id}/location/${loc_id}/orders/statistics?${d}`,
     );
+  },
+
+  addCashDrawer(data, restaurant_id) {
+    return callApi(
+      'POST',
+      `/api/restaurant/${restaurant_id}/cash/drawers`,
+      data,
+      {
+        isformData: false,
+      },
+    );
+  },
+  getCashDrawerBalance(data, restaurant_id) {
+    let d = getQueryString(data);
+    return callApi(
+      'GET',
+      `/api/restaurant/${restaurant_id}/cash/drawers/filter?${d}`,
+    );
+  },
+
+  getCashDrawerTrasactions(data, restaurant_id) {
+    let d = getQueryString(data);
+    return callApi('GET', `/api/restaurant/${restaurant_id}/cash/drawers?${d}`);
   },
 };
 

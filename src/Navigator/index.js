@@ -144,12 +144,20 @@ function Navigator() {
             require('../Screens/ControlCenter/ControlCenter').default
           }
         />
-         <Stack.Screen
+        <Stack.Screen
           name="CashDrawer"
           getComponent={() =>
             require('../Screens/CashDrawer/CashDrawer').default
           }
         />
+         <Stack.Screen
+          name="CashDrawerTransactions"
+          getComponent={() =>
+            require('../Screens/CashDrawer/CashDrawerTransactions').default
+          }
+        />
+
+        
       </Stack.Navigator>
     </NavigationContainer>
   );

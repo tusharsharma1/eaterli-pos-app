@@ -69,6 +69,11 @@ const initialState = {
 
     giftCardModal:{show: false, ref: ''},
     scanOfferModal:{show: false, ref: ''},
+    cashDrawerTrasactions: {
+      totalPage: 1,
+      data: [],
+      currentPage:1
+    },
   },
   order: {
     cart: {},
