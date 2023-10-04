@@ -72,8 +72,10 @@ export default function Orders({navigation, route}) {
       userAction.getOrders(
         userData.restaurant.id,
         selectedLocation,
-        {page: orders.currentPage, limit: 25,
-          order_status: 'delivered'
+        {
+          page: orders.currentPage,
+          limit: 25,
+          // order_status: 'delivered'
         },
         _refresh,
         'orders',
@@ -138,8 +140,7 @@ export default function Orders({navigation, route}) {
 
               <TouchableOpacity
                 onPress={async () => {
-                  let pageWidthLength = 40
-                  ;
+                  let pageWidthLength = 40;
                   let AmountWidthLength = 8;
                   let fontSize = 20;
                   let headingFontSize = 25;
@@ -156,7 +157,7 @@ export default function Orders({navigation, route}) {
                   };
                   let printData = [
                     {
-                      charSize:2,
+                      charSize: 2,
                       size: 35,
                       align: 'center',
                       style: 'bold',
@@ -212,7 +213,7 @@ export default function Orders({navigation, route}) {
                   printData.push(newLineData);
 
                   printData.push({
-                    charSize:headingCharSize,
+                    charSize: headingCharSize,
                     size: headingFontSize,
                     align: 'left',
                     style: 'bold',
@@ -253,7 +254,7 @@ export default function Orders({navigation, route}) {
                   ) {
                     printData.push(newLineData);
                     printData.push({
-                      charSize:headingCharSize,
+                      charSize: headingCharSize,
                       size: headingFontSize,
                       align: 'left',
                       style: 'bold',
@@ -294,13 +295,21 @@ export default function Orders({navigation, route}) {
                   }
                   /////Products//////
                   printData.push(newLineData);
+                  // printData.push({
+                  //   charSize: headingCharSize,
+                  //   size: headingFontSize,
+                  //   align: 'left',
+                  //   style: 'bold',
+                  //   text: `Products`,
+                  // });
                   printData.push({
-                    charSize:headingCharSize,
-                    size: headingFontSize,
+                    charSize,
+                    size: fontSize,
                     align: 'left',
                     style: 'bold',
-                    text: `Products`,
+                    text: `${ensureLength('', pageWidthLength, true, '-')}`,
                   });
+
                   printData.push({
                     charSize,
                     size: fontSize,
@@ -319,7 +328,13 @@ export default function Orders({navigation, route}) {
                       false,
                     )}${ensureLength('Total', AmountWidthLength, false)}`,
                   });
-
+                  printData.push({
+                    charSize,
+                    size: fontSize,
+                    align: 'left',
+                    style: 'bold',
+                    text: `${ensureLength('', pageWidthLength, true, '-')}`,
+                  });
                   data.order_items.forEach(d => {
                     let variants = getVariants(d);
                     let add_ons = getAddons(d);
@@ -335,15 +350,16 @@ export default function Orders({navigation, route}) {
                         totalPrice = totalPrice - _discount;
                       }
                     }
-                    let item_name = `${d.item_name} ${
-                      variants.length
-                        ? variants.map(r => r.title).join(', ')
-                        : ''
-                    }${
-                      add_ons.length
-                        ? add_ons.map(r => r.product_name).join(', ')
-                        : ''
-                    }`;
+                    let item_name = `${d.item_name}`;
+                    // ${
+                    //   variants.length
+                    //     ? variants.map(r => r.title).join(', ')
+                    //     : ''
+                    // }${
+                    //   add_ons.length
+                    //     ? add_ons.map(r => r.product_name).join(', ')
+                    //     : ''
+                    // }`;
                     //  - (${d.quantity} @ ${parseFloat(d.rate || '0').toFixed(
                     //   2,
                     // )})`;
@@ -369,6 +385,51 @@ export default function Orders({navigation, route}) {
                         false,
                       )}`,
                     });
+                    if (variants.length) {
+                      variants.forEach(r => {
+                        printData.push({
+                          charSize,
+                          size: fontSize,
+                          align: 'left',
+                          style: 'normal',
+                          text: `${ensureLength(
+                            ` ${r.title}`,
+                            pageWidthLength -
+                              AmountWidthLength -
+                              4 -
+                              AmountWidthLength,
+                            true,
+                          )}${ensureLength('', 4, false)}${ensureLength(
+                            '',
+                            AmountWidthLength,
+                            false,
+                          )}${ensureLength('', AmountWidthLength, false)}`,
+                        });
+                      });
+                    }
+                    if (add_ons.length) {
+                      add_ons.forEach(r => {
+                        printData.push({
+                          charSize,
+                          size: fontSize,
+                          align: 'left',
+                          style: 'normal',
+                          text: `${ensureLength(
+                            ` ${r.product_name}`,
+                            pageWidthLength -
+                              AmountWidthLength -
+                              4 -
+                              AmountWidthLength,
+                            true,
+                          )}${ensureLength('', 4, false)}${ensureLength(
+                            '',
+                            AmountWidthLength,
+                            false,
+                          )}${ensureLength('', AmountWidthLength, false)}`,
+                        });
+                      });
+                    }
+                    // printData.push(newLineData);
                   });
 
                   if (
@@ -378,7 +439,15 @@ export default function Orders({navigation, route}) {
                   ) {
                     printData.push(newLineData);
                     printData.push({
-                      charSize:headingCharSize,
+                      charSize,
+                      size: fontSize,
+                      align: 'left',
+                      style: 'bold',
+                      text: `${ensureLength('', pageWidthLength, true, '.')}`,
+                    });
+                    printData.push(newLineData);
+                    printData.push({
+                      charSize: headingCharSize,
                       size: headingFontSize,
                       align: 'left',
                       style: 'bold',
@@ -431,6 +500,14 @@ export default function Orders({navigation, route}) {
                     charSize,
                     size: fontSize,
                     align: 'left',
+                    style: 'bold',
+                    text: `${ensureLength('', pageWidthLength, true, '.')}`,
+                  });
+                  printData.push(newLineData);
+                  printData.push({
+                    charSize,
+                    size: fontSize,
+                    align: 'left',
                     style: 'normal',
                     text: `${ensureLength(
                       `Sub Total:`,
@@ -442,6 +519,7 @@ export default function Orders({navigation, route}) {
                       false,
                     )}`,
                   });
+                  printData.push(newLineData);
                   printData.push({
                     charSize,
                     size: fontSize,
@@ -459,6 +537,7 @@ export default function Orders({navigation, route}) {
                       false,
                     )}`,
                   });
+                  printData.push(newLineData);
                   if (!!data.discount) {
                     printData.push({
                       charSize,
@@ -478,7 +557,7 @@ export default function Orders({navigation, route}) {
                         false,
                       )}`,
                     });
-
+                    printData.push(newLineData);
                     printData.push({
                       charSize,
                       size: fontSize,
@@ -496,6 +575,7 @@ export default function Orders({navigation, route}) {
                         false,
                       )}`,
                     });
+                    printData.push(newLineData);
                   }
 
                   printData.push({
@@ -513,7 +593,7 @@ export default function Orders({navigation, route}) {
                       false,
                     )}`,
                   });
-
+                  printData.push(newLineData);
                   if (
                     [
                       PAYMENT_METHOD.cash.id,
@@ -535,28 +615,59 @@ export default function Orders({navigation, route}) {
                         false,
                       )}`,
                     });
+                    printData.push(newLineData);
                     let remaining_amount =
                       parseFloat(data?.order_total) -
                       parseFloat(data?.received_amount);
                     if (!isFinite(remaining_amount)) {
                       remaining_amount = 0;
                     }
+                    // printData.push({
+                    //   charSize,
+                    //   size: fontSize,
+                    //   align: 'left',
+                    //   style: 'normal',
+                    //   text: `${ensureLength(
+                    //     `Remaining Amount:`,
+                    //     pageWidthLength - AmountWidthLength,
+                    //     true,
+                    //   )}${ensureLength(
+                    //     parseFloat(
+                    //       remaining_amount >= 0 ? remaining_amount : 0,
+                    //     ).toFixed(2),
+                    //     AmountWidthLength,
+                    //     false,
+                    //   )}`,
+                    // });
                     printData.push({
                       charSize,
                       size: fontSize,
                       align: 'left',
                       style: 'normal',
                       text: `${ensureLength(
-                        `Remaining Amount:`,
+                        `Change:`,
                         pageWidthLength - AmountWidthLength,
                         true,
                       )}${ensureLength(
-                        parseFloat(remaining_amount).toFixed(2),
+                        parseFloat(
+                          Math.abs(
+                            remaining_amount >= 0 ? 0 : remaining_amount,
+                          ),
+                        ).toFixed(2),
                         AmountWidthLength,
                         false,
                       )}`,
                     });
+                    printData.push(newLineData);
                   }
+
+                  printData.push({
+                    charSize,
+                    size: fontSize,
+                    align: 'left',
+                    style: 'normal',
+                    text: `${ensureLength('', pageWidthLength, true, '*')}`,
+                  });
 
                   POSModule.printUSBGPrinter(printData, res => {
                     console.log('[printUSBGPrinter]', res);
@@ -565,20 +676,25 @@ export default function Orders({navigation, route}) {
                     }
                   });
 
-return
+                  return;
+
+                  let fscal = 12;
                   let fonts = {
                     35: 'var(--sh)',
                     25: 'var(--wh)',
                     20: 'var(--wp)',
+                    1: `${fscal}px`,
+                    2: `${fscal * 2}px`,
+                    3: `${fscal * 3}px`,
                   };
                   let htmlData = printData
                     .map(p => {
                       console.log(p.text);
                       return `<p class="para" style="color:black;text-align:${
                         p.align
-                      };font-weight:${p.style};font-size:${fonts[p.size]}">${
-                        p.text
-                      }</p>`;
+                      };font-weight:${p.style};font-size:${
+                        fonts[p.charSize]
+                      }">${p.text}</p>`;
                     })
                     .join('');
 

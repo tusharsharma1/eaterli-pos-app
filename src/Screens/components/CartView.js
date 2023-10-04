@@ -877,19 +877,19 @@ function Footer({}) {
     console.log(r);
     if (r && r.status) {
       simpleToast(r.message);
-      // toggleModal();
-      // setDiscountValues({
-      //   discount: 0,
-      //   discount_type: '1',
-      //   discount_reason: '',
-      // });
-      // dispatch(
-      //   orderAction.set({
-      //     cart: {},
-      //     diningOption: '',
-      //     customerDetail: CUSTOMER_DETAIL,
-      //   }),
-      // );
+      toggleModal();
+      setDiscountValues({
+        discount: 0,
+        discount_type: '1',
+        discount_reason: '',
+      });
+      dispatch(
+        orderAction.set({
+          cart: {},
+          diningOption: '',
+          customerDetail: CUSTOMER_DETAIL,
+        }),
+      );
     }
   };
 

@@ -104,9 +104,21 @@ const CashPaymentForm = ({total = 0, onSubmitSuccess}) => {
                 />
               </Row> */}
               <Row title={'Remaining amount'}>
-                <Text semibold color={remaining_amount >= 0 ? 'green' : 'red'}>
-                  {remaining_amount >= 0 ? '+' : '-'}$
-                  {Math.abs(remaining_amount).toFixed(2)}
+                <Text semibold color={remaining_amount > 0 ? 'red' : 'green'}>
+                  {remaining_amount >= 0 ? '' : ''}$
+                  {Math.abs(
+                    remaining_amount >= 0 ? remaining_amount : 0,
+                  ).toFixed(2)}
+                </Text>
+              </Row>
+              <Row title={'Change'}>
+                <Text
+                  semibold
+                  color={remaining_amount >= 0 ? 'green' : 'green'}>
+                  {remaining_amount >= 0 ? '' : '+'}$
+                  {Math.abs(
+                    remaining_amount >= 0 ? 0 : remaining_amount,
+                  ).toFixed(2)}
                 </Text>
               </Row>
               <View
