@@ -43,6 +43,11 @@ const initialState = {
       data: [],
       currentPage:1
     },
+    activeOrders: {
+      totalPage: 1,
+      data: [],
+      currentPage:1
+    },
 
     mobileBuilder: {
       layout: {

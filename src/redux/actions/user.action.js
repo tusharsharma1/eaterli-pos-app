@@ -417,6 +417,7 @@ export default {
     restaurant_location_id,
     data,
     refresh = false,
+    props='orders',
     showLoader = true,
   ) {
     return (dispatch, getState) => {
@@ -434,7 +435,7 @@ export default {
             if (refresh) {
               dispatch(
                 actions.set({
-                  _prop: 'orders',
+                  _prop: props,
                   values: {
                     totalPage: res.data.last_page,
                     data: res.data.data,
@@ -444,10 +445,10 @@ export default {
             } else {
               dispatch(
                 actions.set({
-                  _prop: 'orders',
+                  _prop: props,
                   values: {
                     totalPage: res.data.last_page,
-                    data: [...getState().user.orders.data, ...res.data.data],
+                    data: [...getState().user[props].data, ...res.data.data],
                   },
                 }),
               );

@@ -187,6 +187,13 @@ export default function Home(props) {
                 props.navigation.navigate('Orders');
               }}
             />
+             <IconBtn
+              text="Active Orders"
+              iconName="clipboard"
+              onPress={() => {
+                props.navigation.navigate('ActiveOrders');
+              }}
+            />
             <IconBtn
               text="Scan Offer"
               iconName="star"

@@ -86,6 +86,11 @@ function Navigator() {
         />
 
         <Stack.Screen
+          name="ActiveOrders"
+          getComponent={() => require('../Screens/Orders/ActiveOrders').default}
+        />
+
+        <Stack.Screen
           name="ProductMenu"
           getComponent={() =>
             require('../Screens/ProductMenu/ProductMenu').default
@@ -150,14 +155,12 @@ function Navigator() {
             require('../Screens/CashDrawer/CashDrawer').default
           }
         />
-         <Stack.Screen
+        <Stack.Screen
           name="CashDrawerTransactions"
           getComponent={() =>
             require('../Screens/CashDrawer/CashDrawerTransactions').default
           }
         />
-
-        
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -38,23 +38,23 @@ function ensureLength(
   }
 }
 
-export default function Orders({navigation, route}) {
+export default function ActiveOrders({navigation, route}) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
   const userData = useSelector(s => s.user.userData);
-  const orders = useSelector(s => s.user.orders);
+  const activeOrders = useSelector(s => s.user.activeOrders);
   const [refresh, setRefresh] = useState(true);
-  let prevCurrentPage = usePrevious(orders.currentPage);
+  let prevCurrentPage = usePrevious(activeOrders.currentPage);
   const toggleModal = () => {
     setShowModal(!showModal);
   };
   useEffect(() => {
     dispatch(
       userAction.set({
-        _prop: 'orders',
+        _prop: 'activeOrders',
         values: {
           currentPage: 1,
         },
@@ -64,19 +64,17 @@ export default function Orders({navigation, route}) {
     loadData(true);
   }, []);
   useNonInitialEffect(() => {
-    loadData(prevCurrentPage >= orders.currentPage);
-  }, [orders.currentPage, refresh]);
+    loadData(prevCurrentPage >= activeOrders.currentPage);
+  }, [activeOrders.currentPage, refresh]);
   const loadData = async _refresh => {
     setLoaded(false);
     let r = await dispatch(
       userAction.getOrders(
         userData.restaurant.id,
         selectedLocation,
-        {page: orders.currentPage, limit: 25,
-          order_status: 'delivered'
-        },
+        {page: activeOrders.currentPage, limit: 25, order_status: 'created'},
         _refresh,
-        'orders',
+        'activeOrders',
         false,
       ),
     );
@@ -86,6 +84,7 @@ export default function Orders({navigation, route}) {
   const columns = useMemo(() => {
     return [
       {title: 'Order No', align: 'left', key: 'id'},
+      // {title: 'Order Status', align: 'left', key: 'order_status'},
       {
         title: 'Total Products',
         renderValue: data => {
@@ -123,6 +122,22 @@ export default function Orders({navigation, route}) {
               {/* <TouchableOpacity>
           <FontAwesome5Icon name="pen" />
         </TouchableOpacity> */}
+              {/* <TouchableOpacity
+                onPress={() => {
+                  // setSelectedOrder(data);
+                  // toggleModal();
+                }}
+                style={{
+                  // backgroundColor:'red',
+                  padding: 4,
+                  marginRight: 10,
+                }}>
+                <FontAwesome5Icon
+                  name="pencil-alt"
+                  color={'#212121'}
+                  size={22}
+                />
+              </TouchableOpacity> */}
               <TouchableOpacity
                 onPress={() => {
                   setSelectedOrder(data);
@@ -136,7 +151,7 @@ export default function Orders({navigation, route}) {
                 <FontAwesome5Icon name="eye" color={'#212121'} size={22} />
               </TouchableOpacity>
 
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 onPress={async () => {
                   let pageWidthLength = 40
                   ;
@@ -666,7 +681,7 @@ return
                   padding: 4,
                 }}>
                 <FontAwesome5Icon name="print" color={'#212121'} size={22} />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           );
         },
@@ -682,16 +697,16 @@ return
   }
   return (
     <>
-      <Header title={'Orders'} back />
+      <Header title={'Active Orders'} back />
       <Container style={{flex: 1}}>
         <Table
-          data={orders.data}
+          data={activeOrders.data}
           columns={columns}
           refreshing={!loaded}
           onRefresh={() => {
             dispatch(
               userAction.set({
-                _prop: 'orders',
+                _prop: 'activeOrders',
                 values: {
                   currentPage: 1,
                 },
@@ -702,12 +717,12 @@ return
           onEndReachedThreshold={0.1}
           onEndReached={r => {
             // console.log('onEndReached', r);
-            if (loaded && orders.totalPage > orders.currentPage) {
+            if (loaded && activeOrders.totalPage > activeOrders.currentPage) {
               dispatch(
                 userAction.set({
-                  _prop: 'orders',
+                  _prop: 'activeOrders',
                   values: {
-                    currentPage: orders.currentPage + 1,
+                    currentPage: activeOrders.currentPage + 1,
                   },
                 }),
               );
