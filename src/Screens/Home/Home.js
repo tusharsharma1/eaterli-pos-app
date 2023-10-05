@@ -3,38 +3,31 @@ import React, {useEffect, useState} from 'react';
 import {
   PermissionsAndroid,
   Platform,
-  ScrollView,
   TouchableOpacity,
   View,
 } from 'react-native';
+import {PERMISSIONS, requestMultiple} from 'react-native-permissions';
+import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import {useDispatch, useSelector} from 'react-redux';
 import AppLoader from '../../components/AppLoader';
 import Container from '../../components/Container';
 import Header from '../../components/Header';
-import {getPercentValue, showToast} from '../../helpers/app.helpers';
+import ModalContainer from '../../components/ModalContainer';
+import Text from '../../components/Text';
+import {DINING_OPTION} from '../../constants/order.constant';
+import {getPercentValue} from '../../helpers/app.helpers';
 import {getCurrentPosition} from '../../helpers/location.helper';
+import POSModule from '../../helpers/pos.helper';
+import {loadPrinters} from '../../helpers/printer.helper';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
+import orderAction from '../../redux/actions/order.action';
 import userAction from '../../redux/actions/user.action';
+import theme from '../../theme';
 import CartView from '../components/CartView';
 import CategoryGrid from '../components/CategoryGrid';
-import MenuItemGrid from '../components/MenuItemGrid';
-import Button from '../../components/Button';
-import Text from '../../components/Text';
-import theme from '../../theme';
-import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
-import POSModule from '../../helpers/pos.helper';
-import ModalContainer from '../../components/ModalContainer';
-import orderAction from '../../redux/actions/order.action';
-import {DINING_OPTION} from '../../constants/order.constant';
 import GiftCardsModal from '../components/GiftCardsModal';
+import MenuItemGrid from '../components/MenuItemGrid';
 import ScanOfferModal from '../components/ScanOfferModal';
-import {
-  check,
-  request,
-  PERMISSIONS,
-  RESULTS,
-  requestMultiple,
-} from 'react-native-permissions';
 export default function Home(props) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
@@ -49,6 +42,7 @@ export default function Home(props) {
     POSModule.initSDK();
     setLogs([]);
     loadData();
+    loadPrinters();
   }, []);
 
   const loadData = async () => {
@@ -136,6 +130,7 @@ export default function Home(props) {
     });
     console.log('requestMultiple result', r);
   };
+
   //
   const toggleModal = () => {
     dispatch(
@@ -187,7 +182,7 @@ export default function Home(props) {
                 props.navigation.navigate('Orders');
               }}
             />
-             <IconBtn
+            <IconBtn
               text="Active Orders"
               iconName="clipboard"
               onPress={() => {
@@ -346,7 +341,7 @@ export default function Home(props) {
         {!loaded && <AppLoader message={'Loading'} />}
       </View>
     </>
-  )
+  );
 }
 
 function IconBtn({

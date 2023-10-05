@@ -46,6 +46,11 @@ import Select from '../../components/Controls/Select';
 import {MenuProvider} from 'react-native-popup-menu';
 import SelectRadio from '../../components/Controls/SelectRadio';
 import DiscountModal from './DiscountModal';
+import {
+  createOrderReceiptPrintData,
+  doPrintUSBPrinter,
+  doWebViewPrint,
+} from '../../helpers/printer.helper';
 
 const Buffer = require('buffer').Buffer;
 function _CartView({}) {
@@ -252,7 +257,7 @@ function CartRow({id}) {
   const toggleDiscountModal = () => {
     setShowDiscountModal(!showDiscountModal);
   };
-  console.log('cccccc', itemtype,itemData, data,);
+  console.log('cccccc', itemtype, itemData, data);
   if (!itemData) {
     return null;
   }
@@ -890,6 +895,11 @@ function Footer({}) {
           customerDetail: CUSTOMER_DETAIL,
         }),
       );
+
+      let printData = createOrderReceiptPrintData(r.data);
+      await doPrintUSBPrinter(printData);
+      // return;
+      //__DEV__ && doWebViewPrint(printData);
     }
   };
 

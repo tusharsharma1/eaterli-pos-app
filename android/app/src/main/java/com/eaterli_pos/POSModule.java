@@ -800,6 +800,7 @@ if(SDK==null){
                 !DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].getConnState() )
         {
             Utils.toast( this.context,this.context.getString( R.string.str_cann_printer ) );
+            callBack.invoke(map);
             return;
         }
         Context _context=this.context;

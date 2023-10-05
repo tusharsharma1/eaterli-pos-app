@@ -239,6 +239,13 @@ function DrawerContent({navigation}) {
           screenName="CashDrawer"
         />
         <DrawerItem
+          // icon={WalletIcon}
+          title="Printer Settings"
+          // subTitle="USD 0"
+          onPress={drawerItemPress}
+          screenName="PrinterSettings"
+        />
+        <DrawerItem
           //  icon={PreviousRideIcon}
           title="Logout"
           onPress={logoutPress}

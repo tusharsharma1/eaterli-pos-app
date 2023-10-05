@@ -1,10 +1,16 @@
 import {ALERT_TYPE} from '../../constants/alert.constant';
-import {CUSTOMER_DETAIL, PRODUCT_MENU_TYPE} from '../../constants/order.constant';
+import {
+  CUSTOMER_DETAIL,
+  PRODUCT_MENU_TYPE,
+} from '../../constants/order.constant';
 
 const initialState = {
   app: {
     inProgress: false,
     progressMessage: 'Please wait',
+    printers: [],
+    pageWidthLength: 40,
+    pageLeftMarginLength: 0,
   },
   alert: {
     show: false,
@@ -41,12 +47,12 @@ const initialState = {
     orders: {
       totalPage: 1,
       data: [],
-      currentPage:1
+      currentPage: 1,
     },
     activeOrders: {
       totalPage: 1,
       data: [],
-      currentPage:1
+      currentPage: 1,
     },
 
     mobileBuilder: {
@@ -70,14 +76,14 @@ const initialState = {
       logo: '',
       app_name: '',
     },
-    rewards:[],
+    rewards: [],
 
-    giftCardModal:{show: false, ref: ''},
-    scanOfferModal:{show: false, ref: ''},
+    giftCardModal: {show: false, ref: ''},
+    scanOfferModal: {show: false, ref: ''},
     cashDrawerTrasactions: {
       totalPage: 1,
       data: [],
-      currentPage:1
+      currentPage: 1,
     },
   },
   order: {
@@ -89,7 +95,7 @@ const initialState = {
     diningOptionModal: {show: false, ref: ''},
     payModal: {show: false, ref: ''},
     customerDetail: CUSTOMER_DETAIL,
-    splitBills:[]
+    splitBills: [],
   },
 };
 export default initialState;

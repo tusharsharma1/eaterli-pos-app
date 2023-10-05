@@ -163,3 +163,19 @@ export function dateToTimeFormat(date) {
     seconds: parseInt(seconds),//.toString().padStart(2, '0'),
   };
 }
+
+export function ensureTextLength(
+  input = '',
+  requiredLength = 3,
+  padRight = true,
+  padChar = ' ',
+) {
+  input = input.toString();
+  if (input.length > requiredLength) return input.substring(0, requiredLength);
+  if (input.length == requiredLength) return input;
+  if (padRight) {
+    return input.padEnd(requiredLength, padChar);
+  } else {
+    return input.padStart(requiredLength, padChar);
+  }
+}

@@ -1,42 +1,22 @@
+import moment from 'moment';
 import React, {useEffect, useMemo, useState} from 'react';
-import {TouchableOpacity, View} from 'react-native';
-import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
+import {View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
+import {dummyImage} from '../../assets';
 import Container from '../../components/Container';
 import Header from '../../components/Header';
-import Table from '../../components/Table';
-import moment from 'moment';
 import ModalContainer from '../../components/ModalContainer';
-import ProgressImage from '../../components/react-native-image-progress';
+import Table from '../../components/Table';
 import Text from '../../components/Text';
-import theme from '../../theme';
+import ProgressImage from '../../components/react-native-image-progress';
 import {
   DEFAULT_TAX_TITLE,
   PAYMENT_METHOD,
 } from '../../constants/order.constant';
-import {dummyImage} from '../../assets';
-import userAction from '../../redux/actions/user.action';
 import {getAddons, getVariants} from '../../helpers/order.helper';
-import POSModule from '../../helpers/pos.helper';
-import {showToast} from '../../helpers/app.helpers';
-import usePrevious from '../../hooks/usePrevious';
 import {useNonInitialEffect} from '../../hooks/useNonInitialEffect';
-import RNPrint from 'react-native-print';
-function ensureLength(
-  input = '',
-  requiredLength = 3,
-  padRight = true,
-  padChar = ' ',
-) {
-  input = input.toString();
-  if (input.length > requiredLength) return input.substring(0, requiredLength);
-  if (input.length == requiredLength) return input;
-  if (padRight) {
-    return input.padEnd(requiredLength, padChar);
-  } else {
-    return input.padStart(requiredLength, padChar);
-  }
-}
+import usePrevious from '../../hooks/usePrevious';
+import userAction from '../../redux/actions/user.action';
 
 export default function CashDrawerTransactions({navigation, route}) {
   const dispatch = useDispatch();
@@ -108,7 +88,12 @@ export default function CashDrawerTransactions({navigation, route}) {
       {
         title: 'Amount',
         renderCell: data => {
-          return <Text bold color={data.type == '1' ?'green':'red'}>{data.type == '1' ?'':'-'} ${parseFloat(data.amount).toFixed(2)}</Text>;
+          return (
+            <Text bold color={data.type == '1' ? 'green' : 'red'}>
+              {data.type == '1' ? '' : '-'} $
+              {parseFloat(data.amount).toFixed(2)}
+            </Text>
+          );
         },
         align: 'right',
       },

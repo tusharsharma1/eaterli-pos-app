@@ -161,6 +161,12 @@ function Navigator() {
             require('../Screens/CashDrawer/CashDrawerTransactions').default
           }
         />
+        <Stack.Screen
+          name="PrinterSettings"
+          getComponent={() =>
+            require('../Screens/PrinterSettings/PrinterSettings').default
+          }
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
