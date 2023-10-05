@@ -5,38 +5,62 @@ import SplashView from '../components/SplashView';
 import {loginFromKeyChain} from '../helpers/user.helper';
 
 import {getUniqueId} from 'react-native-device-info';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import userAction from '../redux/actions/user.action';
 import theme from '../theme';
-// import {fcmService} from '../firebase/FCMService';
-// import {loginFromKeyChain} from '../helpers/user.helper';
-// import userAction from '../redux/actions/user.action';
-// import store from '../redux/store';
-// import Onboard from '../screens/Onboard/Onboard';
-// import SearchLocation from '../screens/Pickup/SearchLocation';
-// import PersonalInfo from '../screens/Settings/PersonalInfo';
-// import Settings from '../screens/Settings/Settings';
-// import UpdatePersonalInfo from '../screens/Settings/UpdatePersonalInfo';
-// import AddMobile from '../screens/SignUp/AddMobile';
-// import Login from '../screens/SignUp/Login';
-// import SignUp from '../screens/SignUp/SignUp';
-// import HomeNavigator from './HomeNavigator';
-// import CancelRide from '../screens/Pickup/CancelRide';
-// import {checkVersion} from 'react-native-check-version';
-// import SplashView from './SplashView';
-// import Report from '../screens/Report/Report';
-// import ReportSubmit from '../screens/Report/ReportSubmit';
 
+import crashlytics from '@react-native-firebase/crashlytics';
 const Stack = createNativeStackNavigator();
-
+let initCrashlytics = false;
 function Navigator() {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
   const [initialRouteName, setInitialRouteName] = useState('Login');
-
+  const userData = useSelector(s => s.user.userData);
   useEffect(() => {
     checkLogin();
   }, []);
+
+  useEffect(() => {
+    // console.log('initCrashlytics ll', initCrashlytics, userData);
+    if (!initCrashlytics && userData) {
+      loadCrashlytics();
+    }
+  }, [userData]);
+
+  const loadCrashlytics = async () => {
+    console.log(
+      'initCrashlytics',
+      false,
+      crashlytics().isCrashlyticsCollectionEnabled,
+    );
+    crashlytics().log('User signed in.');
+    // await Promise.all([
+    crashlytics()
+      .setUserId(`${userData.user_id}`)
+      .catch(e => {
+        console.log('initCrashlytics setUserId error', e);
+      });
+
+    crashlytics()
+      .setAttributes({
+        // role: 'admin',
+        // followers: '14',
+        user_id: `${userData.user_id}`,
+        email: userData.email,
+        username: userData.name,
+      })
+      .catch(e => {
+        console.log('initCrashlytics setAttributes error', e);
+      });
+
+    // ]).catch(r=>{
+    //   console.log('initCrashlytics error',r)
+    // });
+    initCrashlytics = true;
+
+    console.log('initCrashlytics', initCrashlytics);
+  };
 
   const checkLogin = async () => {
     let deviceId = await getUniqueId();

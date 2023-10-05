@@ -786,6 +786,7 @@ if(SDK==null){
 
         map.putString("pname",pname);
         callBack.invoke(map);
+    //    throw new RuntimeException("Test Crash"); // Force a crash
 
     }
 

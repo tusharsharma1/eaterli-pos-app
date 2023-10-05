@@ -1,0 +1,126 @@
+{
+  "project_info": {
+    "project_number": "1053922372032",
+    "project_id": "eaterli-app",
+    "storage_bucket": "eaterli-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053922372032:android:79807868d107641d6d0025",
+        "android_client_info": {
+          "package_name": "com.eaterli_customer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1053922372032-ejdn082hn1ivbpidc64cvh3t7qpre9ud.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNZgnoZGziFXBOPQO4Vry4RJob7SAW_9g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1053922372032-ejdn082hn1ivbpidc64cvh3t7qpre9ud.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053922372032:android:e01f7977a53707096d0025",
+        "android_client_info": {
+          "package_name": "com.eaterli_customer.fishnfry"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1053922372032-ejdn082hn1ivbpidc64cvh3t7qpre9ud.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNZgnoZGziFXBOPQO4Vry4RJob7SAW_9g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1053922372032-ejdn082hn1ivbpidc64cvh3t7qpre9ud.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053922372032:android:58283bb3a73a07e26d0025",
+        "android_client_info": {
+          "package_name": "com.eaterli_management"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1053922372032-ejdn082hn1ivbpidc64cvh3t7qpre9ud.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNZgnoZGziFXBOPQO4Vry4RJob7SAW_9g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1053922372032-ejdn082hn1ivbpidc64cvh3t7qpre9ud.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053922372032:android:fc17d895150b41046d0025",
+        "android_client_info": {
+          "package_name": "com.eaterli_pos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1053922372032-ejdn082hn1ivbpidc64cvh3t7qpre9ud.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNZgnoZGziFXBOPQO4Vry4RJob7SAW_9g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1053922372032-ejdn082hn1ivbpidc64cvh3t7qpre9ud.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

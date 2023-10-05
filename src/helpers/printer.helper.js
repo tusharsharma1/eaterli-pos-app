@@ -10,7 +10,7 @@ import {PAYMENT_METHOD} from '../constants/order.constant';
 export function getUSBGPrinters() {
   return new Promise(res => {
     POSModule.getUSBGPrinters({}, result => {
-      res(result.devices);
+      res(result?.devices||[]);
     });
   });
 }

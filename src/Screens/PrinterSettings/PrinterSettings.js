@@ -14,7 +14,7 @@ import {
   loadPrinters,
 } from '../../helpers/printer.helper';
 import theme from '../../theme';
-
+import crashlytics from '@react-native-firebase/crashlytics';
 export default function PrinterSettings({navigation, route}) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
@@ -92,6 +92,7 @@ export default function PrinterSettings({navigation, route}) {
                   borderRadius={0}
                   style={{}}
                   onPress={async () => {
+                    // crashlytics().crash()
                     await connectUSBPrinters(pname);
                   }}>
                   {pname}
