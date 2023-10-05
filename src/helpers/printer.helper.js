@@ -20,6 +20,7 @@ export function connectUSBPrinters(pname) {
     POSModule.getConnectUSBGPrinter({pname}, result => {
       if (result.error) {
         simpleToast(result.error);
+        res(false);
       } else {
         simpleToast(`${pname} Connected`);
         React.store.dispatch(
@@ -27,8 +28,9 @@ export function connectUSBPrinters(pname) {
             selectedPrinter: pname,
           }),
         );
+        res(true);
       }
-      res(true);
+     
     });
   });
 }

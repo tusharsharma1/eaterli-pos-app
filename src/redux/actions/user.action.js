@@ -811,4 +811,25 @@ export default {
         .catch(apiErrorHandler);
     };
   },
+
+
+  voidOrderUpdate(restaurant_id, order_id, data, showProgress = true) {
+    return (dispatch, getState) => {
+      showProgress && dispatch(appAction.showProgress());
+      return userService
+        .voidOrderUpdate(restaurant_id, order_id, data)
+        .then(res => {
+          let returnResult = res;
+          if (res && !res.status) {
+            showAlert && apiMessageHandler(res);
+            returnResult = false;
+          }
+          if (returnResult) {
+          }
+          showProgress && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
 };

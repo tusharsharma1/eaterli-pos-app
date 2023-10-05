@@ -150,6 +150,14 @@ export default {
     let d = getQueryString(data);
     return callApi('GET', `/api/restaurant/${restaurant_id}/cash/drawers?${d}`);
   },
+
+  voidOrderUpdate(restaurant_id, order_id, data) {
+    return callApi(
+      'PUT',
+      `/api/restaurant/${restaurant_id}/orders/${order_id}/void`,
+      data,
+    );
+  },
 };
 
 //--->  https://maps.googleapis.com/maps/api/distancematrix/json?departure_time=now&destinations=place_id:ChIJVXLyCt0GoDkRDcqCTX7FDWs&origins=place_id:ChIJeYSWxSIHoDkR3sGoRXQaQBc&key=AIzaSyCL6zp79W047VPyb-sReTtHsklzYP767ac

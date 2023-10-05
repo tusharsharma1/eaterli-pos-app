@@ -66,7 +66,7 @@ export default function PrintersModal({}) {
               style={{}}
               onPress={async () => {
                 // crashlytics().crash()
-                await connectUSBPrinters(pname);
+                let c = await connectUSBPrinters(pname);
 
                 if (pendingOrderPrint) {
                   let printData =
@@ -78,6 +78,9 @@ export default function PrintersModal({}) {
                       pendingOrderPrint: null,
                     }),
                   );
+                }
+                if (c) {
+                  toggleModal();
                 }
               }}>
               {pname}

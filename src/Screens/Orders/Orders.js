@@ -24,6 +24,10 @@ import {
 import {useNonInitialEffect} from '../../hooks/useNonInitialEffect';
 import usePrevious from '../../hooks/usePrevious';
 import userAction from '../../redux/actions/user.action';
+import Button from '../../components/Button';
+import alertAction from '../../redux/actions/alert.action';
+import {ALERT_ICON_TYPE, ALERT_TYPE} from '../../constants/alert.constant';
+import {simpleToast} from '../../helpers/app.helpers';
 
 export default function Orders({navigation, route}) {
   const dispatch = useDispatch();
@@ -72,6 +76,32 @@ export default function Orders({navigation, route}) {
     setLoaded(true);
   };
 
+  const voidPress = () => {
+    dispatch(
+      alertAction.showAlert({
+        type: ALERT_TYPE.CONFIRM,
+        icon: ALERT_ICON_TYPE.CONFIRM,
+        text: 'Do you want to void this order?',
+        heading: 'Confirmation',
+        positiveText: 'Yes, remove',
+        onPositivePress: async () => {
+          let r = await dispatch(
+            userAction.voidOrderUpdate(
+              userData.restaurant.id,
+              selectedOrder.id,
+              {
+                order_void: 1,
+              },
+            ),
+          );
+
+          if (r && r.status) {
+            simpleToast(r.message);
+          }
+        },
+      }),
+    );
+  };
   const columns = useMemo(() => {
     return [
       {title: 'Order No', align: 'left', key: 'id'},
@@ -226,6 +256,16 @@ export default function Orders({navigation, route}) {
       >
         {!!selectedOrder && (
           <>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+              }}>
+              <Button mr={5} onPress={voidPress}>
+                Void
+              </Button>
+              {/* <Button>Refund</Button> */}
+            </View>
             <View
               style={{
                 // alignItems: 'flex-end',
