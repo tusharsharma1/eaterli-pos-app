@@ -1,9 +1,9 @@
 import moment from 'moment';
-import React, { useEffect, useMemo, useState } from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import React, {useEffect, useMemo, useState} from 'react';
+import {TouchableOpacity, View} from 'react-native';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
-import { useDispatch, useSelector } from 'react-redux';
-import { dummyImage } from '../../assets';
+import {useDispatch, useSelector} from 'react-redux';
+import {dummyImage} from '../../assets';
 import Container from '../../components/Container';
 import Header from '../../components/Header';
 import ModalContainer from '../../components/ModalContainer';
@@ -14,9 +14,14 @@ import {
   DEFAULT_TAX_TITLE,
   PAYMENT_METHOD,
 } from '../../constants/order.constant';
-import { getAddons, getVariants } from '../../helpers/order.helper';
-import { createOrderReceiptPrintData, doPrintUSBPrinter, doWebViewPrint } from '../../helpers/printer.helper';
-import { useNonInitialEffect } from '../../hooks/useNonInitialEffect';
+import {getAddons, getVariants} from '../../helpers/order.helper';
+import {
+  checkPrinterConnection,
+  createOrderReceiptPrintData,
+  doPrintUSBPrinter,
+  doWebViewPrint,
+} from '../../helpers/printer.helper';
+import {useNonInitialEffect} from '../../hooks/useNonInitialEffect';
 import usePrevious from '../../hooks/usePrevious';
 import userAction from '../../redux/actions/user.action';
 
@@ -122,10 +127,17 @@ export default function Orders({navigation, route}) {
 
               <TouchableOpacity
                 onPress={async () => {
-                 let printData=createOrderReceiptPrintData(data)
+                  if (!__DEV__) {
+                    let c = await checkPrinterConnection();
+                    if (!c) {
+                      return;
+                    }
+                  }
+
+                  let printData = createOrderReceiptPrintData(data);
                   await doPrintUSBPrinter(printData);
                   // return;
-                  __DEV__ && doWebViewPrint(printData);  
+                  //  __DEV__ && doWebViewPrint(printData);
                   ///////////////////
                   // POSModule.printByAllInOnePOS(printData, res => {
                   //   console.log('[printByAllInOnePOS]', res);

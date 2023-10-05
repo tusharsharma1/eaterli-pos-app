@@ -11,6 +11,9 @@ const initialState = {
     printers: [],
     pageWidthLength: 40,
     pageLeftMarginLength: 0,
+    selectedPrinter:'',
+    printerModal:false,
+    pendingOrderPrint:null
   },
   alert: {
     show: false,

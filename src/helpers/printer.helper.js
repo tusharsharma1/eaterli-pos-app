@@ -10,7 +10,7 @@ import {PAYMENT_METHOD} from '../constants/order.constant';
 export function getUSBGPrinters() {
   return new Promise(res => {
     POSModule.getUSBGPrinters({}, result => {
-      res(result?.devices||[]);
+      res(result?.devices || []);
     });
   });
 }
@@ -21,7 +21,12 @@ export function connectUSBPrinters(pname) {
       if (result.error) {
         simpleToast(result.error);
       } else {
-        simpleToast(`${printers[0]} Connected`);
+        simpleToast(`${pname} Connected`);
+        React.store.dispatch(
+          appAction.set({
+            selectedPrinter: pname,
+          }),
+        );
       }
       res(true);
     });
@@ -53,6 +58,22 @@ export async function loadPrinters(autoSelect = true) {
       simpleToast('No Printer Device Connected.');
     }
   }
+}
+export function selectPrinters() {
+  React.store.dispatch(
+    appAction.set({
+      printerModal: true,
+    }),
+  );
+}
+
+export async function checkPrinterConnection() {
+  let {selectedPrinter} = React.store.getState().app;
+  if (!selectedPrinter) {
+    await loadPrinters(false);
+    selectPrinters();
+  }
+  return !!selectedPrinter
 }
 
 export async function doWebViewPrint(printData = []) {
@@ -114,7 +135,7 @@ export async function doWebViewPrint(printData = []) {
     </body>
   </html>
   `;
-  console.log('print printData', printData, htmlData);
+  // console.log('print printData', printData, htmlData);
 
   let r = await RNPrint.print({
     html: `
@@ -135,7 +156,7 @@ export function createOrderReceiptPrintData(data) {
 
   let charSize = 1;
   let headingCharSize = 1;
-  let pAlign='center'
+  let pAlign = 'center';
   let leftPaddingText = ensureTextLength(``, pageLeftMarginLength, false, '=');
 
   let setMargin = _text => {
@@ -412,7 +433,11 @@ export function createOrderReceiptPrintData(data) {
         size: fontSize,
         align: pAlign,
         style: 'normal',
-        text: `${ensureTextLength(`${i + 1}. ${d.type}`, pageWidthLength, true)}` ,
+        text: `${ensureTextLength(
+          `${i + 1}. ${d.type}`,
+          pageWidthLength,
+          true,
+        )}`,
       });
       printData.push({
         charSize,

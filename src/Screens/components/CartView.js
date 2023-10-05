@@ -47,10 +47,12 @@ import {MenuProvider} from 'react-native-popup-menu';
 import SelectRadio from '../../components/Controls/SelectRadio';
 import DiscountModal from './DiscountModal';
 import {
+  checkPrinterConnection,
   createOrderReceiptPrintData,
   doPrintUSBPrinter,
   doWebViewPrint,
 } from '../../helpers/printer.helper';
+import appAction from '../../redux/actions/app.action';
 
 const Buffer = require('buffer').Buffer;
 function _CartView({}) {
@@ -895,6 +897,18 @@ function Footer({}) {
           customerDetail: CUSTOMER_DETAIL,
         }),
       );
+
+      if (!__DEV__) {
+        let c = await checkPrinterConnection();
+        if (!c) {
+          dispatch(
+            appAction.set({
+              pendingOrderPrint: r.data,
+            }),
+          );
+          return;
+        }
+      }
 
       let printData = createOrderReceiptPrintData(r.data);
       await doPrintUSBPrinter(printData);

@@ -12,6 +12,7 @@ import ToastContainer from './components/ToastContainer';
 import Navigator from './Navigator';
 import theme from './theme';
 import AlertBox from './components/AlertBox';
+import PrintersModal from './Screens/components/PrintersModal';
 
 const App = () => {
   return (
@@ -34,7 +35,7 @@ const App = () => {
       </KeyboardAvoidingView>
       <AlertBox />
       <AppProgess />
-
+      <PrintersModal/>
       <ToastContainer />
     </>
   );

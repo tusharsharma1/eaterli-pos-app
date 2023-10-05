@@ -1,33 +1,16 @@
-import React, {useEffect, useState} from 'react';
-import {View} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
+import React from 'react';
 import Button from '../../components/Button';
 import Container from '../../components/Container';
 import Header from '../../components/Header';
-import ModalContainer from '../../components/ModalContainer';
-import Text from '../../components/Text';
 import {
-  connectUSBPrinters,
   createOrderReceiptPrintData,
   doPrintUSBPrinter,
   doWebViewPrint,
   loadPrinters,
+  selectPrinters,
 } from '../../helpers/printer.helper';
 import theme from '../../theme';
-import crashlytics from '@react-native-firebase/crashlytics';
 export default function PrinterSettings({navigation, route}) {
-  const dispatch = useDispatch();
-  const [showModal, setShowModal] = useState(false);
-  const printers = useSelector(s => s.app.printers);
-  // let printers = ['4234', '2342342', '343534534'];
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {};
-  const toggleModal = () => {
-    setShowModal(!showModal);
-  };
   return (
     <>
       <Header title={'Printer Settings'} back />
@@ -45,7 +28,7 @@ export default function PrinterSettings({navigation, route}) {
             mb={10}
             onPress={async () => {
               await loadPrinters(false);
-              toggleModal();
+              selectPrinters();
             }}>
             Connect USB Printer
           </Button>
@@ -57,55 +40,11 @@ export default function PrinterSettings({navigation, route}) {
               let printData = createOrderReceiptPrintData(TEST_ORDER);
               await doPrintUSBPrinter(printData);
               // return;
-              __DEV__ && doWebViewPrint(printData);
+             __DEV__ && doWebViewPrint(printData);
             }}>
             Test Print
           </Button>
         </Container>
-
-        <ModalContainer
-          // hideTitle
-          center
-          // noscroll
-          onRequestClose={toggleModal}
-          visible={showModal}
-          title={'USB Printers'}
-          landscapeWidth={350}
-          // height={'98%'}
-          // borderRadius={25}
-        >
-          <View
-            style={{
-              // flex: 1,
-
-              padding: 20,
-              paddingVertical: 0,
-            }}>
-            {printers.map((pname, i) => {
-              return (
-                <Button
-                  backgroundColor={'#fff'}
-                  color="#313131"
-                  key={i}
-                  mr={10}
-                  mb={10}
-                  borderRadius={0}
-                  style={{}}
-                  onPress={async () => {
-                    // crashlytics().crash()
-                    await connectUSBPrinters(pname);
-                  }}>
-                  {pname}
-                </Button>
-              );
-            })}
-            {!printers.length && (
-              <Text mt={20} align="center" size={16}>
-                No Printer Device Connected.
-              </Text>
-            )}
-          </View>
-        </ModalContainer>
       </Container>
     </>
   );
