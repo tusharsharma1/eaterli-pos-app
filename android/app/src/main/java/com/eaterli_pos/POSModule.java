@@ -836,7 +836,7 @@ if(SDK==null){
     {
         EscCommand esc = new EscCommand();
         esc.addInitializePrinter();
-        esc.addPrintAndFeedLines( (byte) 3 );
+        esc.addPrintAndFeedLines( (byte) 2 );
         Bitmap b = BitmapFactory.decodeResource( this.context.getResources(),
                 R.drawable.logo );
 
@@ -921,7 +921,7 @@ if(SDK==null){
            // Log.d(getName(), "printByAllInOnePOS Text:-> "+ob.getString("text")+" | "+alignment+" | "+textStyle+" | "+size);
         }
 
-        esc.addPrintAndFeedLines( (byte) 3 );
+        // esc.addPrintAndFeedLines( (byte) 3 );
 
 
 //        /* 设置打印居中 */

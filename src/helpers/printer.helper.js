@@ -124,8 +124,8 @@ export async function doWebViewPrint(printData = []) {
                padding: 0;
             }
             .page{
-              width: 77mm;
-              background-color:#fff;
+              width: 80mm;
+              background-color:#fefefe;
               margin:auto
             }
       </style>
@@ -498,7 +498,7 @@ export function createOrderReceiptPrintData(data) {
       false,
     )}`,
   });
-  printData.push(newLineData);
+  // printData.push(newLineData);
   printData.push({
     charSize,
     size: fontSize,
@@ -516,7 +516,7 @@ export function createOrderReceiptPrintData(data) {
       false,
     )}`,
   });
-  printData.push(newLineData);
+  // printData.push(newLineData);
   if (!!data.discount) {
     printData.push({
       charSize,
@@ -535,7 +535,7 @@ export function createOrderReceiptPrintData(data) {
         false,
       )}`,
     });
-    printData.push(newLineData);
+    // printData.push(newLineData);
     printData.push({
       charSize,
       size: fontSize,
@@ -553,7 +553,7 @@ export function createOrderReceiptPrintData(data) {
         false,
       )}`,
     });
-    printData.push(newLineData);
+    // printData.push(newLineData);
   }
 
   printData.push({
@@ -571,7 +571,7 @@ export function createOrderReceiptPrintData(data) {
       false,
     )}`,
   });
-  printData.push(newLineData);
+  // printData.push(newLineData);
   if (
     [PAYMENT_METHOD.cash.id, PAYMENT_METHOD.split_payment.id].includes(
       data.payment_method,
@@ -592,7 +592,7 @@ export function createOrderReceiptPrintData(data) {
         false,
       )}`,
     });
-    printData.push(newLineData);
+    // printData.push(newLineData);
     let remaining_amount =
       parseFloat(data?.order_total) - parseFloat(data?.received_amount);
     if (!isFinite(remaining_amount)) {
@@ -632,9 +632,9 @@ export function createOrderReceiptPrintData(data) {
         false,
       )}`,
     });
-    printData.push(newLineData);
+    // printData.push(newLineData);
   }
-
+  printData.push(newLineData);
   printData.push({
     charSize,
     size: fontSize,
@@ -642,6 +642,17 @@ export function createOrderReceiptPrintData(data) {
     style: 'normal',
     text: `${ensureTextLength('', pageWidthLength, true, '*')}`,
   });
-
+  printData.push(newLineData);
+  printData.push(newLineData);
+  printData.push(newLineData);
+  printData.push(newLineData);
+  printData.push(newLineData);
+  printData.push({
+    charSize,
+    size: fontSize,
+    align: pAlign,
+    style: 'normal',
+    text: `${ensureTextLength('', pageWidthLength, true, '…')}`,
+  });
   return printData;
 }

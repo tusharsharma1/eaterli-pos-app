@@ -156,6 +156,15 @@ export default {
       'PUT',
       `/api/restaurant/${restaurant_id}/orders/${order_id}/void`,
       data,
+      {isformData:false}
+    );
+  },
+  refundOrder(restaurant_id, order_id, data) {
+    return callApi(
+      'POST',
+      `/api/restaurant/${restaurant_id}/orders/${order_id}/refunds`,
+      data,
+      {isformData:false}
     );
   },
 };

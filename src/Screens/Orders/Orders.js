@@ -28,6 +28,8 @@ import Button from '../../components/Button';
 import alertAction from '../../redux/actions/alert.action';
 import {ALERT_ICON_TYPE, ALERT_TYPE} from '../../constants/alert.constant';
 import {simpleToast} from '../../helpers/app.helpers';
+import OrderRefundForm from '../../forms/OrderRefundForm';
+import Badge from '../../components/Badge';
 
 export default function Orders({navigation, route}) {
   const dispatch = useDispatch();
@@ -39,8 +41,12 @@ export default function Orders({navigation, route}) {
   const orders = useSelector(s => s.user.orders);
   const [refresh, setRefresh] = useState(true);
   let prevCurrentPage = usePrevious(orders.currentPage);
+  const [refundModal, setRefundModal] = useState(false);
   const toggleModal = () => {
     setShowModal(!showModal);
+  };
+  const toggleRefundModal = () => {
+    setRefundModal(!refundModal);
   };
   useEffect(() => {
     dispatch(
@@ -75,7 +81,17 @@ export default function Orders({navigation, route}) {
     );
     setLoaded(true);
   };
-
+  const refreshList = () => {
+    dispatch(
+      userAction.set({
+        _prop: 'orders',
+        values: {
+          currentPage: 1,
+        },
+      }),
+    );
+    setRefresh(!refresh);
+  };
   const voidPress = () => {
     dispatch(
       alertAction.showAlert({
@@ -97,14 +113,41 @@ export default function Orders({navigation, route}) {
 
           if (r && r.status) {
             simpleToast(r.message);
+            toggleModal();
+            refreshList();
           }
         },
       }),
     );
   };
+  const refundPress = () => {
+    toggleRefundModal();
+  };
   const columns = useMemo(() => {
     return [
-      {title: 'Order No', align: 'left', key: 'id'},
+      {
+        title: 'Order No',
+        align: 'left',
+        key: 'id',
+        renderCell: data => {
+          return (
+            <View
+              style={{
+                flexDirection: 'row',
+              }}>
+              <Text mr={5}>{data.id}</Text>
+              {data.order_void == '1' && (
+                <Badge backgroundColor="#e20b3c" mr={4}>
+                  Void
+                </Badge>
+              )}
+              {!!data.order_refunds?.length && (
+                <Badge backgroundColor="#e27b0b">Refund</Badge>
+              )}
+            </View>
+          );
+        },
+      },
       {
         title: 'Total Products',
         renderValue: data => {
@@ -194,6 +237,8 @@ export default function Orders({navigation, route}) {
   if (!isFinite(remaining_amount)) {
     remaining_amount = 0;
   }
+
+  
   return (
     <>
       <Header title={'Orders'} back />
@@ -203,15 +248,7 @@ export default function Orders({navigation, route}) {
           columns={columns}
           refreshing={!loaded}
           onRefresh={() => {
-            dispatch(
-              userAction.set({
-                _prop: 'orders',
-                values: {
-                  currentPage: 1,
-                },
-              }),
-            );
-            setRefresh(!refresh);
+            refreshList();
           }}
           onEndReachedThreshold={0.1}
           onEndReached={r => {
@@ -260,11 +297,32 @@ export default function Orders({navigation, route}) {
               style={{
                 flexDirection: 'row',
                 justifyContent: 'flex-end',
+                marginBottom: 10,
+                alignItems:'center'
               }}>
-              <Button mr={5} onPress={voidPress}>
-                Void
-              </Button>
-              {/* <Button>Refund</Button> */}
+              {!(
+                selectedOrder.order_void == '1'||
+                !!selectedOrder.order_refunds?.length
+              )&& (
+                <>
+                  <Button pv={8} ph={30} mr={5} onPress={voidPress}>
+                    Void
+                  </Button>
+
+                  <Button pv={8} ph={30} onPress={refundPress}>
+                    Refund
+                  </Button>
+                </>
+              )}
+
+              {selectedOrder.order_void == '1' && (
+                <Badge backgroundColor="#e20b3c" mr={4}>
+                  Void
+                </Badge>
+              )}
+              {!!selectedOrder.order_refunds?.length && (
+                <Badge backgroundColor="#e27b0b">Refund</Badge>
+              )}
             </View>
             <View
               style={{
@@ -554,6 +612,40 @@ export default function Orders({navigation, route}) {
             </View>
           </>
         )}
+      </ModalContainer>
+
+      <ModalContainer
+        // hideTitle
+        center
+        // noscroll
+        onRequestClose={toggleRefundModal}
+        visible={refundModal}
+        title={`Refund`}
+        landscapeWidth={400}
+        // width={550}
+        // height={theme.hp(60)}
+        // borderRadius={25}
+        // renderFooter={() => {
+        //   return (
+        //     <View
+        //       style={{
+        //         alignItems: 'flex-end',
+        //       }}>
+        //       <Button ph={30} size={14} onPress={addToCartPress}>
+        //         Add To Cart $ {parseFloat(totalPrice || 0).toFixed(2)}
+        //       </Button>
+        //     </View>
+        //   );
+        // }}
+      >
+        <OrderRefundForm
+          onSubmitSuccess={() => {
+            toggleRefundModal();
+            toggleModal();
+            refreshList();
+          }}
+          orderData={selectedOrder}
+        />
       </ModalContainer>
     </>
   );

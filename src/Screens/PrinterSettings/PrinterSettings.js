@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import Button from '../../components/Button';
 import Container from '../../components/Container';
 import Header from '../../components/Header';
@@ -10,7 +10,21 @@ import {
   selectPrinters,
 } from '../../helpers/printer.helper';
 import theme from '../../theme';
+import NumberInput from '../../components/NumberInput';
+import Text from '../../components/Text';
+import {View} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
+import appAction from '../../redux/actions/app.action';
+import {useNonInitialEffect} from '../../hooks/useNonInitialEffect';
+import storageHelper from '../../helpers/storage.helper';
+
 export default function PrinterSettings({navigation, route}) {
+  const pageWidthLength = useSelector(s => s.app.pageWidthLength);
+  const dispatch = useDispatch();
+
+  useNonInitialEffect(() => {
+    storageHelper.storeData('pageWidthLength', pageWidthLength);
+  }, [pageWidthLength]);
   return (
     <>
       <Header title={'Printer Settings'} back />
@@ -40,10 +54,28 @@ export default function PrinterSettings({navigation, route}) {
               let printData = createOrderReceiptPrintData(TEST_ORDER);
               await doPrintUSBPrinter(printData);
               // return;
-             __DEV__ && doWebViewPrint(printData);
+              __DEV__ && doWebViewPrint(printData);
             }}>
             Test Print
           </Button>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
+            <Text mr={10}>Page Width:</Text>
+            <NumberInput
+              value={pageWidthLength}
+              onChange={v => {
+                dispatch(
+                  appAction.set({
+                    pageWidthLength: v,
+                  }),
+                );
+              }}
+            />
+          </View>
         </Container>
       </Container>
     </>

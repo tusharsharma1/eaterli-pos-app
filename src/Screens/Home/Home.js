@@ -28,6 +28,8 @@ import CategoryGrid from '../components/CategoryGrid';
 import GiftCardsModal from '../components/GiftCardsModal';
 import MenuItemGrid from '../components/MenuItemGrid';
 import ScanOfferModal from '../components/ScanOfferModal';
+import storageHelper from '../../helpers/storage.helper';
+import appAction from '../../redux/actions/app.action';
 export default function Home(props) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
@@ -129,6 +131,16 @@ export default function Home(props) {
       console.log('requestMultiple error', error);
     });
     console.log('requestMultiple result', r);
+
+    let pageWidthLength = await storageHelper.getData('pageWidthLength');
+
+    if (pageWidthLength) {
+      dispatch(
+        appAction.set({
+          pageWidthLength,
+        }),
+      );
+    }
   };
 
   //
