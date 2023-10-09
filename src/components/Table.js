@@ -1,5 +1,5 @@
 import React, {memo} from 'react';
-import {FlatList, View} from 'react-native';
+import {FlatList, TouchableOpacity, View} from 'react-native';
 import Text from './Text';
 import {textAlignToFlexAlign} from '../theme';
 
@@ -9,6 +9,7 @@ export default function Table({
     return index;
   },
   columns = [],
+  rowPress,
   ...props
 }) {
   const renderHeader = () => {
@@ -47,7 +48,7 @@ export default function Table({
     return (
       <FlatList
         renderItem={({item, index}) => {
-          return <RowItem columns={columns} data={item} />;
+          return <RowItem onPress={rowPress} columns={columns} data={item} index={index}/>;
         }}
         data={data}
         keyExtractor={keyExtractor}
@@ -67,20 +68,26 @@ export default function Table({
   );
 }
 
-function _RowItem({columns, data}) {
+function _RowItem({columns, data,index,onPress}) {
   const renderCell = h => {
     if (h.renderCell) {
-      return h.renderCell(data);
+      return h.renderCell(data,index);
     }
     return (
       <Text size={12} medium>
-        {h.renderValue ? h.renderValue(data) : data[h.key]}
+        {h.renderValue ? h.renderValue(data,index) : data[h.key]}
       </Text>
     );
   };
   const renderDataRow = () => {
+
+    let Root=onPress?TouchableOpacity:View;
     return (
-      <View
+      <Root
+      activeOpacity={.6}
+      onPress={()=>{
+        onPress && onPress(data,index)
+      }}
         style={{
           flexDirection: 'row',
           backgroundColor: '#eee',
@@ -107,7 +114,7 @@ function _RowItem({columns, data}) {
             </View>
           );
         })}
-      </View>
+      </Root>
     );
   };
   return renderDataRow();

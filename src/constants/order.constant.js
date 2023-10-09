@@ -46,3 +46,11 @@ export const ORDER_ITEM_TYPE = {
   giftcard_add_balance: {id: 'giftcard_add_balance'},
   offer: {id: 'offer'},
 };
+
+export const REFUND_TYPE = {
+  percantage: {id: 'percantage'},
+  amount: {id: 'amount'},
+  items: {id: 'items'},
+  full: {id: 'full'},
+};
+

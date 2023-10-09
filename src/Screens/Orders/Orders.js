@@ -238,7 +238,6 @@ export default function Orders({navigation, route}) {
     remaining_amount = 0;
   }
 
-  
   return (
     <>
       <Header title={'Orders'} back />
@@ -298,12 +297,12 @@ export default function Orders({navigation, route}) {
                 flexDirection: 'row',
                 justifyContent: 'flex-end',
                 marginBottom: 10,
-                alignItems:'center'
+                alignItems: 'center',
               }}>
               {!(
-                selectedOrder.order_void == '1'||
+                selectedOrder.order_void == '1' ||
                 !!selectedOrder.order_refunds?.length
-              )&& (
+              ) && (
                 <>
                   <Button pv={8} ph={30} mr={5} onPress={voidPress}>
                     Void
@@ -621,7 +620,7 @@ export default function Orders({navigation, route}) {
         onRequestClose={toggleRefundModal}
         visible={refundModal}
         title={`Refund`}
-        landscapeWidth={400}
+        landscapeWidth={550}
         // width={550}
         // height={theme.hp(60)}
         // borderRadius={25}
