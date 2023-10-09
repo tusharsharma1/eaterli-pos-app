@@ -40,6 +40,10 @@ export default function Statistics({navigation, route}) {
       value: 0,
     },
     {
+      title: 'Refund Orders',
+      value: 0,
+    },
+    {
       title: 'Total Customers',
       value: 0,
     },
@@ -79,6 +83,10 @@ export default function Statistics({navigation, route}) {
       _widgets.push({
         title: 'Ready to Pickup Orders',
         value: data.order_confirmed_to_pickup,
+      });
+      _widgets.push({
+        title: 'Refund Orders',
+        value: data.total_refund_order,
       });
       _widgets.push({
         title: 'Total Customers',
