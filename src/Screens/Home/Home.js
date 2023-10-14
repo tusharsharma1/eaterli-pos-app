@@ -62,7 +62,7 @@ export default function Home(props) {
       if (l && l.position) {
         start = {
           latitude: l.position.coords.latitude,
-          longitude: l.position.coords.latitude,
+          longitude: l.position.coords.longitude,
         };
       }
       // console.log(start);
