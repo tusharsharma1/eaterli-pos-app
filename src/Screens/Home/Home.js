@@ -1,6 +1,7 @@
 import {convertDistance, getPreciseDistance} from 'geolib';
 import React, {useEffect, useState} from 'react';
 import {
+  Linking,
   PermissionsAndroid,
   Platform,
   TouchableOpacity,
@@ -30,6 +31,8 @@ import MenuItemGrid from '../components/MenuItemGrid';
 import ScanOfferModal from '../components/ScanOfferModal';
 import storageHelper from '../../helpers/storage.helper';
 import appAction from '../../redux/actions/app.action';
+import { registerPushNotification, unRegisterPushNotification } from '../../firebase/firebase-notification.helper';
+import { displayNotification } from '../../firebase/notification-service';
 export default function Home(props) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
@@ -45,6 +48,11 @@ export default function Home(props) {
     setLogs([]);
     loadData();
     loadPrinters();
+    registerPushNotification(onRegister, onNotification, onOpenNotification);
+    return () => {
+      unRegisterPushNotification();
+   
+    };
   }, []);
 
   const loadData = async () => {
@@ -150,6 +158,60 @@ export default function Home(props) {
         diningOptionModal: {show: !diningOptionModal.show, ref: ''},
       }),
     );
+  };
+
+
+  const onRegister = token => {
+    console.log('[App] onRegister: ', token);
+  };
+
+  const onNotification = notify => {
+    console.log('[display] [App] onNotification HOme: ', notify);
+    if (notify) {
+      const options = {
+        title: notify.notification.title,
+        body: notify.notification.body,
+        data: notify.data,
+        tag: notify.messageId, // (optional) add tag to message
+      };
+
+      displayNotification(options);
+
+      // displayNotification(JSON.parse(notify.data.notifee));
+
+      // localNotificationService.showNotification(
+      //   0,
+      //   notify.notification.title,
+      //   notify.notification.body,
+      //   notify,
+      //   options,
+      // );
+    }
+  };
+
+  const onOpenNotification = (notify, ref) => {
+    console.log('[display] [App] onOpenNotification: ', notify, ref);
+    if (notify) {
+      let data = notify.data || notify.notification?.data || notify.item;
+      console.log('[App] onOpenNotification: data', data);
+      if (data) {
+        let url = data.url;
+        if (url) {
+          Linking.openURL(url);
+          return;
+        }
+
+        // if (data.type == 'SCHEDULE') {
+
+        // }
+        // console.log('[App] onOpenNotification: openURL', notify);
+        // let screenName = getScreenName(data && data.screen);
+
+        // if (screenName) {
+        //   this.props.navigation.navigate(screenName);
+        // }
+      }
+    }
   };
   return (
     <>

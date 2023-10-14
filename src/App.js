@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import {
   KeyboardAvoidingView,
@@ -13,8 +13,20 @@ import Navigator from './Navigator';
 import theme from './theme';
 import AlertBox from './components/AlertBox';
 import PrintersModal from './Screens/components/PrintersModal';
+import { fcmService } from './firebase/FCMService';
+import { useDispatch } from 'react-redux';
+import userAction from './redux/actions/user.action';
 
 const App = () => {
+  const dispatch=useDispatch();
+  useEffect(() => {
+  
+    fcmService.getToken(token => {
+      console.log('[FCMService]  device token',token);
+      dispatch(userAction.set({deviceToken: token}));
+    });
+  }, []);
+
   return (
     <>
       <StatusBar
@@ -35,12 +47,10 @@ const App = () => {
       </KeyboardAvoidingView>
       <AlertBox />
       <AppProgess />
-      <PrintersModal/>
+      <PrintersModal />
       <ToastContainer />
     </>
   );
 };
 
 export default App;
-
-

@@ -15,10 +15,12 @@
     "emulator": "emulator -avd tablet_Nexus_7_API_33 -netdelay none -netspeed full"
   },
   "dependencies": {
+    "@notifee/react-native": "^7.8.0",
     "@react-native-async-storage/async-storage": "^1.17.10",
     "@react-native-community/datetimepicker": "^7.4.2",
     "@react-native-firebase/app": "^18.5.0",
     "@react-native-firebase/crashlytics": "^18.5.0",
+    "@react-native-firebase/messaging": "^18.5.0",
     "@react-navigation/drawer": "^6.6.4",
     "@react-navigation/native": "^6.1.8",
     "@react-navigation/native-stack": "^6.9.14",
