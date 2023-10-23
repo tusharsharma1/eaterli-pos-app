@@ -18,6 +18,11 @@ export const DINING_OPTION = {
   take_out: {id: 'take_out', text: 'Take Out'},
 };
 
+export const DELIVERY_TYPE = {
+  pickup: {id: 'pickup', text: 'Pickup'},
+  delivery: {id: 'delivery', text: 'Delivery'},
+};
+
 export const CART_MODAL_VIEW = {
   reward_question: {id: 'reward_question'},
   customer_phone: {id: 'customer_phone'},
@@ -54,3 +59,19 @@ export const REFUND_TYPE = {
   full: {id: 'full'},
 };
 
+export const ORDER_STATUS = {
+  created: {id: 'created'},
+  restaurant_confirmed: {id: 'restaurant_confirmed'},
+  restaurant_rejected: {id: 'restaurant_rejected'},
+
+  DASHER_CONFIRMED: {id: 'enroute_to_pickup'},
+  DASHER_ARRIVED_AT_PICKUP: {id: 'arrived_at_pickup'},
+  DELIVERY_PICKED_UP: {id: 'picked_up'},
+  DASHER_PICKED_UP: {id: 'enroute_to_dropoff'},
+  DELIVERED: {id: 'delivered'},
+  CANCELLED: {id: 'cancelled'},
+  DASHER_ARRIVED_AT_RETURN: {id: 'arrived_at_return'},
+  RETURNED: {id: 'returned'},
+  CONFIRMED: {id: 'confirmed_to_pickup'},
+  PICKED_UP: {id: 'self_picked_up'},
+};

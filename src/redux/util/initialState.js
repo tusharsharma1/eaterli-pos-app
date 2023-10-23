@@ -88,6 +88,9 @@ const initialState = {
       data: [],
       currentPage: 1,
     },
+    totalActiveOrder:0,
+    totalOngoingPickupOrder:0,
+    totalOngoingDeliveryOrder:0
   },
   order: {
     cart: {},

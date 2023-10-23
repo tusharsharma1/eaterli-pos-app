@@ -12,12 +12,19 @@ import Text from '../../components/Text';
 import ProgressImage from '../../components/react-native-image-progress';
 import {
   DEFAULT_TAX_TITLE,
+  DELIVERY_TYPE,
+  ORDER_STATUS,
   PAYMENT_METHOD,
 } from '../../constants/order.constant';
 import {getAddons, getVariants} from '../../helpers/order.helper';
 import {useNonInitialEffect} from '../../hooks/useNonInitialEffect';
 import usePrevious from '../../hooks/usePrevious';
 import userAction from '../../redux/actions/user.action';
+import OrderDetail from '../components/OrderDetail';
+import {showToast} from '../../helpers/app.helpers';
+import AddCashDrawerButton from '../CashDrawer/AddCashDrawerButton';
+import OptionButton from '../components/OptionButton';
+import theme from '../../theme';
 
 export default function ActiveOrders({navigation, route}) {
   const dispatch = useDispatch();
@@ -25,13 +32,28 @@ export default function ActiveOrders({navigation, route}) {
   const [showModal, setShowModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
+  const deviceId = useSelector(s => s.user.deviceId);
   const userData = useSelector(s => s.user.userData);
+  const totalActiveOrder = useSelector(s => s.user.totalActiveOrder);
+  const totalOngoingDeliveryOrder = useSelector(
+    s => s.user.totalOngoingDeliveryOrder,
+  );
+  const totalOngoingPickupOrder = useSelector(
+    s => s.user.totalOngoingPickupOrder,
+  );
+
   const activeOrders = useSelector(s => s.user.activeOrders);
+  const [selectedFilter, setSelectedFilter] = useState(1);
+
+  const [filter, setFilter] = useState({order_status: ORDER_STATUS.created.id});
   const [refresh, setRefresh] = useState(true);
   let prevCurrentPage = usePrevious(activeOrders.currentPage);
   const toggleModal = () => {
     setShowModal(!showModal);
   };
+  useEffect(() => {
+    loadTotalCountOrder();
+  }, [refresh]);
   useEffect(() => {
     dispatch(
       userAction.set({
@@ -43,7 +65,7 @@ export default function ActiveOrders({navigation, route}) {
     );
 
     loadData(true);
-  }, []);
+  }, [filter]);
   useNonInitialEffect(() => {
     loadData(prevCurrentPage >= activeOrders.currentPage);
   }, [activeOrders.currentPage, refresh]);
@@ -53,7 +75,11 @@ export default function ActiveOrders({navigation, route}) {
       userAction.getOrders(
         userData.restaurant.id,
         selectedLocation,
-        {page: activeOrders.currentPage, limit: 25, order_status: 'created'},
+        {
+          page: activeOrders.currentPage,
+          limit: 25,
+          ...filter,
+        },
         _refresh,
         'activeOrders',
         false,
@@ -62,19 +88,107 @@ export default function ActiveOrders({navigation, route}) {
     setLoaded(true);
   };
 
+  const loadTotalCountOrder = async () => {
+    if (selectedLocation) {
+      let r = await dispatch(
+        userAction.getOrdersTotal(
+          userData.restaurant.id,
+          selectedLocation,
+          {
+            order_status: ORDER_STATUS.created.id,
+          },
+          false,
+        ),
+      );
+      if (r && r.status) {
+        dispatch(
+          userAction.set({
+            totalActiveOrder: r.data.total,
+          }),
+        );
+      }
+
+      r = await dispatch(
+        userAction.getOrdersTotal(
+          userData.restaurant.id,
+          selectedLocation,
+          {
+            delivery_type: DELIVERY_TYPE.pickup.id,
+            order_status: ORDER_STATUS.restaurant_confirmed.id,
+          },
+          false,
+        ),
+      );
+      if (r && r.status) {
+        dispatch(
+          userAction.set({
+            totalOngoingPickupOrder: r.data.total,
+          }),
+        );
+      }
+
+      r = await dispatch(
+        userAction.getOrdersTotal(
+          userData.restaurant.id,
+          selectedLocation,
+          {
+            delivery_type: DELIVERY_TYPE.delivery.id,
+            order_status: ORDER_STATUS.restaurant_confirmed.id,
+          },
+          false,
+        ),
+      );
+      if (r && r.status) {
+        dispatch(
+          userAction.set({
+            totalOngoingDeliveryOrder: r.data.total,
+          }),
+        );
+      }
+    }
+  };
+  const changeStatus = async (status, params = {}) => {
+    let r = await dispatch(
+      userAction.updateOrderStatus(userData.restaurant.id, selectedOrder.id, {
+        order_status: status,
+        device_id: deviceId,
+        staff_id: userData.user_id,
+        ...params,
+      }),
+    );
+
+    if (r && r.status) {
+      toggleModal();
+      loadData(true);
+      showToast(r.message);
+    }
+  };
   const columns = useMemo(() => {
     return [
       {title: 'Order No', align: 'left', key: 'id'},
-      // {title: 'Order Status', align: 'left', key: 'order_status'},
       {
-        title: 'Total Products',
+        title: 'Order Type',
+        align: 'left',
+        renderValue: data => {
+          return `${DELIVERY_TYPE[data.delivery_type || 'pickup']?.text}`;
+        },
+      },
+      {
+        title: 'Estimated Time',
+        align: 'left',
+        renderValue: data => {
+          return `${parseInt(data.estimated_cooking_time)} min`;
+        },
+      },
+      {
+        title: 'Products',
         renderValue: data => {
           return `${data.order_items.length}`;
         },
         align: 'right',
       },
       {
-        title: 'Total Amount',
+        title: 'Amount',
         renderValue: data => {
           return `$ ${parseFloat(data.order_total).toFixed(2)}`;
         },
@@ -138,16 +252,60 @@ export default function ActiveOrders({navigation, route}) {
       },
     ];
   }, []);
-  let remaining_amount =
-    parseFloat(selectedOrder?.order_total) -
-    parseFloat(selectedOrder?.received_amount);
-  if (!isFinite(remaining_amount)) {
-    remaining_amount = 0;
-  }
+
   return (
     <>
       <Header title={'Active Orders'} back />
       <Container style={{flex: 1}}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginBottom: 5,
+          }}>
+          <OptionButton
+            badge={totalActiveOrder}
+            color={selectedFilter == 1 ? '#fff' : undefined}
+            backgroundColor={
+              selectedFilter == 1 ? theme.colors.secondaryColor : undefined
+            }
+            onPress={() => {
+              setSelectedFilter(1);
+              setFilter({order_status: ORDER_STATUS.created.id});
+            }}
+            title={'Pending Order'}
+          />
+          <OptionButton
+            badge={totalOngoingPickupOrder}
+            color={selectedFilter == 2 ? '#fff' : undefined}
+            backgroundColor={
+              selectedFilter == 2 ? theme.colors.secondaryColor : undefined
+            }
+            onPress={() => {
+              setSelectedFilter(2);
+              setFilter({
+                delivery_type: DELIVERY_TYPE.pickup.id,
+                order_status: ORDER_STATUS.restaurant_confirmed.id,
+              });
+            }}
+            title={'Ongoing Pickup'}
+          />
+          <OptionButton
+            badge={totalOngoingDeliveryOrder}
+            color={selectedFilter == 3 ? '#fff' : undefined}
+            backgroundColor={
+              selectedFilter == 3 ? theme.colors.secondaryColor : undefined
+            }
+            onPress={() => {
+              setSelectedFilter(3);
+              setFilter({
+                delivery_type: DELIVERY_TYPE.delivery.id,
+                order_status: ORDER_STATUS.restaurant_confirmed.id,
+              });
+            }}
+            title={'Ongoing Delivery'}
+          />
+        </View>
         <Table
           data={activeOrders.data}
           columns={columns}
@@ -187,312 +345,14 @@ export default function ActiveOrders({navigation, route}) {
         onRequestClose={toggleModal}
         visible={showModal}
         title={`Order Details`}
-        landscapeWidth={550}
-        // width={550}
-        // height={theme.hp(60)}
-        // borderRadius={25}
-        // renderFooter={() => {
-        //   return (
-        //     <View
-        //       style={{
-        //         alignItems: 'flex-end',
-        //       }}>
-        //       <Button ph={30} size={14} onPress={addToCartPress}>
-        //         Add To Cart $ {parseFloat(totalPrice || 0).toFixed(2)}
-        //       </Button>
-        //     </View>
-        //   );
-        // }}
-      >
+        landscapeWidth={550}>
         {!!selectedOrder && (
-          <>
-            <View
-              style={{
-                // alignItems: 'flex-end',
-                marginBottom: 20,
-              }}>
-              <InfoRow title={'Order No:'} value={selectedOrder.id} />
-              <InfoRow
-                title={'Order Date:'}
-                value={moment(selectedOrder.created_at).format(
-                  'DD MMM, YYYY hh:mm A',
-                )}
-              />
-              <InfoRow
-                title={'Payment Method:'}
-                value={`${
-                  selectedOrder.payment_method || ''
-                }`.toLocaleUpperCase()}
-              />
-              {selectedOrder.paymentMethod == PAYMENT_METHOD.card.id && (
-                <>
-                  <InfoRow title={'Payment ID:'} value={'PAY_2332hhj34x'} />
-                </>
-              )}
-            </View>
-
-            {selectedOrder.point_transactions &&
-              !!selectedOrder.point_transactions.length && (
-                <View>
-                  <Text size={18} bold mb={5}>
-                    Reward Points
-                  </Text>
-                  {selectedOrder.point_transactions.map((d, i) => {
-                    return (
-                      <View
-                        key={i}
-                        style={{
-                          marginBottom: 5,
-                        }}>
-                        <Text size={14}>
-                          Description:{' '}
-                          <Text size={14} semibold>
-                            {d.description}
-                          </Text>
-                        </Text>
-                        <Text size={14}>
-                          Point:{' '}
-                          <Text size={14} semibold>
-                            {d.point}
-                          </Text>
-                        </Text>
-                      </View>
-                    );
-                  })}
-                </View>
-              )}
-
-            <Text size={18} bold>
-              Products
-            </Text>
-            <View
-              style={{
-                // height:theme.hp(50),
-                marginBottom: 20,
-              }}>
-              <Table
-                data={selectedOrder.order_items}
-                columns={[
-                  {
-                    title: 'Name',
-                    align: 'left',
-                    renderCell: data => {
-                      let variants = getVariants(data);
-                      let add_ons = getAddons(data);
-                      return (
-                        <View
-                          style={{
-                            flexDirection: 'row',
-                          }}>
-                          <ProgressImage
-                            // color={}
-                            source={
-                              data.image
-                                ? {
-                                    uri: data.image,
-                                    //+ '?t=' + new Date().getTime()
-                                  }
-                                : dummyImage
-                            }
-                            style={{
-                              width: 50,
-                              height: 50,
-
-                              backgroundColor: '#aaa',
-                              marginRight: 5,
-                              // borderRadius: theme.wp(26) / 2,
-                              // borderWidth: 1,
-                              //borderColor: theme.colors.borderColor,
-                              // data.item_image
-                              //  backgroundColor:'red'
-                            }}
-                            imageStyle={{
-                              width: '100%',
-                              height: '100%',
-                              // width: 60,
-                              resizeMode: 'cover',
-                              // height: theme.screenWidth / numColumns - 100,
-                              // height:
-                              //   theme.screenWidth / numColumns -
-                              //   2 * theme.wp(2) * numColumns -
-                              //   theme.hp(5),
-                              // backgroundColor: 'red',
-                              // - (vheight * (10 / 100)), // theme.hp(10),
-                              flex: 1,
-                            }}
-                          />
-                          <View>
-                            <Text>{data.item_name}</Text>
-                            {!!variants.length && (
-                              <Text color="#666" size={12}>
-                                {variants.map(r => r.title).join(', ')}
-                              </Text>
-                            )}
-                            {!!add_ons.length && (
-                              <Text color="#666" size={12}>
-                                {add_ons.map(r => r.product_name).join(', ')}
-                              </Text>
-                            )}
-                          </View>
-                        </View>
-                      );
-                    },
-                  },
-                  {
-                    title: 'Qty',
-                    align: 'right',
-                    key: 'quantity',
-                  },
-                  {
-                    title: 'Rate',
-                    align: 'right',
-                    renderValue: data => {
-                      return data.rate
-                        ? `$${parseFloat(data.rate).toFixed(2)}`
-                        : '';
-                    },
-                  },
-                  {
-                    title: 'Dis.',
-                    align: 'right',
-                    renderValue: data => {
-                      return `${data.discount_type == '2' ? '$' : ''}${
-                        data.discount ?? 0
-                      }${data.discount_type == '1' ? '%' : ''}`;
-                      // return data.rate
-                      //   ? `$${parseFloat(data.rate).toFixed(2)}`
-                      //   : '';
-                    },
-                  },
-                  {
-                    title: 'Total',
-                    align: 'right',
-                    renderValue: data => {
-                      let discount_type = data.discount_type ?? '1';
-
-                      let _discount = parseFloat(data.discount ?? 0);
-                      let totalPrice = data.total_price;
-                      if (_discount) {
-                        if (discount_type == '1') {
-                          totalPrice =
-                            totalPrice - totalPrice * (_discount / 100);
-                        } else if (discount_type == '2') {
-                          totalPrice = totalPrice - _discount;
-                        }
-                      }
-                      return totalPrice
-                        ? `$${parseFloat(totalPrice).toFixed(2)}`
-                        : '';
-                    },
-                  },
-                ]}
-              />
-            </View>
-
-            {[PAYMENT_METHOD.split_payment.id].includes(
-              selectedOrder.payment_method,
-            ) && (
-              <View
-                style={{
-                  marginBottom: 10,
-                }}>
-                <Text size={18} bold>
-                  Split Payment
-                </Text>
-
-                <Table
-                  data={selectedOrder.order_split_payments || []}
-                  columns={[
-                    {
-                      title: 'Type',
-                      align: 'left',
-                      key: 'type',
-                    },
-
-                    {
-                      title: 'Amount',
-                      align: 'right',
-                      renderValue: data => {
-                        return data.amount
-                          ? `$${parseFloat(data.amount).toFixed(2)}`
-                          : '';
-                      },
-                    },
-                    {
-                      title: 'Received Amount',
-                      align: 'right',
-                      renderValue: data => {
-                        return data.received_amount
-                          ? `$${parseFloat(data.received_amount).toFixed(2)}`
-                          : '';
-                      },
-                    },
-                  ]}
-                />
-
-                {/* {(selectedOrder.order_split_payments || []).map(sp => {
-                  return <View key={sp.id}></View>;
-                })} */}
-              </View>
-            )}
-
-            <View
-              style={{
-                alignSelf: 'flex-end',
-                width: 300,
-              }}>
-              <InfoRow
-                title={'Sub Total:'}
-                value={`$ ${parseFloat(selectedOrder.sub_total).toFixed(2)}`}
-              />
-              <InfoRow
-                title={`${
-                  selectedOrder?.tax_title || DEFAULT_TAX_TITLE
-                } (${parseFloat(selectedOrder?.tax_per || 0)}%)`}
-                value={`$ ${parseFloat(selectedOrder.tax_amt).toFixed(2)}`}
-              />
-
-              {!!selectedOrder.discount && (
-                <>
-                  <InfoRow
-                    title={'Total:'}
-                    value={`$ ${(
-                      parseFloat(selectedOrder.sub_total) +
-                      parseFloat(selectedOrder.tax_amt)
-                    ).toFixed(2)}`}
-                  />
-                  <InfoRow
-                    title={'Discount:'}
-                    value={`${selectedOrder.discount_type == '2' ? '$ ' : ''}${
-                      selectedOrder.discount ?? 0
-                    }${selectedOrder.discount_type == '1' ? '%' : ''}`}
-                  />
-                </>
-              )}
-
-              <InfoRow
-                title={'Grand Total:'}
-                value={`$ ${parseFloat(selectedOrder.order_total).toFixed(2)}`}
-              />
-              {[
-                PAYMENT_METHOD.cash.id,
-                PAYMENT_METHOD.split_payment.id,
-              ].includes(selectedOrder.payment_method) && (
-                <>
-                  <InfoRow
-                    title={'Received Amount:'}
-                    value={`$ ${parseFloat(
-                      selectedOrder.received_amount,
-                    ).toFixed(2)}`}
-                  />
-                  <InfoRow
-                    title={'Remaining Amount:'}
-                    value={`$ ${parseFloat(remaining_amount).toFixed(2)}`}
-                  />
-                </>
-              )}
-            </View>
-          </>
+          <OrderDetail
+            showAccept
+            hideRefund
+            data={selectedOrder}
+            changeStatus={changeStatus}
+          />
         )}
       </ModalContainer>
     </>

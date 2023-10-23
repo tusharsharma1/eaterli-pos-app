@@ -14,6 +14,7 @@ export default {
         .login({
           ...data,
           device_token: getState().user.deviceToken,
+          type: 'pos',
         })
         .then(res => {
           let returnResult = res;
@@ -335,11 +336,11 @@ export default {
         .catch(apiErrorHandler);
     };
   },
-  getAddons(location_id, category_id, showLoader = true) {
+  getAddons(restaurant_id,location_id, category_id, showLoader = true) {
     return (dispatch, getState) => {
       showLoader && dispatch(appAction.showProgress());
       return userService
-        .getAddons(location_id, category_id)
+        .getAddons(restaurant_id,location_id, category_id)
         .then(res => {
           let returnResult = res;
 
@@ -372,7 +373,7 @@ export default {
         .then(res => {
           let returnResult = res;
           if (res && !res.status) {
-            showAlert && apiMessageHandler(res);
+            apiMessageHandler(res);
             returnResult = false;
           }
           if (returnResult) {
@@ -401,7 +402,7 @@ export default {
         .then(res => {
           let returnResult = res;
           if (res && !res.status) {
-            showAlert && apiMessageHandler(res);
+            apiMessageHandler(res);
             returnResult = false;
           }
           if (returnResult) {
@@ -412,12 +413,40 @@ export default {
         .catch(apiErrorHandler);
     };
   },
+
+  getOrdersTotal(
+    rest_id,
+    restaurant_location_id,
+    data,
+
+    showLoader = true,
+  ) {
+    return (dispatch, getState) => {
+      showLoader && dispatch(appAction.showProgress());
+      return userService
+        .getOrders(rest_id, restaurant_location_id, data)
+        .then(res => {
+          let returnResult = res;
+
+          if (res && !res.status) {
+            // apiMessageHandler(res.message);
+            returnResult = false;
+          }
+          if (returnResult) {
+          }
+          showLoader && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+
   getOrders(
     rest_id,
     restaurant_location_id,
     data,
     refresh = false,
-    props='orders',
+    props = 'orders',
     showLoader = true,
   ) {
     return (dispatch, getState) => {
@@ -475,7 +504,7 @@ export default {
         .then(res => {
           let returnResult = res;
           if (res && !res.status) {
-            showAlert && apiMessageHandler(res);
+            apiMessageHandler(res);
             returnResult = false;
           }
           if (returnResult) {
@@ -538,7 +567,7 @@ export default {
         .then(res => {
           let returnResult = res;
           if (res && !res.status) {
-            showAlert && apiMessageHandler(res);
+            apiMessageHandler(res);
             returnResult = false;
           }
           if (returnResult) {
@@ -737,7 +766,7 @@ export default {
         .then(res => {
           let returnResult = res;
           if (res && !res.status) {
-            showAlert && apiMessageHandler(res);
+            apiMessageHandler(res);
             returnResult = false;
           }
           if (returnResult) {
@@ -756,7 +785,7 @@ export default {
         .then(res => {
           let returnResult = res;
           if (res && !res.status) {
-            showAlert && apiMessageHandler(res);
+            apiMessageHandler(res);
             returnResult = false;
           }
           if (returnResult) {
@@ -812,7 +841,6 @@ export default {
     };
   },
 
-
   voidOrderUpdate(restaurant_id, order_id, data, showProgress = true) {
     return (dispatch, getState) => {
       showProgress && dispatch(appAction.showProgress());
@@ -821,7 +849,7 @@ export default {
         .then(res => {
           let returnResult = res;
           if (res && !res.status) {
-            showAlert && apiMessageHandler(res);
+            apiMessageHandler(res);
             returnResult = false;
           }
           if (returnResult) {
@@ -841,7 +869,66 @@ export default {
         .then(res => {
           let returnResult = res;
           if (res && !res.status) {
-            showAlert && apiMessageHandler(res);
+            apiMessageHandler(res);
+            returnResult = false;
+          }
+          if (returnResult) {
+          }
+          showProgress && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+
+  updateOrderStatus(restaurant_id, order_id, data, showProgress = true) {
+    return (dispatch, getState) => {
+      showProgress && dispatch(appAction.showProgress());
+      return userService
+        .updateOrderStatus(restaurant_id, order_id, data)
+        .then(res => {
+          let returnResult = res;
+          if (res && !res.status) {
+            apiMessageHandler(res);
+            returnResult = false;
+          }
+          if (returnResult) {
+          }
+          showProgress && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+
+  updateDeviceLocation(restaurant_id, data, showProgress = true) {
+    return (dispatch, getState) => {
+      showProgress && dispatch(appAction.showProgress());
+      return userService
+        .updateDeviceLocation(restaurant_id, data)
+        .then(res => {
+          let returnResult = res;
+          if (res && !res.status) {
+            //showAlert && apiMessageHandler(res);
+            returnResult = false;
+          }
+          if (returnResult) {
+          }
+          showProgress && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+  getOrderDetail(order_id, rest_id, showProgress = true) {
+    return (dispatch, getState) => {
+      showProgress && dispatch(appAction.showProgress());
+      return userService
+        .getOrderDetail(order_id, rest_id)
+        .then(res => {
+          let returnResult = res;
+          if (res && !res.status) {
+            apiMessageHandler(res);
             returnResult = false;
           }
           if (returnResult) {

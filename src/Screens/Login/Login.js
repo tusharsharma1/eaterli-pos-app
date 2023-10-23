@@ -54,6 +54,8 @@ export default function Login(props) {
           email: email,
           passcode: pin,
           restaurant_id: rest_id,
+          type:'pos',
+          
         }),
       );
       if (r && r.status) {

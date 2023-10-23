@@ -1957,7 +1957,7 @@ function Footer({}) {
                       <Text
                         semibold
                         color={remaining_amount >= 0 ? 'green' : 'red'}>
-                        {remaining_amount >= 0 ? '+' : '-'}$
+                        {remaining_amount >= 0 ? '' : '-'}$
                         {Math.abs(remaining_amount).toFixed(2)}
                       </Text>
                     </Text>

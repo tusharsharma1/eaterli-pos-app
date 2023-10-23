@@ -29,10 +29,10 @@ export default {
   getMobileBuilder(restaurant_id) {
     return callApi('GET', `/api/mobile/config/get/${restaurant_id}`);
   },
-  getAddons(location_id, category_id) {
+  getAddons(restaurant_id,location_id, category_id) {
     return callApi(
       'GET',
-      `/api/products/addons?location_id=${location_id}${
+      `/api/restaurant/${restaurant_id}/products/addons?location_id=${location_id}${
         category_id ? `&category_id=${category_id}` : ''
       }`,
     );
@@ -156,7 +156,7 @@ export default {
       'PUT',
       `/api/restaurant/${restaurant_id}/orders/${order_id}/void`,
       data,
-      {isformData:false}
+      {isformData: false},
     );
   },
   refundOrder(restaurant_id, order_id, data) {
@@ -164,7 +164,30 @@ export default {
       'POST',
       `/api/restaurant/${restaurant_id}/orders/${order_id}/refunds`,
       data,
-      {isformData:false}
+      {isformData: false},
+    );
+  },
+  updateOrderStatus(restaurant_id, order_id, data) {
+    return callApi(
+      'PUT',
+      `/api/restaurant/${restaurant_id}/orders/${order_id}/status/update`,
+      data,
+      {isformData: false},
+    );
+  },
+
+  updateDeviceLocation(restaurant_id, data) {
+    return callApi(
+      'PUT',
+      `/api/restaurants/${restaurant_id}/devices/update/location`,
+      data,
+      {isformData: false},
+    );
+  },
+  getOrderDetail(order_id, rest_id) {
+    return callApi(
+      'GET',
+      `/api/restaurant/${rest_id}/orders/${order_id}/details`,
     );
   },
 };

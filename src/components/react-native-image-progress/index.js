@@ -245,4 +245,5 @@ export const createImageProgress = ImageComponent =>
     }
   };
 
-export default createImageProgress(Image);
+const ProgressImage = createImageProgress(Image);
+export default ProgressImage;

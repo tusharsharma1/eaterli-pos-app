@@ -15,7 +15,7 @@ import Container from '../../components/Container';
 import Header from '../../components/Header';
 import ModalContainer from '../../components/ModalContainer';
 import Text from '../../components/Text';
-import {DINING_OPTION} from '../../constants/order.constant';
+import {DINING_OPTION, ORDER_STATUS} from '../../constants/order.constant';
 import {getPercentValue} from '../../helpers/app.helpers';
 import {getCurrentPosition} from '../../helpers/location.helper';
 import POSModule from '../../helpers/pos.helper';
@@ -31,15 +31,22 @@ import MenuItemGrid from '../components/MenuItemGrid';
 import ScanOfferModal from '../components/ScanOfferModal';
 import storageHelper from '../../helpers/storage.helper';
 import appAction from '../../redux/actions/app.action';
-import { registerPushNotification, unRegisterPushNotification } from '../../firebase/firebase-notification.helper';
-import { displayNotification } from '../../firebase/notification-service';
+import {
+  registerPushNotification,
+  unRegisterPushNotification,
+} from '../../firebase/firebase-notification.helper';
+import {displayNotification} from '../../firebase/notification-service';
 export default function Home(props) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
   const [logs, setLogs] = useState([]);
+  const deviceToken = useSelector(s => s.user.deviceToken);
   const userData = useSelector(s => s.user.userData);
   const diningOption = useSelector(s => s.order.diningOption);
   const diningOptionModal = useSelector(s => s.order.diningOptionModal);
+  const selectedLocation = useSelector(s => s.user.selectedLocation);
+
+  const totalActiveOrder = useSelector(s => s.user.totalActiveOrder);
 
   let {width} = useWindowDimensions();
 
@@ -51,9 +58,11 @@ export default function Home(props) {
     registerPushNotification(onRegister, onNotification, onOpenNotification);
     return () => {
       unRegisterPushNotification();
-   
     };
   }, []);
+  useEffect(() => {
+    loadTotalActiveOrder();
+  }, [selectedLocation]);
 
   const loadData = async () => {
     if (userData) {
@@ -115,8 +124,17 @@ export default function Home(props) {
           dispatch(
             userAction.getMenus(distL.id, userData.restaurant.id, false),
           ),
-          dispatch(userAction.getAddons(distL.id, '', false)),
+          dispatch(userAction.getAddons(userData.restaurant.id,distL.id, '', false)),
         ]);
+
+        await dispatch(
+          userAction.updateDeviceLocation(userData.restaurant.id, {
+            location_id: distL.id,
+            type: 'pos',
+            device_token: deviceToken,
+          }),
+        );
+
         setLogs(_logs => [..._logs, `Calling Apis done`]);
         // await dispatch(userAction.getMenus(distL.id, false));
 
@@ -151,6 +169,23 @@ export default function Home(props) {
     }
   };
 
+  const loadTotalActiveOrder = async () => {
+    if (selectedLocation) {
+      let r = await dispatch(
+        userAction.getOrdersTotal(userData.restaurant.id, selectedLocation, {
+          order_status: ORDER_STATUS.created.id,
+        }),
+      );
+      if (r && r.status) {
+        dispatch(
+          userAction.set({
+            totalActiveOrder: r.data.total,
+          }),
+        );
+      }
+    }
+  };
+
   //
   const toggleModal = () => {
     dispatch(
@@ -159,7 +194,6 @@ export default function Home(props) {
       }),
     );
   };
-
 
   const onRegister = token => {
     console.log('[App] onRegister: ', token);
@@ -257,6 +291,7 @@ export default function Home(props) {
               }}
             />
             <IconBtn
+              badge={totalActiveOrder}
               text="Active Orders"
               iconName="clipboard"
               onPress={() => {
@@ -419,6 +454,7 @@ export default function Home(props) {
 }
 
 function IconBtn({
+  badge,
   text,
   subText,
   onPress,
@@ -427,7 +463,7 @@ function IconBtn({
 }) {
   let {width} = useWindowDimensions();
   let w = Math.min(117, getPercentValue(width, 12));
-
+  //  badge=99
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -454,6 +490,24 @@ function IconBtn({
         <Text semibold size={getPercentValue(w, 10)}>
           {subText}
         </Text>
+      )}
+      {!!badge && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 5,
+            right: 5,
+            width: getPercentValue(w, 22),
+            height: getPercentValue(w, 22),
+            borderRadius: getPercentValue(w, 22),
+            backgroundColor: 'red',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <Text size={getPercentValue(w, 10)} color="#fff">
+            {badge > 99 ? '99+' : badge.toString().padStart(2, 0)}
+          </Text>
+        </View>
       )}
     </TouchableOpacity>
   );

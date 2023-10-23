@@ -17,6 +17,8 @@ import Table from '../components/Table';
 import {REFUND_TYPE} from '../constants/order.constant';
 import {getAddons, getVariants} from '../helpers/order.helper';
 import theme from '../theme';
+import alertAction from '../redux/actions/alert.action';
+import {ALERT_ICON_TYPE, ALERT_TYPE} from '../constants/alert.constant';
 
 const _validationSchema = yup.object({
   reason: yup.string().required('Required'),
@@ -94,37 +96,48 @@ const OrderRefundForm = ({orderData, onSubmitSuccess}) => {
     console.log(values);
     Keyboard.dismiss();
 
-    let body = {
-      order_id: orderData.id,
-      refund_amount: getRefundAmount(),
-      refund_reason: values.reason,
-      staff_id: userData.user_id,
-      payment_method: orderData.payment_method,
-      refund_status: 'refunded',
-      device_id: deviceId,
-      metadata: JSON.stringify({
-        perc: values.perc,
-        items: values.items,
-        amt: values.amt,
-        type
-      }),
-      // customer_id
-    };
+    dispatch(
+      alertAction.showAlert({
+        type: ALERT_TYPE.CONFIRM,
+        icon: ALERT_ICON_TYPE.CONFIRM,
+        text: 'Do you want to refund this order?',
+        heading: 'Confirmation',
+        positiveText: 'Yes',
+        onPositivePress: async () => {
+          let body = {
+            order_id: orderData.id,
+            refund_amount: getRefundAmount(),
+            refund_reason: values.reason,
+            staff_id: userData.user_id,
+            payment_method: orderData.payment_method,
+            refund_status: 'refunded',
+            device_id: deviceId,
+            metadata: JSON.stringify({
+              perc: values.perc,
+              items: values.items,
+              amt: values.amt,
+              type,
+            }),
+            // customer_id
+          };
 
-    if (orderData.gift_card_id) {
-      body.gift_card_id = orderData.gift_card_id;
-    }
-    // console.log(body);
-    // return;
-    let r = await dispatch(
-      userAction.refundOrder(userData.restaurant.id, orderData.id, body),
+          if (orderData.gift_card_id) {
+            body.gift_card_id = orderData.gift_card_id;
+          }
+          // console.log(body);
+          // return;
+          let r = await dispatch(
+            userAction.refundOrder(userData.restaurant.id, orderData.id, body),
+          );
+          console.log('result===>  ', r);
+          if (r && r.status) {
+            // let {onSubmit} = this.props;
+            simpleToast(r.message);
+            onSubmitSuccess && onSubmitSuccess();
+          }
+        },
+      }),
     );
-    console.log('result===>  ', r);
-    if (r && r.status) {
-      // let {onSubmit} = this.props;
-      simpleToast(r.message);
-      onSubmitSuccess && onSubmitSuccess();
-    }
   };
   const getRefundAmount = () => {
     if (formikRef.current) {

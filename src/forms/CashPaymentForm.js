@@ -115,7 +115,7 @@ const CashPaymentForm = ({total = 0, onSubmitSuccess}) => {
                 <Text
                   semibold
                   color={remaining_amount >= 0 ? 'green' : 'green'}>
-                  {remaining_amount >= 0 ? '' : '+'}$
+                  {remaining_amount >= 0 ? '' : ''}$
                   {Math.abs(
                     remaining_amount >= 0 ? 0 : remaining_amount,
                   ).toFixed(2)}

@@ -8,12 +8,16 @@ import {formatGridData, getPercentValue} from '../../helpers/app.helpers';
 import useProducts from '../../hooks/useProducts';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
 import userAction from '../../redux/actions/user.action';
+import Select from '../../components/Controls/Select';
+import moment from 'moment';
 let col = 4;
 let hPadding = 2;
 
 export default function Statistics({navigation, route}) {
   const dispatch = useDispatch();
+  let [selectedDate, setSelectedDate] = useState('');
 
+  let [dates, setDates] = useState([]);
   let [widgets, setWidgets] = useState([
     {
       title: 'Total Orders',
@@ -51,48 +55,86 @@ export default function Statistics({navigation, route}) {
   const userData = useSelector(s => s.user.userData);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
   useEffect(() => {
-    loadData();
+    let _dates = [];
+    let selected = {
+      from: moment().startOf('isoWeek').format('YYYY-MM-DD'),
+      to: moment().endOf('isoWeek').format('YYYY-MM-DD'),
+      label: 'This Week',
+    };
+    _dates.push(selected);
+
+    _dates.push({
+      from: moment()
+        .subtract(1, 'week')
+        .startOf('isoWeek')
+        .format('YYYY-MM-DD'),
+      to: moment().subtract(1, 'week').endOf('isoWeek').format('YYYY-MM-DD'),
+      label: 'Last Week',
+    });
+    _dates.push({
+      from: moment().startOf('month').format('YYYY-MM-DD'),
+      to: moment().endOf('month').format('YYYY-MM-DD'),
+      label: 'This Month',
+    });
+    _dates.push({
+      from: moment().subtract(1, 'month').startOf('month').format('YYYY-MM-DD'),
+      to: moment().subtract(1, 'month').endOf('month').format('YYYY-MM-DD'),
+      label: 'Last Month',
+    });
+
+    setSelectedDate(`${selected.from}_${selected.to}`);
+
+    setDates(_dates.map(d => ({...d, value: `${d.from}_${d.to}`})));
   }, []);
+  useEffect(() => {
+    loadData();
+  }, [selectedDate]);
   const loadData = async () => {
-    let r = await dispatch(
-      userAction.getOrderStatistics(userData.restaurant.id, selectedLocation),
-    );
-    if (r && r.status) {
-      let data = r.data;
-      let _widgets = [];
-      _widgets.push({
-        title: 'Total Orders',
-        value: data.total_order,
-      });
-      _widgets.push({
-        title: 'New Orders',
-        value: data.order_created,
-      });
-      _widgets.push({
-        title: 'Confirmed Orders',
-        value: data.order_confirmed,
-      });
-      _widgets.push({
-        title: 'Delivered Orders',
-        value: data.order_delivered,
-      });
-      _widgets.push({
-        title: 'Returned Orders',
-        value: data.order_returned,
-      });
-      _widgets.push({
-        title: 'Ready to Pickup Orders',
-        value: data.order_confirmed_to_pickup,
-      });
-      _widgets.push({
-        title: 'Refund Orders',
-        value: data.total_refund_order,
-      });
-      _widgets.push({
-        title: 'Total Customers',
-        value: data.total_customer,
-      });
-      setWidgets(_widgets);
+    if (selectedDate) {
+      let [from,to]=selectedDate.split('_')
+      let r = await dispatch(
+        userAction.getOrderStatistics(userData.restaurant.id, selectedLocation,{
+          from: from,
+          to: to,
+        }),
+      );
+      if (r && r.status) {
+        let data = r.data;
+        let _widgets = [];
+        _widgets.push({
+          title: 'Total Orders',
+          value: data.total_order,
+        });
+        _widgets.push({
+          title: 'New Orders',
+          value: data.order_created,
+        });
+        _widgets.push({
+          title: 'Confirmed Orders',
+          value: data.order_confirmed,
+        });
+        _widgets.push({
+          title: 'Delivered Orders',
+          value: data.order_delivered,
+        });
+        _widgets.push({
+          title: 'Returned Orders',
+          value: data.order_returned,
+        });
+        _widgets.push({
+          title: 'Ready to Pickup Orders',
+          value: data.order_confirmed_to_pickup||0,
+        });
+        _widgets.push({
+          title: 'Refund Orders',
+          value: data.total_refund_order,
+        });
+        _widgets.push({
+          title: 'Total Customers',
+          value: data.total_customer,
+        });
+        setWidgets(_widgets);
+      }
     }
   };
   //  console.log(route.params)
@@ -132,6 +174,32 @@ export default function Statistics({navigation, route}) {
       <Header title={'Statistics'} back />
 
       <Container style={{flex: 1}}>
+        <View
+          style={{
+            paddingHorizontal: 10,
+            paddingVertical: 10,
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+          <Text
+            bold
+            size={18}
+            style={{
+              flex: 1,
+            }}>
+            Order Statistics
+          </Text>
+          <Select
+            containerStyle={{
+              marginBottom: 0,
+              width: 200,
+            }}
+            onValueChange={d => {
+              setSelectedDate(d);
+            }}
+            value={selectedDate}
+            data={dates}></Select>
+        </View>
         <FlatList
           // horizontal
           numColumns={col}
