@@ -36,6 +36,7 @@ import {
   unRegisterPushNotification,
 } from '../../firebase/firebase-notification.helper';
 import {displayNotification} from '../../firebase/notification-service';
+import {getNearRestaurantLocation} from '../../helpers/user.helper';
 export default function Home(props) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
@@ -59,91 +60,126 @@ export default function Home(props) {
     return () => {
       unRegisterPushNotification();
     };
-  }, []);
+  }, [userData]);
   useEffect(() => {
     loadTotalActiveOrder();
   }, [selectedLocation]);
 
   const loadData = async () => {
-    if (userData) {
-      let {locations, restaurant} = userData;
-      let start = {latitude: 0, longitude: 0};
-      setLogs(_logs => [..._logs, 'fetching location....']);
-      let l = await getCurrentPosition().catch(e => {
-        console.log('distL CurrentPosition error', e);
-        setLogs(_logs => [..._logs, `getCurrentPosition Error`]);
-        // alert(e.message);
-      });
-      setLogs(_logs => [..._logs, `fetched location ${JSON.stringify(l)}`]);
-      // console.log('distL l', l);
-      if (l && l.position) {
-        start = {
-          latitude: l.position.coords.latitude,
-          longitude: l.position.coords.longitude,
-        };
-      }
-      // console.log(start);
-      let distL = locations.map(r => {
-        let end = {
-          latitude: r.lat ? parseFloat(r.lat) : 0,
-          longitude: r.long ? parseFloat(r.long) : 0,
-        };
-        let dist = getPreciseDistance(start, end);
-        let miDist = Math.round(convertDistance(dist, 'mi'));
-        // console.log(end, dist, miDist);
-        return {dist: miDist, ...r};
-      });
-      // console.log('distL', distL);
-      distL = distL.sort((a, b) => a.dist - b.dist)[0];
-      //  console.log('distL', start, distL);
-      setLogs(_logs => [..._logs, `set  location ${distL?.id}`]);
+    let distL = await getNearRestaurantLocation();
+    let {locations, restaurant} = userData;
+    if (distL) {
+      dispatch(
+        userAction.set({
+          selectedLocation: distL.id,
+        }),
+      );
+      setLogs(_logs => [..._logs, `Calling Apis..`]);
 
-      // setNearByLocation(distL);
-      // console.log('Promise',Promise.allSettled);
-
-      // await dispatch(
-      //   userAction.getMobileBuilder(userData.restaurant.id, false),
-      // );
-      // console.time('prom');
-
-      // await dispatch(userAction.getVariations(restaurant.id, false));
-      // console.timeLog('prom', 2);
-
-      if (distL) {
+      // dispatch(userAction.set({selectedLocation: location.id}));
+      await Promise.all([
+        dispatch(userAction.getMenuTitle(restaurant.id, false)),
+        dispatch(userAction.getVariations(restaurant.id, false)),
+        dispatch(userAction.getMenus(distL.id, userData.restaurant.id, false)),
         dispatch(
-          userAction.set({
-            selectedLocation: distL.id,
-          }),
-        );
-        setLogs(_logs => [..._logs, `Calling Apis..`]);
+          userAction.getAddons(userData.restaurant.id, distL.id, '', false),
+        ),
+      ]);
 
-        // dispatch(userAction.set({selectedLocation: location.id}));
-        await Promise.all([
-          dispatch(userAction.getMenuTitle(restaurant.id, false)),
-          dispatch(userAction.getVariations(restaurant.id, false)),
-          dispatch(
-            userAction.getMenus(distL.id, userData.restaurant.id, false),
-          ),
-          dispatch(userAction.getAddons(userData.restaurant.id,distL.id, '', false)),
-        ]);
+      await dispatch(
+        userAction.updateDeviceLocation(userData.restaurant.id, {
+          location_id: distL.id,
+          type: 'pos',
+          device_token: deviceToken,
+        }),
+      );
 
-        await dispatch(
-          userAction.updateDeviceLocation(userData.restaurant.id, {
-            location_id: distL.id,
-            type: 'pos',
-            device_token: deviceToken,
-          }),
-        );
+      setLogs(_logs => [..._logs, `Calling Apis done`]);
+      // await dispatch(userAction.getMenus(distL.id, false));
 
-        setLogs(_logs => [..._logs, `Calling Apis done`]);
-        // await dispatch(userAction.getMenus(distL.id, false));
-
-        // console.timeLog('prom', 3);
-        // await dispatch(userAction.getAddons(distL.id, '', false));
-      }
-      // console.timeEnd('prom');
+      // console.timeLog('prom', 3);
+      // await dispatch(userAction.getAddons(distL.id, '', false));
     }
-    setLogs(_logs => [..._logs, `End`]);
+
+    // if (userData) {
+    //   let {locations, restaurant} = userData;
+    //   let start = {latitude: 0, longitude: 0};
+    //   setLogs(_logs => [..._logs, 'fetching location....']);
+    //   let l = await getCurrentPosition().catch(e => {
+    //     console.log('distL CurrentPosition error', e);
+    //     setLogs(_logs => [..._logs, `getCurrentPosition Error`]);
+    //     // alert(e.message);
+    //   });
+    //   setLogs(_logs => [..._logs, `fetched location ${JSON.stringify(l)}`]);
+    //   // console.log('distL l', l);
+    //   if (l && l.position) {
+    //     start = {
+    //       latitude: l.position.coords.latitude,
+    //       longitude: l.position.coords.longitude,
+    //     };
+    //   }
+    //   // console.log(start);
+    //   let distL = locations.map(r => {
+    //     let end = {
+    //       latitude: r.lat ? parseFloat(r.lat) : 0,
+    //       longitude: r.long ? parseFloat(r.long) : 0,
+    //     };
+    //     let dist = getPreciseDistance(start, end);
+    //     let miDist = Math.round(convertDistance(dist, 'mi'));
+    //     // console.log(end, dist, miDist);
+    //     return {dist: miDist, ...r};
+    //   });
+    //   // console.log('distL', distL);
+    //   distL = distL.sort((a, b) => a.dist - b.dist)[0];
+    //   //  console.log('distL', start, distL);
+    //   setLogs(_logs => [..._logs, `set  location ${distL?.id}`]);
+
+    //   // setNearByLocation(distL);
+    //   // console.log('Promise',Promise.allSettled);
+
+    //   // await dispatch(
+    //   //   userAction.getMobileBuilder(userData.restaurant.id, false),
+    //   // );
+    //   // console.time('prom');
+
+    //   // await dispatch(userAction.getVariations(restaurant.id, false));
+    //   // console.timeLog('prom', 2);
+
+    //   if (distL) {
+    //     dispatch(
+    //       userAction.set({
+    //         selectedLocation: distL.id,
+    //       }),
+    //     );
+    //     setLogs(_logs => [..._logs, `Calling Apis..`]);
+
+    //     // dispatch(userAction.set({selectedLocation: location.id}));
+    //     await Promise.all([
+    //       dispatch(userAction.getMenuTitle(restaurant.id, false)),
+    //       dispatch(userAction.getVariations(restaurant.id, false)),
+    //       dispatch(
+    //         userAction.getMenus(distL.id, userData.restaurant.id, false),
+    //       ),
+    //       dispatch(userAction.getAddons(userData.restaurant.id,distL.id, '', false)),
+    //     ]);
+
+    //     await dispatch(
+    //       userAction.updateDeviceLocation(userData.restaurant.id, {
+    //         location_id: distL.id,
+    //         type: 'pos',
+    //         device_token: deviceToken,
+    //       }),
+    //     );
+
+    //     setLogs(_logs => [..._logs, `Calling Apis done`]);
+    //     // await dispatch(userAction.getMenus(distL.id, false));
+
+    //     // console.timeLog('prom', 3);
+    //     // await dispatch(userAction.getAddons(distL.id, '', false));
+    //   }
+    //   // console.timeEnd('prom');
+    // }
+    // setLogs(_logs => [..._logs, `End`]);
     toggleModal();
 
     setLoaded(true);

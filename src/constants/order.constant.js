@@ -21,6 +21,8 @@ export const DINING_OPTION = {
 export const DELIVERY_TYPE = {
   pickup: {id: 'pickup', text: 'Pickup'},
   delivery: {id: 'delivery', text: 'Delivery'},
+  dine_in: {id: 'dine_in', text: 'Dine In'},
+  take_out: {id: 'take_out', text: 'Take Out'},
 };
 
 export const CART_MODAL_VIEW = {

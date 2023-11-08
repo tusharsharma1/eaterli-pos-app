@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Image, View} from 'react-native';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import Button from '../../components/Button';
 import Container from '../../components/Container';
 import PinKeyBoard from '../../components/PinKeyBoard';
@@ -21,10 +21,16 @@ export default function Login(props) {
   const [loaded, setLoaded] = useState(false);
   const [loginTab, setLoginTab] = useState(1);
   const [bH, setBH] = useState(height);
-
+  const deviceId = useSelector(s => s.user.deviceId);
+  const userData = useSelector(s => s.user.userData);
   useEffect(() => {
     loadData();
   }, []);
+
+
+  useEffect(() => {
+    checkDevice();
+  }, [userData]);
 
   const loadData = async () => {
     let email = await storageHelper.getData('email');
@@ -38,7 +44,7 @@ export default function Login(props) {
   };
 
   const onSubmit = () => {
-    props.navigation.replace('HomeNav');
+    // checkDevice();
   };
 
   const onCompleted = async pin => {
@@ -54,8 +60,7 @@ export default function Login(props) {
           email: email,
           passcode: pin,
           restaurant_id: rest_id,
-          type:'pos',
-          
+          type: 'pos',
         }),
       );
       if (r && r.status) {
@@ -63,7 +68,8 @@ export default function Login(props) {
         //  helpers.resetForm();
         // showSnackbar('Sign successfully.');
         showToast(r.message, 'success');
-        props.navigation.replace('HomeNav');
+        // checkDevice();
+
         //let data = r.data;
         // console.log('srsss', data);
         // let password = await stringHelper.encrypt(values.password);
@@ -117,6 +123,27 @@ export default function Login(props) {
     //     false,
     //   ),
     // );
+  };
+
+  const checkDevice = async () => {
+
+    if(!userData){
+      return
+    }
+    // console.log('checkDevice....',userData.restaurant.id, 'pos', deviceId)
+    let r = await dispatch(
+      userAction.getDeviceDetail(userData.restaurant.id, 'pos', deviceId),
+    );
+    if (r) {
+      if (r.status) {
+        props.navigation.replace('HomeNav');
+      } else {
+         props.navigation.replace('DeviceSetup');
+      }
+
+    }
+    //  props.navigation.replace('HomeNav');
+    //  props.navigation.replace('DeviceSetup');
   };
   if (!loaded) {
     return <SplashView />;

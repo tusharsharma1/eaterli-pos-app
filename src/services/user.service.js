@@ -29,7 +29,7 @@ export default {
   getMobileBuilder(restaurant_id) {
     return callApi('GET', `/api/mobile/config/get/${restaurant_id}`);
   },
-  getAddons(restaurant_id,location_id, category_id) {
+  getAddons(restaurant_id, location_id, category_id) {
     return callApi(
       'GET',
       `/api/restaurant/${restaurant_id}/products/addons?location_id=${location_id}${
@@ -188,6 +188,18 @@ export default {
     return callApi(
       'GET',
       `/api/restaurant/${rest_id}/orders/${order_id}/details`,
+    );
+  },
+  createDevice(restaurant_id, data) {
+    return callApi('POST', `/api/pos-device/${restaurant_id}`, data, {
+      isformData: false,
+    });
+  },
+  getDeviceDetail(restaurant_id, type, device_id) {
+    return callApi(
+      'GET',
+      `/api/pos-device/${restaurant_id}/${type}/${device_id}`,{},
+      {isformData: false},
     );
   },
 };

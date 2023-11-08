@@ -13,7 +13,6 @@ import {
 import ControlContainer from './ControlContainer';
 
 class Select extends PureComponent {
- 
   render() {
     let {
       title,
@@ -23,6 +22,7 @@ class Select extends PureComponent {
       placeholder = {value: '', label: ''},
       error,
       onValueChange,
+      renderOption,
     } = this.props;
 
     let _value = (data || []).find(d => d.value == value);
@@ -73,9 +73,13 @@ class Select extends PureComponent {
                 {data.map(m => {
                   return (
                     <MenuOption key={m.value} value={m.value}>
-                      <Text style={{color: '#000', fontSize: 20}}>
-                        {m.label}
-                      </Text>
+                      {renderOption ? (
+                        renderOption(m)
+                      ) : (
+                        <Text style={{color: '#000', fontSize: 20}}>
+                          {m.label}
+                        </Text>
+                      )}
                     </MenuOption>
                   );
                 })}

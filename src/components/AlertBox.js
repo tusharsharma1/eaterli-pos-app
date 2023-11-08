@@ -168,7 +168,7 @@ export default function AlertBox({}) {
                     // backgroundColor: 'gray',
                     // paddingVertical: theme.hp(1.3),
                   }}>
-                  {alert.NegativeText}
+                  {alert.negativeText}
                 </Button>
               )}
               <Button

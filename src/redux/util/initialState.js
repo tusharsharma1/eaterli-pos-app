@@ -25,7 +25,7 @@ const initialState = {
     onPositivePress: null,
     onNegativePress: null,
     positiveText: 'OK',
-    NegativeText: 'No',
+    negativeText: 'No',
   },
   user: {
     deviceId: '',

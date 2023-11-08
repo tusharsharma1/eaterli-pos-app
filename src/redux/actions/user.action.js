@@ -336,11 +336,11 @@ export default {
         .catch(apiErrorHandler);
     };
   },
-  getAddons(restaurant_id,location_id, category_id, showLoader = true) {
+  getAddons(restaurant_id, location_id, category_id, showLoader = true) {
     return (dispatch, getState) => {
       showLoader && dispatch(appAction.showProgress());
       return userService
-        .getAddons(restaurant_id,location_id, category_id)
+        .getAddons(restaurant_id, location_id, category_id)
         .then(res => {
           let returnResult = res;
 
@@ -930,6 +930,45 @@ export default {
           if (res && !res.status) {
             apiMessageHandler(res);
             returnResult = false;
+          }
+          if (returnResult) {
+          }
+          showProgress && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+
+  createDevice(restaurant_id, data, showProgress = true) {
+    return (dispatch, getState) => {
+      showProgress && dispatch(appAction.showProgress());
+      return userService
+        .createDevice(restaurant_id, data)
+        .then(res => {
+          let returnResult = res;
+          if (res && !res.status) {
+            apiMessageHandler(res);
+            returnResult = false;
+          }
+          if (returnResult) {
+          }
+          showProgress && dispatch(appAction.hideProgress());
+          return returnResult;
+        })
+        .catch(apiErrorHandler);
+    };
+  },
+  getDeviceDetail(restaurant_id, type, device_id, showProgress = true) {
+    return (dispatch, getState) => {
+      showProgress && dispatch(appAction.showProgress());
+      return userService
+        .getDeviceDetail(restaurant_id, type, device_id)
+        .then(res => {
+          let returnResult = res;
+          if (res && !res.status) {
+            //showAlert && apiMessageHandler(res);
+            // returnResult = false;
           }
           if (returnResult) {
           }

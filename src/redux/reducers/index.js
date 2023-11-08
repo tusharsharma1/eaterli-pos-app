@@ -19,6 +19,7 @@ let rootReducer = (state, action) => {
       user: {
         ...initialState.user,
         deviceToken: state.user.deviceToken,
+        deviceId:state.user.deviceId,
       },
     };
   }

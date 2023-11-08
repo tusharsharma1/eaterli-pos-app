@@ -870,7 +870,7 @@ function Footer({}) {
       existCustomer,
       loyalityProgram,
       diningOption,
-
+      delivery_type: diningOption,
       split_payments: splitPayment ? JSON.stringify(splitPayments) : '[]',
       gift_card_id: giftCardID,
       // paymentMethod:PAYMENT_METHOD.gift_card.id,
@@ -898,20 +898,33 @@ function Footer({}) {
         }),
       );
 
-      if (!__DEV__) {
-        let c = await checkPrinterConnection();
-        if (!c) {
-          dispatch(
-            appAction.set({
-              pendingOrderPrint: r.data,
-            }),
-          );
-          return;
-        }
-      }
+      dispatch(
+        alertAction.showAlert({
+          type: ALERT_TYPE.CONFIRM,
+          icon: ALERT_ICON_TYPE.CONFIRM,
+          text: 'Would you like to print the receipt?',
+          heading: 'Confirmation',
+          positiveText: 'Print Receipt',
+          negativeText: 'No Receipt',
+          onPositivePress: async () => {
+            if (!__DEV__) {
+              let c = await checkPrinterConnection();
+              if (!c) {
+                dispatch(
+                  appAction.set({
+                    pendingOrderPrint: r.data,
+                  }),
+                );
+                return;
+              }
+            }
 
-      let printData = createOrderReceiptPrintData(r.data);
-      await doPrintUSBPrinter(printData);
+            let printData = createOrderReceiptPrintData(r.data);
+            await doPrintUSBPrinter(printData);
+          },
+        }),
+      );
+
       // return;
       //__DEV__ && doWebViewPrint(printData);
     }

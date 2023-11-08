@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 
 import {
   KeyboardAvoidingView,
@@ -13,20 +13,25 @@ import Navigator from './Navigator';
 import theme from './theme';
 import AlertBox from './components/AlertBox';
 import PrintersModal from './Screens/components/PrintersModal';
-import { fcmService } from './firebase/FCMService';
-import { useDispatch } from 'react-redux';
+import {fcmService} from './firebase/FCMService';
+import {useDispatch} from 'react-redux';
 import userAction from './redux/actions/user.action';
+import { getUniqueId } from 'react-native-device-info';
 
 const App = () => {
-  const dispatch=useDispatch();
+  const dispatch = useDispatch();
   useEffect(() => {
-  
+    initApp();
+  }, []);
+  const initApp = async () => {
+    let deviceId = await getUniqueId();
+    dispatch(userAction.set({deviceId:`${deviceId}`}));
+
     fcmService.getToken(token => {
-      console.log('[FCMService]  device token',token);
+      console.log('[FCMService]  device token', token);
       dispatch(userAction.set({deviceToken: token}));
     });
-  }, []);
-
+  };
   return (
     <>
       <StatusBar

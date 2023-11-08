@@ -13,7 +13,7 @@ export default {
       onPositivePress: null,
       positiveText: 'OK',
       onNegativePress: null,
-      NegativeText: 'No',
+      negativeText: 'No',
     },
   ) {
     return (dispatch) => {

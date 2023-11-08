@@ -63,8 +63,7 @@ function Navigator() {
   };
 
   const checkLogin = async () => {
-    let deviceId = await getUniqueId();
-    dispatch(userAction.set({deviceId}));
+  
 
     let r = await loginFromKeyChain();
     console.log('loginFromKeyChain', r);
@@ -100,7 +99,16 @@ function Navigator() {
         />
 
         {/* /////////////////PRIVATE SCREENS///////////////////////// */}
+      
         <Stack.Screen
+          name="DeviceSetup"
+          getComponent={() =>
+            require('../Screens/DeviceSetup/DeviceSetup').default
+          }
+        />
+      
+      
+       <Stack.Screen
           name="HomeNav"
           getComponent={() => require('./HomeNavigator').default}
         />
