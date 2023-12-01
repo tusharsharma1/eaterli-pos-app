@@ -3,36 +3,27 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {TouchableOpacity, View} from 'react-native';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import {useDispatch, useSelector} from 'react-redux';
-import {dummyImage} from '../../assets';
+import Badge from '../../components/Badge';
 import Container from '../../components/Container';
 import Header from '../../components/Header';
 import ModalContainer from '../../components/ModalContainer';
+import OptionMenu from '../../components/OptionMenu';
 import Table from '../../components/Table';
 import Text from '../../components/Text';
-import ProgressImage from '../../components/react-native-image-progress';
-import {
-  DEFAULT_TAX_TITLE,
-  DELIVERY_TYPE,
-  PAYMENT_METHOD,
-} from '../../constants/order.constant';
-import {getAddons, getVariants} from '../../helpers/order.helper';
+import {ALERT_ICON_TYPE, ALERT_TYPE} from '../../constants/alert.constant';
+import {DELIVERY_TYPE} from '../../constants/order.constant';
+import OrderRefundForm from '../../forms/OrderRefundForm';
+import {simpleToast} from '../../helpers/app.helpers';
 import {
   checkPrinterConnection,
   createOrderReceiptPrintData,
   doPrintUSBPrinter,
-  doWebViewPrint,
 } from '../../helpers/printer.helper';
 import {useNonInitialEffect} from '../../hooks/useNonInitialEffect';
 import usePrevious from '../../hooks/usePrevious';
-import userAction from '../../redux/actions/user.action';
-import Button from '../../components/Button';
 import alertAction from '../../redux/actions/alert.action';
-import {ALERT_ICON_TYPE, ALERT_TYPE} from '../../constants/alert.constant';
-import {simpleToast} from '../../helpers/app.helpers';
-import OrderRefundForm from '../../forms/OrderRefundForm';
-import Badge from '../../components/Badge';
+import userAction from '../../redux/actions/user.action';
 import OrderDetail from '../components/OrderDetail';
-
 export default function Orders({navigation, route}) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
@@ -214,7 +205,7 @@ export default function Orders({navigation, route}) {
                 <FontAwesome5Icon name="eye" color={'#212121'} size={22} />
               </TouchableOpacity>
 
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 onPress={async () => {
                   if (!__DEV__) {
                     let c = await checkPrinterConnection();
@@ -239,7 +230,58 @@ export default function Orders({navigation, route}) {
                   padding: 4,
                 }}>
                 <FontAwesome5Icon name="print" color={'#212121'} size={22} />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
+
+              <OptionMenu
+                color="#212121"
+                menus={[
+                  {
+                    icon: (
+                      <FontAwesome5Icon
+                        size={16}
+                        name="print"
+                        color="#212121"
+                      />
+                    ),
+                    text: 'Print Receipt',
+                    onPress: async () => {
+                      if (!__DEV__) {
+                        let c = await checkPrinterConnection();
+                        if (!c) {
+                          return;
+                        }
+                      }
+
+                      let printData = createOrderReceiptPrintData(data);
+                      await doPrintUSBPrinter(printData);
+                      // return;
+                      //  __DEV__ && doWebViewPrint(printData);
+                      ///////////////////
+                      // POSModule.printByAllInOnePOS(printData, res => {
+                      //   console.log('[printByAllInOnePOS]', res);
+                      //   showToast(res.res);
+                      //   // alert(JSON.stringify(res));
+                      // });
+                    },
+                  },
+                  !!data.tracking_url &&
+                    data.delivery_type == DELIVERY_TYPE.delivery.id && {
+                      icon: (
+                        <FontAwesome5Icon
+                          size={16}
+                          name="truck"
+                          color="#212121"
+                        />
+                      ),
+                      text: 'Track',
+                      onPress: () => {
+                        navigation.navigate('TrackOrder', {
+                          data: data,
+                        });
+                      },
+                    },
+                ].filter(Boolean)}
+              />
             </View>
           );
         },
@@ -300,7 +342,13 @@ export default function Orders({navigation, route}) {
         //   );
         // }}
       >
-        {!!selectedOrder && <OrderDetail voidPress={voidPress} refundPress={refundPress} data={selectedOrder} />}
+        {!!selectedOrder && (
+          <OrderDetail
+            voidPress={voidPress}
+            refundPress={refundPress}
+            data={selectedOrder}
+          />
+        )}
       </ModalContainer>
 
       <ModalContainer

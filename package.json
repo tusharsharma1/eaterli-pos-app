@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android --port=8082",
+    "android": "react-native run-android --port=8086",
     "release": "react-native run-android --mode=release",
     "ios": "react-native run-ios",
-    "start": "react-native start --port=8082 -- --reset-cache",
+    "start": "react-native start --port=8086 -- --reset-cache",
     "test": "jest",
     "lint": "eslint .",
     "prettier": "prettier --check \"src/**/*.{ts,js,jsx}\"",
@@ -39,6 +39,7 @@
     "react-native-gesture-handler": "^2.9.0",
     "react-native-keychain": "^8.1.1",
     "react-native-masked-text": "^1.13.0",
+    "react-native-material-menu": "^2.0.0",
     "react-native-permissions": "^3.9.2",
     "react-native-popup-menu": "^0.16.1",
     "react-native-print": "^0.11.0",
@@ -51,6 +52,7 @@
     "react-native-svg": "^13.2.0",
     "react-native-toast-message": "^2.1.5",
     "react-native-vector-icons": "^9.2.0",
+    "react-native-webview": "^13.6.3",
     "react-redux": "^8.0.4",
     "redux-logger": "^3.0.6",
     "yup": "^0.32.11"

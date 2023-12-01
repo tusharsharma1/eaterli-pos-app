@@ -199,6 +199,12 @@ function Navigator() {
             require('../Screens/PrinterSettings/PrinterSettings').default
           }
         />
+        <Stack.Screen
+          name="TrackOrder"
+          getComponent={() =>
+            require('../Screens/Orders/TrackOrder').default
+          }
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
