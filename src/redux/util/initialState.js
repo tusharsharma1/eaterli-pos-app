@@ -11,9 +11,24 @@ const initialState = {
     printers: [],
     pageWidthLength: 40,
     pageLeftMarginLength: 0,
-    selectedPrinter:'',
-    printerModal:false,
-    pendingOrderPrint:null
+    selectedPrinter: '',
+    printerModal: false,
+    pendingOrderPrint: null,
+    darkMode: true,
+    themeConfig: {
+      light: {
+        appBg: '#71717B',
+        bodyBg: '#F4F4F6',
+        cardBg: '#E4E3E8',
+        textColor: '#18171D',
+      },
+      dark: {
+        appBg: '#414147',
+        bodyBg: '#18171D',
+        cardBg: '#27262B',
+        textColor: '#F4F4F6',
+      },
+    },
   },
   alert: {
     show: false,
@@ -88,11 +103,12 @@ const initialState = {
       data: [],
       currentPage: 1,
     },
-    totalActiveOrder:0,
-    totalOngoingPickupOrder:0,
-    totalOngoingDeliveryOrder:0
+    totalActiveOrder: 0,
+    totalOngoingPickupOrder: 0,
+    totalOngoingDeliveryOrder: 0,
   },
   order: {
+    holdCarts:[],
     cart: {},
     productMenuType: PRODUCT_MENU_TYPE.restuarant.id,
     orderType: 'pickup',

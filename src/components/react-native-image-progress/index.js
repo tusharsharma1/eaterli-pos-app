@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const DefaultIndicator = Progress.Circle;
+const DefaultIndicator = ActivityIndicator;//Progress.Circle;
 
 const getSourceKey = source => (source && source.uri) || String(source);
 

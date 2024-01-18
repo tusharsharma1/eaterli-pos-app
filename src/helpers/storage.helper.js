@@ -18,7 +18,11 @@ const getData = async key => {
   let decryptedData = await stringHelper.decrypt(jsonValue, skey);
   return jsonValue != null ? JSON.parse(decryptedData) : null;
 };
-
+const removeItem = async (key) => {
+  let encryptedKey = await stringHelper.encrypt(key);
+  await AsyncStorage.removeItem(encryptedKey);
+  // console.log('AsyncStorage clear Done.')
+};
 const clearAll = async () => {
   await AsyncStorage.clear();
   // console.log('AsyncStorage clear Done.')
@@ -28,4 +32,5 @@ export default {
   storeData,
   getData,
   clearAll,
+  removeItem
 };

@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android --port=8086",
+    "android": "react-native run-android --port=8087",
     "release": "react-native run-android --mode=release",
     "ios": "react-native run-ios",
-    "start": "react-native start --port=8086 -- --reset-cache",
+    "start": "react-native start --port=8087 -- --reset-cache",
     "test": "jest",
     "lint": "eslint .",
     "prettier": "prettier --check \"src/**/*.{ts,js,jsx}\"",

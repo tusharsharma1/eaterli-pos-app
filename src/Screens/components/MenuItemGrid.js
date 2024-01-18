@@ -32,7 +32,10 @@ import {
   ORDER_ITEM_TYPE,
   PRODUCT_MENU_TYPE,
 } from '../../constants/order.constant';
-let col = 4;
+import useTheme from '../../hooks/useTheme';
+import ProgressImage from '../../components/react-native-image-progress';
+import {dummyImage} from '../../assets';
+let col = 2;
 
 let hPadding = 2;
 
@@ -41,6 +44,7 @@ export default function MenuItemGrid(props) {
   const [leftContainerWidth, setLeftContainerWidth] = useState(theme.wp(70));
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
+  const themeData=useTheme()
   const [selectedItem, setSelectedItem] = useState(null);
   let {selectedCategory, categories} = useProducts();
   const diningOption = useSelector(s => s.order.diningOption);
@@ -64,7 +68,7 @@ export default function MenuItemGrid(props) {
           justifyContent: 'center',
           height: 100,
         }}>
-        <Text size={20} color={'#000'} medium>
+        <Text size={20} color={themeData.textColor} medium>
           No records
         </Text>
       </View>
@@ -110,6 +114,7 @@ export default function MenuItemGrid(props) {
         data={item}
         onPress={onItemPress}
         containerWidth={leftContainerWidth}
+        index={index}
       />
     );
   };
@@ -121,7 +126,7 @@ export default function MenuItemGrid(props) {
     setShowModal(!showModal);
   };
   let data = cat.menu_items; //Array.from(Array(100)).map((e, i) => i);
-
+  let bgcolor = cat.category_color || '#933249';
   return (
     <View
       onLayout={e => {
@@ -139,29 +144,50 @@ export default function MenuItemGrid(props) {
           containerWidth={leftContainerWidth}
         />
       ) : (
-        <FlatList
-          // horizontal
-          numColumns={col}
-          contentContainerStyle={{
-            paddingVertical: 2,
-            paddingHorizontal: hPadding,
-          }}
-          data={formatGridData(data, col)}
-          keyExtractor={keyExtractor}
-          renderItem={renderItem}
-          // refreshing={!loaded}
-          // onRefresh={loadData}
-          progressViewOffset={0}
-          ListEmptyComponent={ListEmptyComponent}
-        />
+        <>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom:10
+            }}>
+            <Text size={20} semibold color={bgcolor}>{cat.category_name}</Text>
+            <View
+              style={{
+                backgroundColor: bgcolor,
+                height: 6,
+                borderRadius: 20,
+                flex: 1,
+                marginLeft:10
+              }}></View>
+          </View>
+          <FlatList
+            // horizontal
+            numColumns={col}
+            contentContainerStyle={
+              {
+                // paddingVertical: 2,
+                // paddingHorizontal: hPadding,
+                // justifyContent: 'space-between',
+              }
+            }
+            data={formatGridData(data, col)}
+            keyExtractor={keyExtractor}
+            renderItem={renderItem}
+            // refreshing={!loaded}
+            // onRefresh={loadData}
+            progressViewOffset={0}
+            ListEmptyComponent={ListEmptyComponent}
+          />
+        </>
       )}
     </View>
   );
 }
-function _Item({data, onPress, containerWidth}) {
+function _Item({data, index, onPress, containerWidth}) {
   const dispatch = useDispatch();
   let {categories, menuItems, selectedCategory} = useProducts();
-
+  const themeData = useTheme();
   let d = menuItems[data];
   let {price, cutPrice} = getPrice(data, '', false);
   if (!d) {
@@ -172,24 +198,27 @@ function _Item({data, onPress, containerWidth}) {
   }
   let empty = data.empty === true;
 
-  let marginOffset = 2;
+  let marginOffset = 2.5;
 
-  let itemSize = (containerWidth - hPadding * 2) / col - marginOffset * 2;
+  let itemSize = (containerWidth - hPadding * 2) / col - marginOffset;
   let _itemStyle = {
     // flexDirection: 'row',
     // marginHorizontal: 15,
     // marginVertical: 5,
-    backgroundColor: empty ? 'transparent' : '#bbb',
+    backgroundColor: empty ? 'transparent' : themeData.cardBg,
     width: itemSize,
     // flex: 1,
     // height: 40,
-    margin: marginOffset,
+    // margin: marginOffset,
     // alignItems: 'center',
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
     paddingVertical: 10, //theme.hp(5),
     paddingHorizontal: 10,
-    height: getPercentValue(itemSize, 45),
+    // height: getPercentValue(itemSize, 45),
     borderRadius: 5,
+    marginBottom: 10,
+    marginRight: index % 2 ? 0 : 10,
+    flexDirection: 'row',
   };
   if (empty) {
     return <View style={_itemStyle} />;
@@ -203,22 +232,68 @@ function _Item({data, onPress, containerWidth}) {
       style={{
         ..._itemStyle,
       }}>
-      <Text
-        numberOfLines={2}
-        color="#111"
-        medium
-        size={getPercentValue(itemSize, 7.6)}
-        align="left">
-        {d.item_name}
-      </Text>
+      {!!d.item_image && (
+        <ProgressImage
+          color={'#F4F4F6'}
+          source={
+            d.item_image
+              ? {
+                  uri: d.item_image,
+                  //+ '?t=' + new Date().getTime()
+                }
+              : dummyImage
+          }
+          style={{
+            width: getPercentValue(itemSize, 33),
+            height: getPercentValue(itemSize, 33),
+            marginRight: 10,
+            // backgroundColor: Color(product_bg).darken(0.2).toString(),
 
-      <Text
-        color="#111"
-        bold
-        size={getPercentValue(itemSize, 6.7)}
-        align="left">
-        $ {parseFloat(price || 0).toFixed(2)}
-      </Text>
+            // borderWidth: 1,
+            //borderColor: theme.colors.borderColor,
+            // data.item_image
+            //  backgroundColor:'red'
+          }}
+          imageStyle={{
+            width: '100%',
+            height: '100%',
+            resizeMode: 'cover',
+            borderRadius: 5,
+          }}
+        />
+      )}
+      <View
+        style={{
+          flex: 1,
+        }}>
+        <View
+          style={{
+            flex: 1,
+          }}>
+          <Text
+            numberOfLines={1}
+            color={themeData.textColor}
+            medium
+            size={getPercentValue(itemSize, 7)}
+            align="left">
+            {d.item_name}
+          </Text>
+          <Text
+            numberOfLines={2}
+            mb={5}
+            color={themeData.textColor}
+            size={getPercentValue(itemSize, 4.6)}>
+            {d.item_description}
+          </Text>
+        </View>
+        <Text
+          color={themeData.textColor}
+          bold
+          size={getPercentValue(itemSize, 7)}
+          align="right">
+          $ {parseFloat(price || 0).toFixed(2)}
+        </Text>
+      </View>
     </TouchableOpacity>
   );
 }

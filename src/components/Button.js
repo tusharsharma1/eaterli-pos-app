@@ -16,6 +16,7 @@ function ButtonUI({
   backgroundColor = theme.colors.secondaryColor,
   noShadow = false,
   style = {},
+  content,
   children,
   pv = 12,
   ph = 15,
@@ -62,7 +63,7 @@ function ButtonUI({
         ...style,
       }}
       {...props}>
-      <Text
+     {content ?content: <Text
       // backgroundColor={'red'}
         regular={regular}
         medium={medium}
@@ -73,7 +74,7 @@ function ButtonUI({
         color={color}
         lineHeight={lineHeight}>
         {children}
-      </Text>
+      </Text>}
     </TouchableOpacity>
   );
 }

@@ -3,10 +3,10 @@ import {Text as TextReact} from 'react-native';
 import {getFont} from '../theme';
 function TextUI({
   regular,
-  medium,
-  bold,
-  semibold,
-  light,
+  medium=false,
+  bold=false,
+  semibold=false,
+  light=false,
   size = 14,
   align = 'left',
   mb = 0,

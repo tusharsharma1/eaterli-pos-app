@@ -53,20 +53,27 @@ import {
   doWebViewPrint,
 } from '../../helpers/printer.helper';
 import appAction from '../../redux/actions/app.action';
+import useTheme from '../../hooks/useTheme';
+import PencilIcon from '../../assets/PencilIcon';
+import TagIcon from '../../assets/TagIcon';
+import DeleteIcon from '../../assets/DeleteIcon';
+import {useNonInitialEffect} from '../../hooks/useNonInitialEffect';
+import storageHelper from '../../helpers/storage.helper';
 
 const Buffer = require('buffer').Buffer;
 function _CartView({}) {
+  const themeData = useTheme();
   return (
     <>
       <View
         style={{
-          backgroundColor: theme.colors.primaryColor,
+          // backgroundColor: theme.colors.primaryColor,
           height: 50,
           paddingHorizontal: 10,
           justifyContent: 'center',
           // paddingVertical: 10,
         }}>
-        <Text bold size={18} color="#fff">
+        <Text bold size={18} color={themeData.textColor}>
           Cart
         </Text>
       </View>
@@ -96,54 +103,66 @@ function CartTable({}) {
   );
 }
 function TableHeader({}) {
+  const themeData = useTheme();
   return (
     <View
       style={{
         flexDirection: 'row',
-        backgroundColor: '#fff',
+        backgroundColor: themeData.bodyBg,
         paddingHorizontal: 10,
         paddingVertical: 5,
-        borderBottomColor: '#ddd',
-        borderBottomWidth: 1,
+        // borderBottomColor: '#ddd',
+        //borderBottomWidth: 1,
       }}>
       <View
         style={{
           flex: 2,
         }}>
-        <Text bold>Product</Text>
+        <Text color={themeData.textColor} size={14} medium>
+          Product
+        </Text>
       </View>
       <View
         style={{
           flex: 1,
           alignItems: 'flex-end',
         }}>
-        <Text bold>Qty</Text>
+        <Text color={themeData.textColor} size={14} medium>
+          Qty
+        </Text>
       </View>
       <View
         style={{
           flex: 1,
           alignItems: 'flex-end',
         }}>
-        <Text bold>Rate</Text>
+        <Text color={themeData.textColor} size={14} medium>
+          Rate
+        </Text>
       </View>
       <View
         style={{
           flex: 1,
           alignItems: 'flex-end',
         }}>
-        <Text bold>Dis.</Text>
+        <Text color={themeData.textColor} size={14} medium>
+          Dis.
+        </Text>
       </View>
       <View
         style={{
           flex: 1,
           alignItems: 'flex-end',
         }}>
-        <Text bold>Total</Text>
+        <Text color={themeData.textColor} size={14} medium>
+          Total
+        </Text>
       </View>
     </View>
   );
 }
 function CartRow({id}) {
+  const themeData = useTheme();
   const dispatch = useDispatch();
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [note, setNote] = useState('');
@@ -259,7 +278,7 @@ function CartRow({id}) {
   const toggleDiscountModal = () => {
     setShowDiscountModal(!showDiscountModal);
   };
-  console.log('cccccc', itemtype, itemData, data);
+  //console.log('cccccc', itemtype, itemData, data);
   if (!itemData) {
     return null;
   }
@@ -277,11 +296,11 @@ function CartRow({id}) {
     <>
       <View
         style={{
-          backgroundColor: selected ? '#e5acb5' : '#ccc',
+          // backgroundColor: selected ? '#e5acb5' : '#ccc',
           paddingHorizontal: 10,
           paddingVertical: 5,
-          borderBottomColor: '#aaa',
-          borderBottomWidth: 1,
+          // borderBottomColor: '#aaa',
+          // borderBottomWidth: 1,
         }}>
         <TouchableOpacity
           onPress={() => {
@@ -303,14 +322,14 @@ function CartRow({id}) {
             style={{
               flex: 2,
             }}>
-            <Text medium>{itemData.item_name}</Text>
+            <Text color={themeData.textColor}>{itemData.item_name}</Text>
             {!!sizeData?.length && (
-              <Text color="#666" size={12}>
+              <Text color={themeData.textColor} size={12}>
                 {sizeData.map(r => r.title).join(', ')}
               </Text>
             )}
             {!!add_ons?.length && (
-              <Text color="#666" size={12}>
+              <Text color={themeData.textColor} size={12}>
                 {add_ons.map(r => r.product_name).join(', ')}
               </Text>
             )}
@@ -320,7 +339,7 @@ function CartRow({id}) {
               flex: 1,
               alignItems: 'flex-end',
             }}>
-            <Text size={size} medium>
+            <Text color={themeData.textColor} size={size}>
               {data.qty}
             </Text>
           </View>
@@ -329,7 +348,7 @@ function CartRow({id}) {
               flex: 1,
               alignItems: 'flex-end',
             }}>
-            <Text size={size} medium>
+            <Text color={themeData.textColor} size={size}>
               ${parseFloat(rate).toFixed(2)}
             </Text>
           </View>
@@ -338,7 +357,7 @@ function CartRow({id}) {
               flex: 1,
               alignItems: 'flex-end',
             }}>
-            <Text size={size} medium>
+            <Text color={themeData.textColor} size={size}>
               {discount_type == '2' && '$'}
               {_discount}
               {discount_type == '1' && '%'}
@@ -352,7 +371,7 @@ function CartRow({id}) {
             {!!_discount && (
               <Text
                 size={size}
-                medium
+                color={themeData.textColor}
                 style={{
                   textDecorationLine: 'line-through',
                   textDecorationStyle: 'solid',
@@ -361,7 +380,7 @@ function CartRow({id}) {
               </Text>
             )}
 
-            <Text size={size} medium>
+            <Text color={themeData.textColor} size={size}>
               ${parseFloat(totalPrice).toFixed(2)}
             </Text>
           </View>
@@ -370,115 +389,22 @@ function CartRow({id}) {
           <View
             style={{
               marginTop: 10,
+              backgroundColor: themeData.bodyBg,
+              borderRadius: 5,
+              paddingHorizontal: 10,
+              paddingVertical: 10,
+              // alignItems: 'center',
             }}>
             <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
               }}>
-              {itemtype == ORDER_ITEM_TYPE.menu.id ? (
-                <>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      flex: 1,
-                    }}>
-                    <Button
-                      onPress={onMinusPress}
-                      noShadow
-                      width={30}
-                      height={30}
-                      borderRadius={30}
-                      lineHeight={28}
-                      size={24}
-                      bold
-                      ph={0}
-                      pv={0}>
-                      -
-                    </Button>
-                    <Text
-                      ml={5}
-                      style={{minWidth: 45}}
-                      backgroundColor={'#eeeeee67'}
-                      align="center"
-                      semibold
-                      size={18}
-                      mr={5}>
-                      {data.qty}
-                    </Text>
-                    <Button
-                      onPress={onAddPress}
-                      noShadow
-                      width={30}
-                      height={30}
-                      borderRadius={30}
-                      lineHeight={28}
-                      size={24}
-                      bold
-                      ph={0}
-                      pv={0}>
-                      +
-                    </Button>
-                  </View>
-                  <View
-                    style={{
-                      alignItems: 'center',
-                      marginRight: 5,
-                    }}>
-                    <Button
-                      onPress={toggleNoteModal}
-                      noShadow
-                      width={30}
-                      height={30}
-                      borderRadius={30}
-                      lineHeight={28}
-                      // size={24}
-                      bold
-                      // mr={5}
-                      ph={0}
-                      pv={0}>
-                      <FontAwesome5Icon name="pencil-alt" size={18} />
-                    </Button>
-                    <Text medium size={9}>
-                      NOTE
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      alignItems: 'center',
-                      marginRight: 5,
-                    }}>
-                    <Button
-                      onPress={toggleDiscountModal}
-                      noShadow
-                      width={30}
-                      height={30}
-                      borderRadius={30}
-                      lineHeight={28}
-                      // size={24}
-                      bold
-                      ph={0}
-                      pv={0}>
-                      <FontAwesome5Icon name="tag" size={18} />
-                    </Button>
-                    <Text medium size={9}>
-                      DISCOUNT
-                    </Text>
-                  </View>
-                </>
-              ) : (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    flex: 1,
-                  }}></View>
-              )}
               <View
                 style={{
+                  flexDirection: 'row',
                   alignItems: 'center',
-                  marginRight: 5,
+                  flex: 1,
                 }}>
                 <Button
                   onPress={onDeletePress}
@@ -489,14 +415,97 @@ function CartRow({id}) {
                   lineHeight={28}
                   // size={24}
                   bold
+                  mr={8}
                   ph={0}
-                  pv={0}>
-                  <FontAwesome5Icon name="trash" size={18} />
-                </Button>
-                <Text medium size={9}>
-                  DELETE
-                </Text>
+                  pv={0}
+                  backgroundColor={theme.colors.primaryColor}
+                  content={<DeleteIcon width={15} height={15} />}></Button>
+                {itemtype == ORDER_ITEM_TYPE.menu.id && (
+                  <>
+                    <Button
+                      onPress={toggleNoteModal}
+                      noShadow
+                      width={30}
+                      height={30}
+                      borderRadius={30}
+                      lineHeight={28}
+                      // size={24}
+                      bold
+                      mr={8}
+                      ph={0}
+                      pv={0}
+                      backgroundColor={theme.colors.primaryColor}
+                      content={<PencilIcon width={15} height={15} />}></Button>
+
+                    <Button
+                      onPress={toggleDiscountModal}
+                      noShadow
+                      width={30}
+                      height={30}
+                      borderRadius={30}
+                      lineHeight={28}
+                      // size={24}
+                      bold
+                      mr={8}
+                      ph={0}
+                      pv={0}
+                      backgroundColor={theme.colors.primaryColor}
+                      content={<TagIcon width={15} height={15} />}></Button>
+                  </>
+                )}
               </View>
+              {itemtype == ORDER_ITEM_TYPE.menu.id && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#E4E3E8',
+                    borderRadius: 50,
+                    paddingHorizontal: 2,
+                    paddingVertical: 2,
+                    // flex: 1,
+                  }}>
+                  <Button
+                    backgroundColor={'#F4F4F6'}
+                    onPress={onMinusPress}
+                    noShadow
+                    width={26}
+                    height={26}
+                    borderRadius={30}
+                    lineHeight={24}
+                    size={22}
+                    medium
+                    ph={0}
+                    pv={0}
+                    color="#18171D">
+                    -
+                  </Button>
+                  <Text
+                    ml={5}
+                    style={{minWidth: 25}}
+                    color="#18171D"
+                    align="center"
+                    medium
+                    size={14}
+                    mr={5}>
+                    {data.qty}
+                  </Text>
+                  <Button
+                    backgroundColor={theme.colors.primaryColor}
+                    onPress={onAddPress}
+                    noShadow
+                    width={26}
+                    height={26}
+                    borderRadius={30}
+                    lineHeight={24}
+                    size={22}
+                    medium
+                    ph={0}
+                    pv={0}>
+                    +
+                  </Button>
+                </View>
+              )}
             </View>
           </View>
         )}
@@ -566,7 +575,7 @@ function Footer({}) {
   const [splitPayment, setSplitPayment] = useState(false);
   const [splitPaymentBy, setSplitPaymentBy] = useState(1);
   const [totalSplitBills, setTotalSplitBills] = useState(2);
-
+  const themeData = useTheme();
   const [giftCardID, setGiftCardId] = useState(0);
   const [giftCardBalance, setGiftCardBalance] = useState(0);
   const [showDiscountModal, setShowDiscountModal] = useState(false);
@@ -2383,11 +2392,33 @@ function Footer({}) {
 
     toggleDiscountModal();
   };
+  const onHoldPress = () => {
+    let products = getCartProducts();
+    if (!products.length) {
+      simpleToast('Add Products first.');
+      return;
+    }
+    let state = React.store.getState();
+    let {holdCarts, cart} = state.order;
+    let ob = {
+      id: new Date().getTime(),
+      cart,
+      date: new Date(),
+    };
+    let _holdCarts = [...holdCarts, ob];
+    dispatch(
+      orderAction.set({
+        holdCarts: _holdCarts,
+        cart: {},
+      }),
+    );
+    simpleToast('Added');
+  };
   return (
     <>
       <View
         style={{
-          backgroundColor: '#fff',
+          // backgroundColor: '#fff',
           // height: 50,
           paddingHorizontal: 10,
           justifyContent: 'center',
@@ -2402,11 +2433,14 @@ function Footer({}) {
             style={{
               flex: 1,
             }}
-            semibold
-            size={16}>
-            Total
+            color={themeData.textColor}
+            medium
+            size={14}>
+            Sub Total
           </Text>
-          <Text size={16}>${parseFloat(sub_total).toFixed(2)}</Text>
+          <Text medium color={themeData.textColor} size={14}>
+            ${parseFloat(sub_total).toFixed(2)}
+          </Text>
         </View>
         <View
           style={{
@@ -2417,11 +2451,14 @@ function Footer({}) {
             style={{
               flex: 1,
             }}
-            semibold
-            size={16}>
+            color={themeData.textColor}
+            medium
+            size={14}>
             {tax_title} ({tax_per}%)
           </Text>
-          <Text size={16}>${parseFloat(tax_amt).toFixed(2)}</Text>
+          <Text medium color={themeData.textColor} size={14}>
+            ${parseFloat(tax_amt).toFixed(2)}
+          </Text>
         </View>
 
         {!!offerDiscount && (
@@ -2434,11 +2471,12 @@ function Footer({}) {
               style={{
                 flex: 1,
               }}
-              semibold
-              size={16}>
+              color={themeData.textColor}
+              medium
+              size={14}>
               Offer Discount
             </Text>
-            <Text size={16}>
+            <Text medium color={themeData.textColor} size={14}>
               {offer_discount_type == '2' && '$'}
               {_offer_discount}
               {offer_discount_type == '1' && '%'}
@@ -2453,14 +2491,15 @@ function Footer({}) {
               marginBottom: 2,
             }}>
             <Text
+              color={themeData.textColor}
               style={{
                 flex: 1,
               }}
-              semibold
-              size={16}>
+              medium
+              size={14}>
               Discount
             </Text>
-            <Text size={16}>
+            <Text medium color={themeData.textColor} size={14}>
               {discount_type == '2' && '$'}
               {_discount}
               {discount_type == '1' && '%'}
@@ -2472,18 +2511,26 @@ function Footer({}) {
           style={{
             flexDirection: 'row',
             marginBottom: 4,
+            borderTopColor: '#52525C',
+            borderTopWidth: 1,
+            borderStyle: 'dashed',
+            marginTop: 8,
+            paddingTop: 8,
           }}>
           <Text
             style={{
               flex: 1,
             }}
-            semibold
-            size={16}>
-            Grand Total
+            color={themeData.textColor}
+            medium
+            size={14}>
+            Total
           </Text>
           {!!_discount && (
             <Text
-              size={16}
+              medium
+              color={themeData.textColor}
+              size={14}
               mr={5}
               style={{
                 textDecorationLine: 'line-through',
@@ -2492,37 +2539,110 @@ function Footer({}) {
               ${parseFloat(tax_total).toFixed(2)}
             </Text>
           )}
-          <Text bold size={16}>
+          <Text medium color={themeData.textColor} size={14}>
             ${parseFloat(total).toFixed(2)}
           </Text>
+        </View>
+
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginTop: 15,
+            marginBottom: 15,
+          }}>
+          <Button
+            // onPress={}
+            noShadow
+            backgroundColor={'#71717B'}
+            mr={8}
+            ph={0}
+            pv={0}
+            borderRadius={3}
+            size={14}
+            medium
+            width={40}
+            height={35}
+            style={{flex: 1}}>
+            TYPE
+          </Button>
+          <Button
+            onPress={onHoldPress}
+            noShadow
+            backgroundColor={'#71717B'}
+            mr={8}
+            ph={0}
+            pv={0}
+            borderRadius={3}
+            size={14}
+            medium
+            width={40}
+            height={35}
+            style={{flex: 1}}>
+            HOLD
+          </Button>
+          <Button
+            // onPress={}
+            noShadow
+            backgroundColor={'#71717B'}
+            // mr={8}
+            ph={0}
+            pv={0}
+            borderRadius={3}
+            size={14}
+            medium
+            width={40}
+            height={35}
+            style={{flex: 1}}>
+            CANCEL
+          </Button>
         </View>
 
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Button
             onPress={onDeletePress}
             noShadow
-            backgroundColor={theme.colors.dangerColor}
-            mr={5}
-            ph={20}>
-            <FontAwesome5Icon color={'#fff'} size={18} name="trash" />
+            backgroundColor={theme.colors.primaryColor}
+            mr={8}
+            ph={0}
+            pv={0}
+            borderRadius={40}
+            width={40}
+            height={40}>
+            <DeleteIcon color="#18171D" width={22} height={22} />
           </Button>
           <Button
             onPress={() => {
               toggleDiscountModal();
             }}
             noShadow
-            backgroundColor={theme.colors.dangerColor}
-            mr={5}
-            ph={20}>
-            <FontAwesome5Icon name="tag" size={18} />
+            backgroundColor={theme.colors.primaryColor}
+            mr={8}
+            ph={0}
+            pv={0}
+            borderRadius={40}
+            width={40}
+            height={40}>
+            <TagIcon color="#18171D" width={22} height={22} />
           </Button>
           <Button
             onPress={onPayPress}
             backgroundColor={theme.colors.primaryColor}
             noShadow
-            style={{flex: 1}}>
-            Pay - ${parseFloat(total).toFixed(2)}
-          </Button>
+            height={40}
+            pv={0}
+            style={{flex: 1, flexDirection: 'row'}}
+            content={
+              <>
+                <Text
+                  style={{
+                    flex: 1,
+                  }}>
+                  Place Order
+                </Text>
+                <Text>${parseFloat(total).toFixed(2)}</Text>
+              </>
+            }></Button>
         </View>
       </View>
       <ModalContainer
@@ -2548,10 +2668,35 @@ function Footer({}) {
         onRequestClose={toggleDiscountModal}
         onUpdatePress={updateDiscount}
       />
+      <HoldCartSaver />
     </>
   );
 }
+function HoldCartSaver() {
+  const dispatch = useDispatch();
+  const holdCarts = useSelector(s => s.order.holdCarts);
+  useEffect(() => {
+    // storageHelper.removeItem('holdCarts')
+    loadData();
+  }, []);
 
+  useNonInitialEffect(() => {
+    // console.log(holdCarts)
+    storageHelper.storeData('holdCarts', holdCarts);
+  }, [holdCarts]);
+
+  const loadData = async () => {
+    let _holdCarts = await storageHelper.getData('holdCarts');
+    if (_holdCarts) {
+      dispatch(
+        orderAction.set({
+          holdCarts: _holdCarts,
+        }),
+      );
+    }
+  };
+  return null;
+}
 const SplitByItemProduct = memo(function ({index, data}) {
   const dispatch = useDispatch();
   const [selectedItem, setSelectedItem] = useState('');
