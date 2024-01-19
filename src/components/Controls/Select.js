@@ -11,91 +11,87 @@ import {
   MenuTrigger,
 } from 'react-native-popup-menu';
 import ControlContainer from './ControlContainer';
+import useTheme from '../../hooks/useTheme';
 
-class Select extends PureComponent {
-  render() {
-    let {
-      title,
-      data = [],
-      value = '',
-      containerStyle,
-      placeholder = {value: '', label: ''},
-      error,
-      onValueChange,
-      renderOption,
-    } = this.props;
+export default function Select({
+  title,
+  data = [],
+  value = '',
+  containerStyle,
+  placeholder = {value: '', label: ''},
+  error,
+  onValueChange,
+  renderOption,
+}) {
+  let themeData=useTheme()
+  let _value = (data || []).find(d => d.value == value);
+  return (
+    <>
+      <ControlContainer title={title} containerStyle={[containerStyle, {}]}>
+        <Menu onSelect={onValueChange}>
+          <MenuTrigger>
+            <View
+              style={{
+                zIndex: 2,
+                // backgroundColor: '#FFFFFF',
+                flexDirection: 'row',
+                alignItems: 'center',
+                // borderRadius: 30,
+                // paddingHorizontal: 20,
+                // paddingVertical: 12,
+                // marginHorizontal: theme.paddingHorizontal,
+                // marginBottom: mb,
+                // shadowColor: '#000',
+                // shadowOffset: {
+                //   width: 0,
+                //   height: 2,
+                // },
+                // shadowOpacity: 0.8,
+                // shadowRadius: 6,
 
-    let _value = (data || []).find(d => d.value == value);
-    return (
-      <>
-        <ControlContainer title={title} containerStyle={[containerStyle, {}]}>
-          <Menu onSelect={onValueChange}>
-            <MenuTrigger>
-              <View
-                onPress={this.showMenu}
-                style={{
-                  zIndex: 2,
-                  // backgroundColor: '#FFFFFF',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  // borderRadius: 30,
-                  // paddingHorizontal: 20,
-                  // paddingVertical: 12,
-                  // marginHorizontal: theme.paddingHorizontal,
-                  // marginBottom: mb,
-                  shadowColor: '#000',
-                  shadowOffset: {
-                    width: 0,
-                    height: 2,
+                // elevation: 7,
+              }}>
+              <Text
+                style={[
+                  styles.inputText,
+                  {
+                    textAlignVertical: 'center',
+                    flex: 1,
+                    lineHeight:28,
+                    color: _value && _value.label ? themeData.textColor : 'gray',
+                    // backgroundColor:'yellow'
                   },
-                  shadowOpacity: 0.8,
-                  shadowRadius: 6,
+                ]}>
+                {_value && _value.label ? _value.label : placeholder.label}
+              </Text>
+              <FontAwesome5 color={themeData.textColor} name="caret-down" size={theme.hp(2.2)} />
+            </View>
+          </MenuTrigger>
+          <MenuOptions>
+            <ScrollView style={{maxHeight: 200}}>
+              {data.map(m => {
+                return (
+                  <MenuOption key={m.value} value={m.value}>
+                    {renderOption ? (
+                      renderOption(m)
+                    ) : (
+                      <Text style={{color: '#000', fontSize: 20}}>
+                        {m.label}
+                      </Text>
+                    )}
+                  </MenuOption>
+                );
+              })}
+            </ScrollView>
+          </MenuOptions>
+        </Menu>
 
-                  elevation: 7,
-                }}>
-                <Text
-                  style={[
-                    styles.inputText,
-                    {
-                      textAlignVertical: 'center',
-                      flex: 1,
-                      color: _value && _value.label ? '#000' : 'gray',
-                      // backgroundColor:'yellow'
-                    },
-                  ]}>
-                  {_value && _value.label ? _value.label : placeholder.label}
-                </Text>
-                <FontAwesome5 name="caret-down" size={theme.hp(2.2)} />
-              </View>
-            </MenuTrigger>
-            <MenuOptions>
-              <ScrollView style={{maxHeight: 200}}>
-                {data.map(m => {
-                  return (
-                    <MenuOption key={m.value} value={m.value}>
-                      {renderOption ? (
-                        renderOption(m)
-                      ) : (
-                        <Text style={{color: '#000', fontSize: 20}}>
-                          {m.label}
-                        </Text>
-                      )}
-                    </MenuOption>
-                  );
-                })}
-              </ScrollView>
-            </MenuOptions>
-          </Menu>
-
-          {error && error != '' ? (
-            <Text style={styles.errorText}>{error}</Text>
-          ) : (
-            <></>
-          )}
-        </ControlContainer>
-      </>
-    );
-  }
+        {error && error != '' ? (
+          <Text style={styles.errorText}>{error}</Text>
+        ) : (
+          <></>
+        )}
+      </ControlContainer>
+    </>
+  );
 }
-
-export default Select;

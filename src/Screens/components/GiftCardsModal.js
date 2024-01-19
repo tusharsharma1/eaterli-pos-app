@@ -25,6 +25,7 @@ import {uniqueId} from 'lodash';
 import {getCartItemID} from '../../helpers/order.helper';
 import theme from '../../theme';
 import {ORDER_ITEM_TYPE} from '../../constants/order.constant';
+import useTheme from '../../hooks/useTheme';
 const Buffer = require('buffer').Buffer;
 let initialFormData = {
   amount: '',
@@ -43,7 +44,7 @@ let initialFormData = {
   personalized_message_from: '',
   personalized_message: '',
 };
-const TEST_ORDATA = ''; //WyJnaWZ0LWNhcmQiLDE3LDI3NSw3XQ==
+const TEST_ORDATA = ""//'WyJnaWZ0LWNhcmQiLDE3LDI3NSw3XQ=='; //WyJnaWZ0LWNhcmQiLDE3LDI3NSw3XQ==
 export default function GiftCardsModal(props) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(true);
@@ -57,7 +58,7 @@ export default function GiftCardsModal(props) {
   const [giftCardID, setGiftCardId] = useState('');
 
   const [QRData, setQRData] = useState(TEST_ORDATA); //WyJnaWZ0LWNhcmQiLDE3LDI3NSw3XQ==
-
+  let themeData = useTheme();
   // useEffect(() => {
   //   loadData();
   // }, []);
@@ -292,7 +293,9 @@ export default function GiftCardsModal(props) {
                 onPress={() => {
                   setView(GIFT_CARD_VIEW.options.id);
                 }}
-                backgroundColor="#212121">
+                backgroundColor={themeData.btnSecondaryBg}
+                borderRadius={4}
+                >
                 Back
               </Button>
               <Button
@@ -309,7 +312,8 @@ export default function GiftCardsModal(props) {
                   }
 
                   setView(GIFT_CARD_VIEW.send_to.id);
-                }}>
+                }}  backgroundColor={theme.colors.primaryColor}
+                borderRadius={4}>
                 Next
               </Button>
             </View>
@@ -324,7 +328,7 @@ export default function GiftCardsModal(props) {
               // backgroundColor: 'red',
               alignSelf: 'center',
             }}>
-            <Text bold size={20} mb={5}>
+            <Text bold color={themeData.textColor} size={20} mb={5}>
               Send To:
             </Text>
             <TextInput
@@ -348,7 +352,7 @@ export default function GiftCardsModal(props) {
                 },
               }}
             />
-            <Text medium size={16} align="center" mb={5}>
+            <Text medium color={themeData.textColor} size={16} align="center" mb={5}>
               OR
             </Text>
             <TextInput
@@ -481,7 +485,8 @@ export default function GiftCardsModal(props) {
                 onPress={() => {
                   setView(GIFT_CARD_VIEW.sell_card.id);
                 }}
-                backgroundColor="#212121">
+                backgroundColor={themeData.btnSecondaryBg}
+                borderRadius={4}>
                 Back
               </Button>
               <Button
@@ -521,7 +526,8 @@ export default function GiftCardsModal(props) {
                   }
 
                   setView(GIFT_CARD_VIEW.purchaser_info.id);
-                }}>
+                }}  backgroundColor={theme.colors.primaryColor}
+                borderRadius={4}>
                 Next
               </Button>
             </View>
@@ -535,7 +541,7 @@ export default function GiftCardsModal(props) {
               // backgroundColor: 'red',
               alignSelf: 'center',
             }}>
-            <Text bold size={20} mb={5}>
+            <Text bold color={themeData.textColor} size={20} mb={5}>
               Purchaser Information (Optional)
             </Text>
             <TextInput
@@ -610,13 +616,15 @@ export default function GiftCardsModal(props) {
                 onPress={() => {
                   setView(GIFT_CARD_VIEW.send_to.id);
                 }}
-                backgroundColor="#212121">
+                backgroundColor={themeData.btnSecondaryBg}
+                borderRadius={4}>
                 Back
               </Button>
               <Button
                 onPress={() => {
                   setView(GIFT_CARD_VIEW.personalized_message.id);
-                }}>
+                }}  backgroundColor={theme.colors.primaryColor}
+                borderRadius={4}>
                 Next
               </Button>
             </View>
@@ -631,13 +639,13 @@ export default function GiftCardsModal(props) {
               // backgroundColor: 'red',
               alignSelf: 'center',
             }}>
-            <Text bold size={20} mb={5}>
+            <Text bold color={themeData.textColor} size={20} mb={5}>
               Sending To:
             </Text>
-            <Text size={18} mb={5}>
+            <Text color={themeData.textColor} size={18} mb={5}>
               Text Message : {formData.send_to_phone}
             </Text>
-            <Text bold size={20} mb={5}>
+            <Text bold color={themeData.textColor} size={20} mb={5}>
               Personalized Message (Optional)
             </Text>
             <TextInput
@@ -716,10 +724,12 @@ export default function GiftCardsModal(props) {
                 onPress={() => {
                   setView(GIFT_CARD_VIEW.purchaser_info.id);
                 }}
-                backgroundColor="#212121">
+                backgroundColor={themeData.btnSecondaryBg}
+                borderRadius={4}>
                 Back
               </Button>
-              <Button onPress={createCardPress}>Create</Button>
+              <Button onPress={createCardPress}  backgroundColor={theme.colors.primaryColor}
+                  borderRadius={4}>Create</Button>
             </View>
           </View>
         );
@@ -739,16 +749,17 @@ export default function GiftCardsModal(props) {
                 }}
                 style={{
                   alignSelf: 'flex-start',
-                }}>
+                }}  backgroundColor={themeData.btnSecondaryBg}
+                borderRadius={4}>
                 Back
               </Button>
-              <Text ml={10} size={18} medium>
+              <Text ml={10} color={themeData.textColor} size={18} medium>
                 Balance Inquiry
               </Text>
             </View>
             {balance != '' ? (
               <View>
-                <Text align="center" semibold mt={30} mb={30} size={22}>
+                <Text color={themeData.textColor} align="center" semibold mt={30} mb={30} size={22}>
                   Total Balance:{' '}
                   <Text
                     align="center"
@@ -775,7 +786,7 @@ export default function GiftCardsModal(props) {
                     zIndex: 1,
                   }}>
                   <ActivityIndicator size={'large'} />
-                  <Text>Scanning...</Text>
+                  <Text color={themeData.textColor}>Scanning...</Text>
                 </View>
                 <_TextInput
                   style={{
@@ -820,10 +831,11 @@ export default function GiftCardsModal(props) {
                 }}
                 style={{
                   alignSelf: 'flex-start',
-                }}>
+                }} backgroundColor={themeData.btnSecondaryBg}
+                borderRadius={4}>
                 Back
               </Button>
-              <Text ml={10} size={18} medium>
+              <Text color={themeData.textColor} ml={10} size={18} medium>
                 Add Value($)
               </Text>
             </View>
@@ -835,10 +847,10 @@ export default function GiftCardsModal(props) {
                   alignSelf: 'center',
                   paddingVertical: 10,
                 }}>
-                <Text semibold mt={10} mb={10} size={22}>
+                <Text color={themeData.textColor} semibold mt={10} mb={10} size={22}>
                   Card No.: {giftCardID}
                 </Text>
-                <Text semibold mb={10} size={22}>
+                <Text  color={themeData.textColor} semibold mb={10} size={22}>
                   Available Balance: {parseFloat(balance).toFixed(2)}
                 </Text>
                 <TextInput
@@ -889,7 +901,10 @@ export default function GiftCardsModal(props) {
                   }}
                   style={{
                     alignSelf: 'flex-end',
-                  }}>
+                  }}
+                  backgroundColor={theme.colors.primaryColor}
+                  borderRadius={4}
+                  >
                   Add
                 </Button>
               </View>
@@ -909,7 +924,7 @@ export default function GiftCardsModal(props) {
                     zIndex: 1,
                   }}>
                   <ActivityIndicator size={'large'} />
-                  <Text>Scanning...</Text>
+                  <Text color={themeData.textColor}>Scanning...</Text>
                 </View>
                 <_TextInput
                   style={{

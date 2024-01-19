@@ -906,7 +906,7 @@ function Footer({}) {
           customerDetail: CUSTOMER_DETAIL,
         }),
       );
-
+      setLoyalityProgram(false);
       dispatch(
         alertAction.showAlert({
           type: ALERT_TYPE.CONFIRM,
@@ -1133,7 +1133,7 @@ function Footer({}) {
               paddingVertical: 40,
               // backgroundColor: 'red',
             }}>
-            <Text mb={10} bold size={22}>
+            <Text mb={10} color={themeData.textColor} bold size={22}>
               Existing Rewards Customer?
             </Text>
 
@@ -1163,7 +1163,7 @@ function Footer({}) {
       case CART_MODAL_VIEW.customer_phone.id:
         return (
           <>
-            <Button
+            <BackButton
               onPress={() => {
                 if (loyalityProgram) {
                   setModalView(CART_MODAL_VIEW.loyality.id);
@@ -1173,11 +1173,7 @@ function Footer({}) {
                 dispatch(orderAction.set({customerDetail: CUSTOMER_DETAIL}));
                 setModalView(CART_MODAL_VIEW.reward_question.id);
               }}
-              style={{
-                alignSelf: 'flex-start',
-              }}>
-              Back
-            </Button>
+            />
             <View
               style={{
                 width: '60%',
@@ -1187,7 +1183,7 @@ function Footer({}) {
               }}>
               {existCustomer ? (
                 <>
-                  <Text mb={10} bold size={22}>
+                  <Text color={themeData.textColor} mb={10} bold size={22}>
                     Customer Phone No.
                   </Text>
                   <TextInput
@@ -1224,7 +1220,7 @@ function Footer({}) {
                 </>
               ) : (
                 <>
-                  <Text mb={10} bold size={22}>
+                  <Text mb={10} color={themeData.textColor} bold size={22}>
                     Customer Details
                   </Text>
                   <TextInput
@@ -1351,13 +1347,14 @@ function Footer({}) {
                 }}>
                 <Button
                   // mt={10}
+                  borderRadius={4}
+                  backgroundColor={themeData.btnSecondaryBg}
                   onPress={async () => {
                     setQRDataScaning(true);
                     setQRData(TEST_ORDATA);
                     setModalView(CART_MODAL_VIEW.scan_qr.id);
                   }}
                   ph={40}
-                  backgroundColor={theme.colors.primaryColor}
                   style={
                     {
                       // alignSelf: 'center',
@@ -1366,6 +1363,8 @@ function Footer({}) {
                   Scan QR
                 </Button>
                 <Button
+                  backgroundColor={theme.colors.primaryColor}
+                  borderRadius={4}
                   onPress={customerDetailNextPress}
                   ph={40}
                   ml={10}
@@ -1384,16 +1383,12 @@ function Footer({}) {
         //  if (device == null) return null;
         return (
           <>
-            <Button
+            <BackButton
               mb={10}
               onPress={() => {
                 setModalView(CART_MODAL_VIEW.customer_phone.id);
               }}
-              style={{
-                alignSelf: 'flex-start',
-              }}>
-              Back
-            </Button>
+            />
             <View
               style={{
                 width: '100%',
@@ -1408,8 +1403,8 @@ function Footer({}) {
                   position: 'absolute',
                   zIndex: 1,
                 }}>
-                <ActivityIndicator size={'large'} />
-                <Text>Scanning...</Text>
+                <ActivityIndicator color={themeData.textColor} size={'large'} />
+                <Text color={themeData.textColor}>Scanning...</Text>
               </View>
               <_TextInput
                 style={{
@@ -1440,16 +1435,12 @@ function Footer({}) {
       case CART_MODAL_VIEW.loyality.id:
         return (
           <>
-            <Button
+            <BackButton
               onPress={() => {
                 setLoyalityProgram(false);
                 setModalView(CART_MODAL_VIEW.reward_question.id);
               }}
-              style={{
-                alignSelf: 'flex-start',
-              }}>
-              Back
-            </Button>
+            />
             <View
               style={{
                 width: '60%',
@@ -1457,7 +1448,7 @@ function Footer({}) {
                 paddingVertical: 40,
                 // backgroundColor: 'red',
               }}>
-              <Text mb={10} bold size={22}>
+              <Text color={themeData.textColor} mb={10} bold size={22}>
                 Would you like to add this customer to our the Rewards Program?
               </Text>
 
@@ -1496,7 +1487,7 @@ function Footer({}) {
       case CART_MODAL_VIEW.ask_split_payment.id:
         return (
           <>
-            <Button
+            <BackButton
               onPress={() => {
                 if (existCustomer || loyalityProgram) {
                   setModalView(CART_MODAL_VIEW.customer_phone.id);
@@ -1505,11 +1496,7 @@ function Footer({}) {
 
                 setModalView(CART_MODAL_VIEW.loyality.id);
               }}
-              style={{
-                alignSelf: 'flex-start',
-              }}>
-              Back
-            </Button>
+            />
 
             <View
               style={{
@@ -1526,9 +1513,10 @@ function Footer({}) {
                       alignItems: 'center',
                       marginBottom: 15,
                     }}>
-                    <Text medium size={20} mr={10}>
+                    <Text color={themeData.textColor} medium size={20} mr={10}>
                       Reward Member :{' '}
                       <Text
+                        color={themeData.textColor}
                         // mb={10}
                         style={{
                           textTransform: 'capitalize',
@@ -1547,7 +1535,7 @@ function Footer({}) {
                   </View>
                 )}
 
-              <Text mb={10} bold size={22}>
+              <Text color={themeData.textColor} mb={10} bold size={22}>
                 Would like to split payment?
               </Text>
 
@@ -1577,7 +1565,7 @@ function Footer({}) {
       case CART_MODAL_VIEW.payment_method.id:
         return (
           <>
-            <Button
+            <BackButton
               onPress={() => {
                 if (existCustomer || loyalityProgram) {
                   setModalView(CART_MODAL_VIEW.customer_phone.id);
@@ -1592,11 +1580,7 @@ function Footer({}) {
 
                 // setModalView(CART_MODAL_VIEW.ask_split_payment.id);
               }}
-              style={{
-                alignSelf: 'flex-start',
-              }}>
-              Back
-            </Button>
+            />
 
             <View
               style={{
@@ -1613,9 +1597,10 @@ function Footer({}) {
                       alignItems: 'center',
                       marginBottom: 15,
                     }}>
-                    <Text medium size={20} mr={10}>
+                    <Text color={themeData.textColor} medium size={20} mr={10}>
                       Reward Member :{' '}
                       <Text
+                        color={themeData.textColor}
                         // mb={10}
                         style={{
                           textTransform: 'capitalize',
@@ -1634,7 +1619,7 @@ function Footer({}) {
                   </View>
                 )}
 
-              <Text mb={10} bold size={22}>
+              <Text color={themeData.textColor} mb={10} bold size={22}>
                 Select Payment Method
               </Text>
 
@@ -1677,7 +1662,7 @@ function Footer({}) {
         let lessBalance = parseFloat(giftCardBalance) < parseFloat(total);
         return (
           <>
-            <Button
+            <BackButton
               mb={10}
               onPress={() => {
                 if (splitPayment) {
@@ -1687,11 +1672,7 @@ function Footer({}) {
 
                 setModalView(CART_MODAL_VIEW.payment_method.id);
               }}
-              style={{
-                alignSelf: 'flex-start',
-              }}>
-              Back
-            </Button>
+            />
 
             {giftCardID != 0 ? (
               <View
@@ -1702,21 +1683,24 @@ function Footer({}) {
                   paddingVertical: 20,
                   // backgroundColor: 'red',
                 }}>
-                <Text mb={10} medium size={22}>
+                <Text color={themeData.textColor} mb={10} medium size={22}>
                   Gift Card No.:{' '}
-                  <Text bold size={22}>
+                  <Text color={themeData.textColor} bold size={22}>
                     {giftCardID}
                   </Text>
                 </Text>
-                <Text mb={10} medium size={22}>
+                <Text color={themeData.textColor} mb={10} medium size={22}>
                   Balance:{' '}
-                  <Text bold size={22} color={lessBalance ? 'red' : undefined}>
+                  <Text
+                    bold
+                    size={22}
+                    color={lessBalance ? 'red' : themeData.textColor}>
                     {parseFloat(giftCardBalance).toFixed(2)}
                   </Text>
                 </Text>
-                <Text mb={10} medium size={22}>
+                <Text mb={10} color={themeData.textColor} medium size={22}>
                   Total Amount:{' '}
-                  <Text bold size={22}>
+                  <Text bold color={themeData.textColor} size={22}>
                     {parseFloat(gcdebitAmt).toFixed(2)}
                   </Text>
                 </Text>
@@ -1730,13 +1714,15 @@ function Footer({}) {
                   <Button
                     mt={20}
                     width={200}
-                    backgroundColor={theme.colors.primaryColor}
+                    // backgroundColor={theme.colors.primaryColor}
                     // style={{alignSelf: 'center'}}
                     // disabled={props.isSubmitting}
                     onPress={() => {
                       setSplitPayment(true);
                       setModalView(CART_MODAL_VIEW.split_payment.id);
-                    }}>
+                    }}
+                    borderRadius={4}
+                    backgroundColor={themeData.btnSecondaryBg}>
                     Split Payment
                   </Button>
                 )}
@@ -1785,8 +1771,11 @@ function Footer({}) {
                     position: 'absolute',
                     zIndex: 1,
                   }}>
-                  <ActivityIndicator size={'large'} />
-                  <Text>Scanning...</Text>
+                  <ActivityIndicator
+                    color={themeData.textColor}
+                    size={'large'}
+                  />
+                  <Text color={themeData.textColor}>Scanning...</Text>
                 </View>
                 <_TextInput
                   style={{
@@ -1826,7 +1815,7 @@ function Footer({}) {
                 style={{
                   flex: 1,
                 }}>
-                <Button
+                <BackButton
                   onPress={() => {
                     // if (splitPayment) {
                     //   setModalView(CART_MODAL_VIEW.split_payment.id);
@@ -1834,14 +1823,10 @@ function Footer({}) {
                     // }
                     setModalView(CART_MODAL_VIEW.payment_method.id);
                   }}
-                  style={{
-                    alignSelf: 'flex-start',
-                  }}>
-                  Back
-                </Button>
+                />
               </View>
               <Button
-                backgroundColor={theme.colors.primaryColor}
+                // backgroundColor={theme.colors.primaryColor}
                 onPress={() => {
                   // if (splitPayment) {
                   //   setModalView(CART_MODAL_VIEW.split_payment.id);
@@ -1852,7 +1837,9 @@ function Footer({}) {
                 }}
                 style={{
                   alignSelf: 'flex-start',
-                }}>
+                }}
+                borderRadius={4}
+                backgroundColor={themeData.btnSecondaryBg}>
                 Split Payment
               </Button>
             </View>
@@ -1892,7 +1879,7 @@ function Footer({}) {
                 flexDirection: 'row',
                 marginBottom: 10,
               }}>
-              <Button
+              <BackButton
                 onPress={() => {
                   if (paymentMethod == PAYMENT_METHOD.gift_card.id) {
                     setModalView(CART_MODAL_VIEW.payment_method.id);
@@ -1902,56 +1889,71 @@ function Footer({}) {
 
                   setSplitPayment(false);
                 }}
+              />
+            </View>
+            <View
+              style={{
+                // flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+                // justifyContent: 'center',
+                marginBottom: 10,
+                // backgroundColor:'red'
+              }}>
+              <Button
+                borderRadius={0}
+                noShadow
+                // mr={10}
+                backgroundColor={
+                  splitPaymentBy == 1
+                    ? theme.colors.primaryColor
+                    : themeData.tabBg
+                }
+                color={splitPaymentBy == 1 ? '#F4F4F6' : themeData.textColor}
+                onPress={() => {
+                  // if (splitPayment) {
+                  //   setModalView(CART_MODAL_VIEW.split_payment.id);
+                  //   return;
+                  // }
+                  setSplitPaymentBy(1);
+                  // setSplitPayment(true);
+                  //setModalView(CART_MODAL_VIEW.split_payment.id);
+                }}
                 style={{
-                  alignSelf: 'flex-start',
+                  // alignSelf: 'flex-start',
+                  flex: 1,
+                  borderBottomColor: themeData.tabBorderColor,
+                  borderBottomWidth: splitPaymentBy == 1 ? 0 : 1,
                 }}>
-                Back
+                Split By Amount
               </Button>
-              <View
+              <Button
+                noShadow
+                borderRadius={0}
+                backgroundColor={
+                  splitPaymentBy == 2
+                    ? theme.colors.primaryColor
+                    : themeData.tabBg
+                }
+                color={splitPaymentBy == 2 ? '#F4F4F6' : themeData.textColor}
+                onPress={() => {
+                  // if (splitPayment) {
+                  //   setModalView(CART_MODAL_VIEW.split_payment.id);
+                  //   return;
+                  // }
+                  setSplitPaymentBy(2);
+                  //  setSplitPayment(true);
+                  // setModalView(CART_MODAL_VIEW.split_payment.id);
+                }}
                 style={{
                   flex: 1,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  borderBottomColor: themeData.tabBorderColor,
+
+                  borderBottomWidth: splitPaymentBy == 2 ? 0 : 1,
+                  // alignSelf: 'flex-start',
                 }}>
-                <Button
-                  mr={10}
-                  backgroundColor={splitPaymentBy == 1 ? '#333' : '#999'}
-                  onPress={() => {
-                    // if (splitPayment) {
-                    //   setModalView(CART_MODAL_VIEW.split_payment.id);
-                    //   return;
-                    // }
-                    setSplitPaymentBy(1);
-                    // setSplitPayment(true);
-                    //setModalView(CART_MODAL_VIEW.split_payment.id);
-                  }}
-                  style={
-                    {
-                      // alignSelf: 'flex-start',
-                    }
-                  }>
-                  Split By Amount
-                </Button>
-                <Button
-                  backgroundColor={splitPaymentBy == 2 ? '#333' : '#999'}
-                  onPress={() => {
-                    // if (splitPayment) {
-                    //   setModalView(CART_MODAL_VIEW.split_payment.id);
-                    //   return;
-                    // }
-                    setSplitPaymentBy(2);
-                    //  setSplitPayment(true);
-                    // setModalView(CART_MODAL_VIEW.split_payment.id);
-                  }}
-                  style={
-                    {
-                      // alignSelf: 'flex-start',
-                    }
-                  }>
-                  Split By Item
-                </Button>
-              </View>
+                Split By Item
+              </Button>
             </View>
             {splitPaymentBy == 1 && (
               <MenuProvider skipInstanceCheck>
@@ -1965,61 +1967,85 @@ function Footer({}) {
                       // backgroundColor: 'red',
                     }
                   }>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      // justifyContent: 'center',
-                      alignItems: 'center',
-                    }}>
-                    <Text semibold>
-                      Total Amount: <Text>${parseFloat(total).toFixed(2)}</Text>
+                  <Row title={'Total Amount'}>
+                    <Text color={themeData.textColor}>
+                      ${parseFloat(total).toFixed(2)}
                     </Text>
-                    <Text semibold ml={10}>
-                      Remaining Amount:{' '}
-                      <Text
-                        semibold
-                        color={remaining_amount >= 0 ? 'green' : 'red'}>
-                        {remaining_amount >= 0 ? '' : '-'}$
-                        {Math.abs(remaining_amount).toFixed(2)}
-                      </Text>
+                  </Row>
+                  <Row title={'Remaining Amount'}>
+                    <Text
+                      semibold
+                      color={remaining_amount >= 0 ? '#02C20F' : 'red'}>
+                      {remaining_amount >= 0 ? '' : '-'}$
+                      {Math.abs(remaining_amount).toFixed(2)}
                     </Text>
-
+                  </Row>
+                  <Row title={'No. of persons'}>
                     <View
                       style={{
-                        flex: 1,
                         flexDirection: 'row',
-                        justifyContent: 'center',
                         alignItems: 'center',
-                        marginLeft: -190,
+                        backgroundColor: '#E4E3E8',
+                        borderRadius: 50,
+                        paddingHorizontal: 2,
+                        paddingVertical: 2,
+                        // flex: 1,
                       }}>
                       <Button
+                        backgroundColor={'#F4F4F6'}
                         onPress={() => {
                           if (splitNo > 1) {
                             setSplitNo(s => {
                               return s - 1;
                             });
                           }
-                        }}>
+                        }}
+                        noShadow
+                        width={26}
+                        height={26}
+                        borderRadius={30}
+                        lineHeight={24}
+                        size={22}
+                        medium
+                        ph={0}
+                        pv={0}
+                        color="#18171D">
                         -
                       </Button>
                       <Text
+                        ml={5}
+                        style={{minWidth: 25}}
+                        color="#18171D"
                         align="center"
-                        style={{
-                          minWidth: 50,
-                        }}>
+                        medium
+                        size={14}
+                        mr={5}>
                         {splitNo}
                       </Text>
                       <Button
+                        backgroundColor={theme.colors.primaryColor}
                         onPress={() => {
                           setSplitNo(s => {
                             return s + 1;
                           });
-                        }}>
+                        }}
+                        noShadow
+                        width={26}
+                        height={26}
+                        borderRadius={30}
+                        lineHeight={24}
+                        size={22}
+                        medium
+                        ph={0}
+                        pv={0}>
                         +
                       </Button>
                     </View>
-                  </View>
-                  <Container>
+                  </Row>
+
+                  <Container style={{
+                    marginTop:15
+                  }}>
                     {splitPayments.map((r, i) => {
                       // let _rem_amount =
                       //   parseFloat(r.received_amount) - parseFloat(r.amount);
@@ -2032,22 +2058,28 @@ function Footer({}) {
                           key={i}
                           style={{
                             flexDirection: 'row',
-                            // backgroundColor:'red',
+                            // backgroundColor: 'red',
                             alignItems: 'center',
-                            marginBottom: 10,
+                            // marginBottom: 10,
+                            paddingHorizontal:15,
+                            marginBottom:10
                           }}>
-                          <Text mr={5}>{i + 1}.</Text>
+                          <Text size={18} style={{
+                            minWidth:25
+                          }} color={themeData.textColor} mr={15}>{i + 1}</Text>
 
                           <Select
-                            containerStyle={{
-                              marginBottom: 0,
-                              // flex: 1,
-                              width: getPercentValue(width, 20),
-                              paddingVertical: 5,
-                              paddingHorizontal: 15,
-                              // backgroundColor: 'red',
-                              marginRight: 5,
-                            }}
+                            containerStyle={
+                              {
+                                marginBottom: 0,
+                                // flex: 1,
+                                 width: getPercentValue(width, 20),
+                                // paddingVertical: 5,
+                                // paddingHorizontal: 15,
+                                // backgroundColor: 'red',
+                                marginRight: 10,
+                              }
+                            }
                             onValueChange={item => {
                               if (r.paid) {
                                 return;
@@ -2086,15 +2118,17 @@ function Footer({}) {
                             // containerStyle={{marginBottom: 20}}
                           />
 
-                          <TextInput
-                            containerStyle={{
-                              marginBottom: 0,
-                              // flex: 2,
-                              width: getPercentValue(width, 40),
-                              paddingVertical: 5,
-                              paddingHorizontal: 15,
-                              // backgroundColor: 'red',
-                            }}
+                         <TextInput
+                            containerStyle={
+                              {
+                                marginBottom: 0,
+                                // flex: 2,
+                                width: getPercentValue(width, 30),
+                                // paddingVertical: 5,
+                                // paddingHorizontal: 15,
+                                // backgroundColor: 'red',
+                              }
+                            }
                             // title="Customer Phone No."
                             textInputProps={{
                               onChangeText: d => {
@@ -2163,15 +2197,15 @@ function Footer({}) {
                             style={{
                               flexDirection: 'row',
                               alignItems: 'center',
-                              justifyContent: 'flex-end',
+                              // justifyContent: 'flex-end',
                               flex: 1,
                             }}>
-                            <Text semibold ml={10}>
+                            {/* <Text color={themeData.textColor} semibold ml={10}>
                               Received Amount:{' '}
-                              <Text semibold>
+                              <Text color={themeData.textColor} semibold>
                                 ${parseFloat(r.received_amount).toFixed(2)}
                               </Text>
-                            </Text>
+                            </Text> */}
 
                             {/* <Text semibold ml={10}>
                             Remaining Amount:{' '}
@@ -2198,6 +2232,8 @@ function Footer({}) {
                               </View>
                             ) : (
                               <Button
+                              width={'100%'}
+                              borderRadius={4}
                                 onPress={() => {
                                   console.log(remaining_amount);
                                   if (remaining_amount != 0) {
@@ -2226,7 +2262,9 @@ function Footer({}) {
                                 }
                                 ml={10}
                                 ph={20}
-                                pv={5}>
+                                pv={13}
+                                noShadow
+                                >
                                 Charge
                               </Button>
                             )}
@@ -2279,6 +2317,7 @@ function Footer({}) {
                         -
                       </Button>
                       <Text
+                        color={themeData.textColor}
                         align="center"
                         style={{
                           minWidth: 50,
@@ -2330,7 +2369,7 @@ function Footer({}) {
                 style={{
                   flex: 1,
                 }}>
-                <Button
+                <BackButton
                   onPress={() => {
                     // if (splitPayment) {
                     //   setModalView(CART_MODAL_VIEW.split_payment.id);
@@ -2338,11 +2377,7 @@ function Footer({}) {
                     // }
                     setModalView(CART_MODAL_VIEW.split_payment.id);
                   }}
-                  style={{
-                    alignSelf: 'flex-start',
-                  }}>
-                  Back
-                </Button>
+                />
               </View>
             </View>
             <View
@@ -2654,7 +2689,7 @@ function Footer({}) {
         title={'Pay'}
         // widthPerc={60}
         landscapeWidth={
-          modalView == CART_MODAL_VIEW.split_payment.id ? '98%' : 720
+          modalView == CART_MODAL_VIEW.split_payment.id ? 720 : 720
         }>
         {renderView()}
       </ModalContainer>
@@ -3278,21 +3313,67 @@ function SplitCartItem({id, index, data}) {
 }
 
 function PayMethodButton({text, onPress}) {
+  let themeData = useTheme();
   return (
     <TouchableOpacity
       onPress={onPress}
       style={{
         flex: 1,
         height: 100,
-        backgroundColor: '#eee',
+        backgroundColor: themeData.cardBg,
         margin: 3,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 10,
       }}>
-      <Text semibold size={18}>
+      <Text semibold color={themeData.textColor} size={18}>
         {text}
       </Text>
     </TouchableOpacity>
+  );
+}
+
+function BackButton(props) {
+  const themeData = useTheme();
+  return (
+    <Button
+      style={{
+        alignSelf: 'flex-start',
+      }}
+      backgroundColor={themeData.btnSecondaryBg}
+      borderRadius={4}
+      {...props}>
+      Back
+    </Button>
+  );
+}
+function Row({title, children}) {
+  let themeData = useTheme();
+  return (
+    <View
+      style={{
+        // width: '100%',
+        // flex: 1,
+        paddingHorizontal: 15,
+        paddingVertical: 8,
+        backgroundColor: themeData.cardBg,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}>
+      <View style={{}}>
+        <Text color={themeData.textColor} semibold>
+          {title}
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            // flex: 1,
+          }
+        }>
+        {children}
+      </View>
+    </View>
   );
 }

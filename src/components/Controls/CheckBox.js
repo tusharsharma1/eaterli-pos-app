@@ -4,7 +4,21 @@ import {TouchableOpacity, View} from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import theme from '../../theme';
 import Text from '../Text';
-function _CheckBox({onChange,checkIconSize=16,iconMR=10,mb=20, borderRadius=8, size = 26, checked = false, title, style = {},titleProps}) {
+import useTheme from '../../hooks/useTheme';
+function _CheckBox({
+  onChange,
+  checkIconSize = 16,
+  iconMR = 10,
+  mb = 20,
+  borderRadius = 4,
+  size = 26,
+  checked = false,
+  title,
+  style = {},
+  titleProps,
+}) {
+  let themeData = useTheme();
+
   return (
     <TouchableOpacity
       activeOpacity={1}
@@ -24,27 +38,23 @@ function _CheckBox({onChange,checkIconSize=16,iconMR=10,mb=20, borderRadius=8, s
           borderRadius: borderRadius,
           backgroundColor: checked ? theme.colors.primaryColor : null,
           borderColor: theme.colors.primaryColor,
-          borderWidth: 1,
+          borderWidth: 2,
           alignItems: 'center',
           justifyContent: 'center',
           marginRight: iconMR,
         }}>
         {checked && (
-          <FontAwesome5
-            size={checkIconSize}
-            color={'#fff'}
-            name="check"
-          />
+          <FontAwesome5 size={checkIconSize} color={'#fff'} name="check" />
         )}
       </View>
       <Text
+        color={themeData.textColor}
         bold
         size={18}
         style={{
           flex: 1,
         }}
-        {...titleProps}
-        >
+        {...titleProps}>
         {title}
       </Text>
     </TouchableOpacity>

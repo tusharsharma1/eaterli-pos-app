@@ -5,6 +5,7 @@ import styles from '../../styles';
 import theme from '../../theme';
 import Text from '../Text';
 import ControlContainer from './ControlContainer';
+import useTheme from '../../hooks/useTheme';
 function TextInputUI({
   textInputProps = {},
 
@@ -16,6 +17,7 @@ function TextInputUI({
   title = '',
   round,
 }) {
+  let themeData = useTheme();
   return (
     <ControlContainer
       round={round}
@@ -36,6 +38,7 @@ function TextInputUI({
             {
               textAlignVertical: 'center',
               textAlign: round ? 'center' : 'left',
+              color: themeData.textColor,
               ...textStyle,
             },
           ]}
@@ -53,13 +56,13 @@ function TextInputUI({
             {
               textAlignVertical: 'center',
               textAlign: round ? 'center' : 'left',
+              color: themeData.textColor,
               ...textStyle,
               // backgroundColor:'yellow'
             },
           ]}
-          placeholderTextColor="#BDBDBD"        
+          placeholderTextColor="#BDBDBD"
           {...textInputProps}
-          
         />
       )}
     </ControlContainer>

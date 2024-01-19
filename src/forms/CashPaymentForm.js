@@ -14,6 +14,8 @@ import stringHelper from '../helpers/string.helper';
 import userAction from '../redux/actions/user.action';
 import Text from '../components/Text';
 import CalculatorPriceInput from '../components/CalculatorPriceInput';
+import theme from '../theme';
+import useTheme from '../hooks/useTheme';
 // import {showToast} from '../helpers/app.helpers';
 // import stringHelper from '../helpers/string.helper';
 // import AlertActions from '../redux/actions/alert.action';
@@ -32,6 +34,7 @@ const _initialValues = {
 const CashPaymentForm = ({total = 0, onSubmitSuccess}) => {
   const [initialValues, setInitialValues] = useState(_initialValues);
   const dispatch = useDispatch();
+  const themeData=useTheme()
   // useEffect(() => {
   //   loadData();
   // }, [total]);
@@ -79,7 +82,7 @@ const CashPaymentForm = ({total = 0, onSubmitSuccess}) => {
           return (
             <>
               <Row title={'Total amount'}>
-                <Text>${parseFloat(total).toFixed(2)}</Text>
+                <Text color={themeData.textColor}>${parseFloat(total).toFixed(2)}</Text>
               </Row>
               {/* <Row title={'Received amount  ($)'}>
                 <TextInput
@@ -135,6 +138,8 @@ const CashPaymentForm = ({total = 0, onSubmitSuccess}) => {
               <Button
                 mt={20}
                 width={200}
+                borderRadius={4}
+                backgroundColor={theme.colors.primaryColor}
                 style={{alignSelf: 'center'}}
                 // disabled={props.isSubmitting}
                 onPress={props.handleSubmit}>
@@ -151,18 +156,21 @@ const CashPaymentForm = ({total = 0, onSubmitSuccess}) => {
 export default CashPaymentForm;
 
 function Row({title, children}) {
+  let themeData=useTheme()
   return (
     <View
       style={{
         // width: '100%',
         // flex: 1,
-        // backgroundColor:'yellow',
+        paddingHorizontal:15,
+        paddingVertical:8,
+        backgroundColor:themeData.cardBg,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
       }}>
       <View style={{}}>
-        <Text semibold>{title}</Text>
+        <Text color={themeData.textColor} semibold>{title}</Text>
       </View>
       <View
         style={

@@ -15,6 +15,9 @@ import Text from './Text';
 import AppProgess from './AppProgess';
 import useWindowDimensions from '../hooks/useWindowDimensions';
 import {getPercentValue} from '../helpers/app.helpers';
+import useTheme from '../hooks/useTheme';
+import CloseIcon from '../assets/CloseIcon';
+import TimesIcon from '../assets/TimesIcon';
 
 function _ModalContainer({
   visible,
@@ -28,11 +31,12 @@ function _ModalContainer({
   center,
   children,
   renderFooter,
-  borderRadius = 10,
+  borderRadius = 4,
   landscapeWidth,
   width,
   widthPerc = 92,
 }) {
+  let themeData=useTheme();
   let {width: sw, height: sh, isPortrait} = useWindowDimensions();
   width = width ?? getPercentValue(sw, widthPerc);
   if (!isPortrait) {
@@ -65,8 +69,12 @@ function _ModalContainer({
             maxHeight: height,
 
             //  marginVertical: theme.hp(3),
-            backgroundColor: 'white',
+            backgroundColor: themeData.modalBg,
             borderRadius: borderRadius,
+            borderTopLeftRadius:0,
+            borderTopRightRadius:0,
+            borderTopColor:theme.colors.primaryColor,
+            borderTopWidth:5,
             overflow: 'hidden',
             marginTop: 10,
             // paddingHorizontal: theme.wp(3),
@@ -111,8 +119,8 @@ function _ModalContainer({
               style={{
                 // backgroundColor: theme.colors.primaryColor,
                 paddingVertical: 8,
-                borderBottomWidth: StyleSheet.hairlineWidth,
-                borderBottomColor: '#aaa',
+                // borderBottomWidth: StyleSheet.hairlineWidth,
+                // borderBottomColor: '#aaa',
                 flexDirection: 'row',
 
                 alignItems: 'center',
@@ -123,7 +131,7 @@ function _ModalContainer({
                   //  marginTop:2
                   paddingLeft: 15,
                 }}
-                color={theme.colors.textColor}
+                color={themeData.textColor}
                 semibold
                 size={16}>
                 {title}
@@ -153,7 +161,8 @@ function _ModalContainer({
                   alignSelf: 'flex-start',
                 }}
                 onPress={onRequestClose}>
-                <FontAwesome5 name={'times'} size={18} color={'gray'} />
+                  <TimesIcon color={themeData.darkMode?'#E4E3E8':'#A1A1AA'}/>
+                {/* <FontAwesome5 name={'times'} size={18} color={'gray'} /> */}
               </TouchableOpacity>
             </View>
           )}

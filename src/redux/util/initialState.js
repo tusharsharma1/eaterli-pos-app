@@ -21,12 +21,29 @@ const initialState = {
         bodyBg: '#F4F4F6',
         cardBg: '#E4E3E8',
         textColor: '#18171D',
+        modalBg: '#F4F4F6',
+        inputBorderColor: '#A1A1AA',
+        inputBg: '#F4F4F6',
+
+        btnSecondaryBg: '#71717B',
+
+        tabBg: '#F4F4F6',
+        tabBorderColor: '#A1A1AA',
       },
       dark: {
         appBg: '#414147',
         bodyBg: '#18171D',
         cardBg: '#27262B',
         textColor: '#F4F4F6',
+        modalBg: '#34333A',
+
+        inputBorderColor: '#A1A1AA',
+        inputBg: '#27262B',
+
+        btnSecondaryBg: '#636369',
+
+        tabBg: '#27262B',
+        tabBorderColor: '#E4E3E8',
       },
     },
   },
@@ -108,7 +125,7 @@ const initialState = {
     totalOngoingDeliveryOrder: 0,
   },
   order: {
-    holdCarts:[],
+    holdCarts: [],
     cart: {},
     productMenuType: PRODUCT_MENU_TYPE.restuarant.id,
     orderType: 'pickup',

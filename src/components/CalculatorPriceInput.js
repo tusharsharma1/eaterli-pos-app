@@ -3,14 +3,16 @@ import {TouchableOpacity, View} from 'react-native';
 import Text from './Text';
 import {getPercentValue} from '../helpers/app.helpers';
 import theme from '../theme';
+import useTheme from '../hooks/useTheme';
 
 export default function CalculatorPriceInput({
-  size = 300,
+  size = 350,
   padding = 1,
-  itemMargin = 1,
+  itemMargin = 5,
   onChange,
   total = 0,
 }) {
+  let themeData = useTheme();
   const [value, setValue] = useState('');
   const [decimalPlace, setDecimalPlace] = useState(1);
 
@@ -94,9 +96,9 @@ export default function CalculatorPriceInput({
       totalNotes = totalNotes + 1;
     }
     // console.log('nnn notesCountAmount',amount, note,totalNotes,totalNotes * note);
-    return  totalNotes * note;
+    return totalNotes * note;
   };
- 
+
   let itemSize = (size - padding * 2) / 4;
   itemSize = itemSize - itemMargin * 2;
 
@@ -140,26 +142,31 @@ export default function CalculatorPriceInput({
           //   height: itemSize,
 
           flexDirection: 'row',
-          margin: itemMargin,
+          // margin: itemMargin,
         }}>
         <View
           style={{
             flex: 1,
-            borderColor: '#aaa',
+            borderColor: themeData.inputBorderColor,
             borderWidth: 1,
-            borderRadius: 5,
+            borderRadius: 4,
             paddingVertical: getPercentValue(itemSize, 8),
             paddingHorizontal: getPercentValue(itemSize, 15),
-            // backgroundColor: 'red',
+            backgroundColor: themeData.inputBg,
+            margin: itemMargin,
           }}>
           <Text
-            color="#888"
+            color={themeData.textColor}
             semibold
             mb={getPercentValue(itemSize, 3)}
             size={getPercentValue(itemSize, 25)}>
             Received amount ($)
           </Text>
-          <Text bold align="right" size={getPercentValue(itemSize, 30)}>
+          <Text
+            bold
+            align="right"
+            color={themeData.textColor}
+            size={getPercentValue(itemSize, 30)}>
             ${isDecimal(price) ? price.toFixed(2) : price}
           </Text>
         </View>
@@ -206,6 +213,7 @@ export default function CalculatorPriceInput({
           itemMargin={itemMargin}
           // text={`$${completePrice + 20}`}
           // data={(completePrice + 20) * 100}
+          color={'#fff'}
           text={
             btns[0]
               ? `$${isDecimal(btns[0]) ? btns[0].toFixed(2) : btns[0]}`
@@ -239,6 +247,7 @@ export default function CalculatorPriceInput({
           size={itemSize}
           backgroundColor={theme.colors.primaryColor}
           itemMargin={itemMargin}
+          color={'#fff'}
           // text={`$${completePrice + 15}`}
           // data={(completePrice + 15) * 100}
           text={btns[1] ? `$${btns[1]}` : ''}
@@ -274,6 +283,7 @@ export default function CalculatorPriceInput({
           // data={(completePrice + 10) * 100}
           text={btns[2] ? `$${btns[2]}` : ''}
           data={(btns[2] ?? 0) * 100}
+          color={'#fff'}
           onPress={onAmountPress}
         />
         <Btn
@@ -302,6 +312,7 @@ export default function CalculatorPriceInput({
           // data={completePrice * 100}
           text={btns[4] ? `$${btns[4]}` : ''}
           data={(btns[4] ?? 0) * 100}
+          color={'#fff'}
           onPress={onAmountPress}
         />
         <Btn
@@ -312,6 +323,7 @@ export default function CalculatorPriceInput({
           // data={(completePrice + 5) * 100}
           text={btns[3] ? `$${btns[3]}` : ''}
           data={(btns[3] ?? 0) * 100}
+          color={'#fff'}
           onPress={onAmountPress}
         />
       </View>
@@ -321,34 +333,35 @@ export default function CalculatorPriceInput({
 function Btn({
   text = '',
   size = 80,
-  heightPerc = 75,
-  backgroundColor = '#fff',
-  color = '#212121',
+  heightPerc = 80,
+  backgroundColor,
+  color,
   itemMargin,
   onPress,
   data,
 }) {
+  let themeData = useTheme();
   return (
     <TouchableOpacity
       onPress={() => {
         onPress && onPress(data);
       }}
       style={{
-        backgroundColor: backgroundColor,
+        backgroundColor: backgroundColor ?? themeData.cardBg,
         width: size,
         height: getPercentValue(size, heightPerc),
         margin: itemMargin,
         alignItems: 'center',
         justifyContent: 'center',
-        borderColor: '#aaa',
-        borderWidth: 1,
-        borderRadius: 5,
+        // borderColor: '#aaa',
+        // borderWidth: 1,
+        borderRadius: 4,
         // flex: 1,
       }}>
       <Text
         bold
-        color={color}
-       size={Math.min(15, getPercentValue(size, 20))}
+        color={color ?? themeData.textColor}
+        size={Math.min(16, getPercentValue(size, 25))}
         // size={14}
       >
         {text}

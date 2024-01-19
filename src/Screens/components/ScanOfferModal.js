@@ -16,9 +16,11 @@ import {breakCartItemID, getCartItemID} from '../../helpers/order.helper';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
 import orderAction from '../../redux/actions/order.action';
 import userAction from '../../redux/actions/user.action';
+import useTheme from '../../hooks/useTheme';
+import theme from '../../theme';
 const Buffer = require('buffer').Buffer;
 
-const TEST_ORDATA = ''//Buffer.from('["offer",4,332,7]').toString('base64');
+const TEST_ORDATA = ''; //Buffer.from('["offer",4,332,7]').toString('base64');
 export default function ScanOfferModal(props) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(true);
@@ -30,7 +32,7 @@ export default function ScanOfferModal(props) {
   const scanOfferModal = useSelector(s => s.user.scanOfferModal);
 
   const [QRData, setQRData] = useState(TEST_ORDATA); //WyJnaWZ0LWNhcmQiLDE3LDI3NSw3XQ==
-
+  let themeData = useTheme();
   // useEffect(() => {
   //   loadData();
   // }, []);
@@ -150,10 +152,20 @@ export default function ScanOfferModal(props) {
                 style={{
                   alignItems: 'center',
                 }}>
-                <Text align="center" semibold mt={30} mb={30} size={22}>
-                  {offerData.title}
+                <Text
+                  align="center"
+                  color={themeData.textColor}
+                  semibold
+                  mt={30}
+                  mb={30}
+                  size={22}>
+                  {offerData?.title}
                 </Text>
-                <Button onPress={onApplyPress} ph={30}>
+                <Button
+                  borderRadius={4}
+                  backgroundColor={theme.colors.primaryColor}
+                  onPress={onApplyPress}
+                  ph={30}>
                   Apply
                 </Button>
               </View>
@@ -173,7 +185,7 @@ export default function ScanOfferModal(props) {
                     zIndex: 1,
                   }}>
                   <ActivityIndicator size={'large'} />
-                  <Text>Scanning...</Text>
+                  <Text color={themeData.textColor}>Scanning...</Text>
                 </View>
                 <_TextInput
                   style={{
