@@ -12,12 +12,13 @@ import GridView from '../../components/GridView';
 import ProgressImage from '../../components/react-native-image-progress';
 import {dummyImage} from '../../assets';
 import Color from 'color';
+import useTheme from '../../hooks/useTheme';
 let chunk = 2;
 
 export default function CategoryGrid(props) {
   const dispatch = useDispatch();
   const [leftContainerWidth, setLeftContainerWidth] = useState(theme.wp(70));
-
+  const themeData = useTheme();
   let {categoriesSortable} = useProducts();
   useEffect(() => {
     dispatch(
@@ -42,7 +43,7 @@ export default function CategoryGrid(props) {
           justifyContent: 'center',
           height: 100,
         }}>
-        <Text size={20} align="center" color={'#000'} medium>
+        <Text size={20} align="center" color={themeData.textColor} medium>
           No records
         </Text>
       </View>

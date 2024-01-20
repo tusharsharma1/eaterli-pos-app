@@ -19,6 +19,7 @@ import {getAddons, getVariants} from '../helpers/order.helper';
 import theme from '../theme';
 import alertAction from '../redux/actions/alert.action';
 import {ALERT_ICON_TYPE, ALERT_TYPE} from '../constants/alert.constant';
+import useTheme from '../hooks/useTheme';
 
 const _validationSchema = yup.object({
   reason: yup.string().required('Required'),
@@ -48,6 +49,7 @@ const OrderRefundForm = ({orderData, onSubmitSuccess}) => {
   const [initialValues, setInitialValues] = useState(_initialValues);
   const [validationSchema, setValidationSchema] = useState(_validationSchema);
   const dispatch = useDispatch();
+  const themeData = useTheme();
   useEffect(() => {
     loadData();
   }, [type]);
@@ -203,9 +205,9 @@ const OrderRefundForm = ({orderData, onSubmitSuccess}) => {
           let percAmt = getRefundAmount();
           return (
             <>
-              <Text size={18} mb={10}>
+              <Text color={themeData.textColor} size={18} mb={10}>
                 Total Amount:{' '}
-                <Text semibold size={18}>
+                <Text semibold color={themeData.textColor} size={18}>
                   $ {parseFloat(orderData.order_total).toFixed(2)}
                 </Text>
               </Text>
@@ -283,7 +285,7 @@ const OrderRefundForm = ({orderData, onSubmitSuccess}) => {
                               color={
                                 selected
                                   ? theme.colors.secondaryColor
-                                  : '#222222'
+                                  : themeData.textColor
                               }
                               name={selected ? 'check-circle' : 'circle'}
                             />
@@ -339,14 +341,14 @@ const OrderRefundForm = ({orderData, onSubmitSuccess}) => {
                               }}
                             /> */}
                               <View>
-                                <Text>{data.item_name}</Text>
+                                <Text color={themeData.textColor}>{data.item_name}</Text>
                                 {!!variants.length && (
-                                  <Text color="#666" size={12}>
+                                  <Text color={themeData.textColor} size={12}>
                                     {variants.map(r => r.title).join(', ')}
                                   </Text>
                                 )}
                                 {!!add_ons.length && (
-                                  <Text color="#666" size={12}>
+                                  <Text color={themeData.textColor} size={12}>
                                     {add_ons
                                       .map(r => r.product_name)
                                       .join(', ')}
@@ -424,9 +426,9 @@ const OrderRefundForm = ({orderData, onSubmitSuccess}) => {
                 </View>
               )}
 
-              <Text size={18} mb={10}>
+              <Text color={themeData.textColor} size={18} mb={10}>
                 Refund Amount:{' '}
-                <Text semibold size={18}>
+                <Text color={themeData.textColor} semibold size={18}>
                   $ {parseFloat(percAmt).toFixed(2)}
                 </Text>
               </Text>
@@ -512,6 +514,8 @@ const OrderRefundForm = ({orderData, onSubmitSuccess}) => {
               />
 
               <Button
+              borderRadius={4}
+              backgroundColor={theme.colors.primaryColor}
                 width={200}
                 style={{alignSelf: 'center'}}
                 // disabled={props.isSubmitting}
@@ -529,13 +533,15 @@ const OrderRefundForm = ({orderData, onSubmitSuccess}) => {
 export default OrderRefundForm;
 
 function TypeButton({text = '', type, selected, onPress}) {
+  const themeData = useTheme();
   return (
     <Button
+    borderRadius={4}
       // style={{
       //   flex:1
       // }}
-      color={selected ? undefined : '#111111'}
-      backgroundColor={selected ? undefined : '#efefef'}
+      color={selected ? undefined : '#efefef'}
+      backgroundColor={selected ? undefined : themeData.btnSecondaryBg}
       onPress={() => {
         onPress && onPress(type);
       }}>

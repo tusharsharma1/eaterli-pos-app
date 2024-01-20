@@ -58,11 +58,11 @@ export default function Home(props) {
     let distL = await getNearRestaurantLocation();
     let {locations, restaurant} = userData;
     if (distL) {
-      dispatch(
-        userAction.set({
-          selectedLocation: distL.id,
-        }),
-      );
+      // dispatch(
+      //   userAction.set({
+      //     selectedLocation: distL.id,
+      //   }),
+      // );
       setLogs(_logs => [..._logs, `Calling Apis..`]);
 
       // dispatch(userAction.set({selectedLocation: location.id}));
@@ -323,101 +323,12 @@ export default function Home(props) {
                 borderRadius: 8,
                 marginLeft: 10,
               }}>
-                <CartView />
-              </View>
+              <CartView />
+            </View>
           </View>
         </View>
         <RightMenu />
       </View>
     </>
-  );
-}
-
-function IconBtn({
-  badge,
-  text,
-  subText,
-  onPress,
-  iconName,
-  IconComponent = FontAwesome5Icon,
-}) {
-  let {width} = useWindowDimensions();
-  let w = Math.min(117, getPercentValue(width, 12));
-  //  badge=99
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.7}
-      style={{
-        width: w,
-        backgroundColor: '#eee',
-        borderRadius: 2,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: getPercentValue(w, 9),
-        paddingHorizontal: getPercentValue(w, 8),
-        marginBottom: 5,
-      }}>
-      <IconComponent
-        color={'#9a9a9a'}
-        size={getPercentValue(w, 16)}
-        name={iconName}
-      />
-      <Text semibold mt={getPercentValue(w, 5)} size={getPercentValue(w, 11)}>
-        {text}
-      </Text>
-      {!!subText && (
-        <Text semibold size={getPercentValue(w, 10)}>
-          {subText}
-        </Text>
-      )}
-      {!!badge && (
-        <View
-          style={{
-            position: 'absolute',
-            top: 5,
-            right: 5,
-            width: getPercentValue(w, 22),
-            height: getPercentValue(w, 22),
-            borderRadius: getPercentValue(w, 22),
-            backgroundColor: 'red',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-          <Text size={getPercentValue(w, 10)} color="#fff">
-            {badge > 99 ? '99+' : badge.toString().padStart(2, 0)}
-          </Text>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
-}
-
-function DiningItem({
-  text,
-  iconName,
-  IconComponent = FontAwesome5Icon,
-  onPress,
-}) {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={{
-        paddingHorizontal: 10,
-        paddingVertical: 20,
-        // borderBottomColor: '#eee',
-        // borderBottomWidth: 1,
-        flex: 1,
-        marginHorizontal: 5,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#eee',
-        borderRadius: 5,
-      }}>
-      <IconComponent color={'#9a9a9a'} size={18} name={iconName} />
-      <Text medium mt={10} size={16}>
-        {text}
-      </Text>
-    </TouchableOpacity>
   );
 }

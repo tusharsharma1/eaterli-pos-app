@@ -7,6 +7,7 @@ import {useSelector} from 'react-redux';
 // import BackIcon from '../assets/BackIcon';
 import Text from './Text';
 import theme from '../theme';
+import useTheme from '../hooks/useTheme';
 
 export const HeaderHeight = 50;
 function _Header({
@@ -15,9 +16,10 @@ function _Header({
   absolute = false,
   size = 18,
   // hideCart = false,
-  color = '#ffffff',
-  backgroundColor = theme.colors.secondaryColor,
+  color='#F4F4F6',
+  backgroundColor,
 }) {
+  const themeData = useTheme();
   const navigation = useNavigation();
   // const mobileBuilder = useSelector(s => s.user.mobileBuilder);
 
@@ -36,7 +38,7 @@ function _Header({
         style={{
           height: HeaderHeight,
 
-          backgroundColor: backgroundColor,
+          backgroundColor: backgroundColor ?? themeData.appBg,
           alignItems: 'center',
           flexDirection: 'row',
           paddingHorizontal: 10,
@@ -63,7 +65,11 @@ function _Header({
               // paddingLeft: 25,
             }}>
             {/* <BackIcon /> */}
-            <MaterialIcons name="arrow-back" color={color} size={30} />
+            <MaterialIcons
+              name="arrow-back"
+              color={color ?? themeData.textColor}
+              size={30}
+            />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
@@ -77,7 +83,11 @@ function _Header({
               // paddingLeft: 25,
             }}>
             {/* <BackIcon /> */}
-            <MaterialIcons name="menu" color={color} size={45} />
+            <MaterialIcons
+              name="menu"
+              color={color ?? themeData.textColor}
+              size={45}
+            />
           </TouchableOpacity>
         )}
 
@@ -90,7 +100,11 @@ function _Header({
             // marginRight: 10,
             // alignItems: 'center',
           }}>
-          <Text size={size} color={color} semibold align="left">
+          <Text
+            size={size}
+            color={color ?? themeData.textColor}
+            semibold
+            align="left">
             {title}
           </Text>
         </View>

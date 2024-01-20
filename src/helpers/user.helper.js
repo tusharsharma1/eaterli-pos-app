@@ -4,8 +4,8 @@ import userAction from '../redux/actions/user.action';
 
 import store from '../redux/store';
 import stringHelper from './string.helper';
-import { getCurrentPosition } from './location.helper';
-import { convertDistance, getPreciseDistance } from 'geolib';
+import {getCurrentPosition} from './location.helper';
+import {convertDistance, getPreciseDistance} from 'geolib';
 export async function loginFromKeyChain() {
   let credentials = await Keychain.getGenericPassword();
   console.log('wwwww credentials', credentials);
@@ -59,7 +59,10 @@ export async function getNearRestaurantLocation() {
       return {dist: miDist, ...r};
     });
     // console.log('distL', distL);
-    distL = distL.sort((a, b) => a.dist - b.dist)[0];
+    let primaryLoc = distL.find(r => r.is_primary == '1');
+    distL = primaryLoc;
+    // distL = distL.sort((a, b) => a.dist - b.dist)[0];
+
     //  console.log('distL', start, distL);
     console.log('[home] loc', distL);
 

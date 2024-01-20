@@ -2,6 +2,7 @@ import React, {memo} from 'react';
 import {FlatList, TouchableOpacity, View} from 'react-native';
 import Text from './Text';
 import {textAlignToFlexAlign} from '../theme';
+import useTheme from '../hooks/useTheme';
 
 export default function Table({
   data,
@@ -12,16 +13,17 @@ export default function Table({
   rowPress,
   ...props
 }) {
+  const themeData = useTheme();
   const renderHeader = () => {
     return (
       <View
         style={{
           flexDirection: 'row',
-          backgroundColor: '#fff',
+          backgroundColor: themeData.bodyBg,
           paddingHorizontal: 10,
           paddingVertical: 5,
-          borderBottomColor: '#ddd',
-          borderBottomWidth: 1,
+          // borderBottomColor: '#ddd',
+          // borderBottomWidth: 1,
         }}>
         {columns.map((h, i) => {
           let vstyle = {flex: h.flex ?? 1};
@@ -37,7 +39,9 @@ export default function Table({
                 ...vstyle,
                 alignItems: textAlignToFlexAlign(h.align),
               }}>
-              <Text bold>{h.title}</Text>
+              <Text color={themeData.textColor} bold>
+                {h.title}
+              </Text>
             </View>
           );
         })}
@@ -48,7 +52,14 @@ export default function Table({
     return (
       <FlatList
         renderItem={({item, index}) => {
-          return <RowItem onPress={rowPress} columns={columns} data={item} index={index}/>;
+          return (
+            <RowItem
+              onPress={rowPress}
+              columns={columns}
+              data={item}
+              index={index}
+            />
+          );
         }}
         data={data}
         keyExtractor={keyExtractor}
@@ -68,33 +79,33 @@ export default function Table({
   );
 }
 
-function _RowItem({columns, data,index,onPress}) {
+function _RowItem({columns, data, index, onPress}) {
+  const themeData = useTheme();
   const renderCell = h => {
     if (h.renderCell) {
-      return h.renderCell(data,index);
+      return h.renderCell(data, index);
     }
     return (
-      <Text size={12} medium>
-        {h.renderValue ? h.renderValue(data,index) : data[h.key]}
+      <Text size={12} color={themeData.textColor} medium>
+        {h.renderValue ? h.renderValue(data, index) : data[h.key]}
       </Text>
     );
   };
   const renderDataRow = () => {
-
-    let Root=onPress?TouchableOpacity:View;
+    let Root = onPress ? TouchableOpacity : View;
     return (
       <Root
-      activeOpacity={.6}
-      onPress={()=>{
-        onPress && onPress(data,index)
-      }}
+        activeOpacity={0.6}
+        onPress={() => {
+          onPress && onPress(data, index);
+        }}
         style={{
           flexDirection: 'row',
-          backgroundColor: '#eee',
+          // backgroundColor: '#eee',
           paddingHorizontal: 10,
           paddingVertical: 8,
-          borderBottomColor: '#ddd',
-          borderBottomWidth: 1,
+          // borderBottomColor: '#ddd',
+          // borderBottomWidth: 1,
         }}>
         {columns.map((h, i) => {
           let vstyle = {flex: h.flex ?? 1};

@@ -15,6 +15,7 @@ import ModalContainer from '../../components/ModalContainer';
 
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {simpleToast} from '../../helpers/app.helpers';
+import useTheme from '../../hooks/useTheme';
 export default function OrderDetail({
   hideRefund,
   showAccept,
@@ -25,7 +26,7 @@ export default function OrderDetail({
 }) {
   const [acceptModal, setAcceptModal] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
-
+  const themeData = useTheme();
   const toggleAcceptModal = () => {
     setAcceptModal(!acceptModal);
   };
@@ -82,17 +83,21 @@ export default function OrderDetail({
             onPress={() => {
               toggleAcceptModal();
               //  changeStatus && changeStatus(ORDER_STATUS.restaurant_confirmed.id);
-            }}>
+            }}
+            borderRadius={4}
+            backgroundColor={themeData.btnSecondaryBg}
+            >
             Accept
           </Button>
 
           <Button
-            backgroundColor={theme.colors.primaryColor}
+            // backgroundColor={theme.colors.primaryColor}
             pv={8}
             ph={30}
             onPress={() => {
               changeStatus && changeStatus(ORDER_STATUS.restaurant_rejected.id);
-            }}>
+            }} borderRadius={4}
+            >
             Reject
           </Button>
         </View>
@@ -108,11 +113,14 @@ export default function OrderDetail({
           }}>
           {!(data.order_void == '1' || !!data.order_refunds?.length) && (
             <>
-              <Button pv={8} ph={30} mr={5} onPress={voidPress}>
+              <Button borderRadius={4}
+            // backgroundColor={themeData.btnSecondaryBg}
+             pv={8} ph={30} mr={5} onPress={voidPress}>
                 Void
               </Button>
 
-              <Button pv={8} ph={30} onPress={refundPress}>
+              <Button borderRadius={4}
+            backgroundColor={themeData.btnSecondaryBg} pv={8} ph={30} onPress={refundPress}>
                 Refund
               </Button>
             </>
@@ -151,7 +159,7 @@ export default function OrderDetail({
 
       {data.point_transactions && !!data.point_transactions.length && (
         <View>
-          <Text size={18} bold mb={5}>
+          <Text color={themeData.textColor} size={18} bold mb={5}>
             Reward Points
           </Text>
           {data.point_transactions.map((d, i) => {
@@ -161,15 +169,15 @@ export default function OrderDetail({
                 style={{
                   marginBottom: 5,
                 }}>
-                <Text size={14}>
+                <Text  color={themeData.textColor} size={14}>
                   Description:{' '}
-                  <Text size={14} semibold>
+                  <Text color={themeData.textColor} size={14} semibold>
                     {d.description}
                   </Text>
                 </Text>
-                <Text size={14}>
+                <Text color={themeData.textColor} size={14}>
                   Point:{' '}
-                  <Text size={14} semibold>
+                  <Text color={themeData.textColor} size={14} semibold>
                     {d.point}
                   </Text>
                 </Text>
@@ -179,7 +187,7 @@ export default function OrderDetail({
         </View>
       )}
 
-      <Text size={18} bold>
+      <Text color={themeData.textColor} size={18} bold>
         Products
       </Text>
       <View
@@ -239,14 +247,14 @@ export default function OrderDetail({
                       }}
                     />
                     <View>
-                      <Text>{_data.item_name}</Text>
+                      <Text color={themeData.textColor} >{_data.item_name}</Text>
                       {!!variants.length && (
-                        <Text color="#666" size={12}>
+                        <Text color={themeData.textColor} size={12}>
                           {variants.map(r => r.title).join(', ')}
                         </Text>
                       )}
                       {!!add_ons.length && (
-                        <Text color="#666" size={12}>
+                        <Text color={themeData.textColor} size={12}>
                           {add_ons.map(r => r.product_name).join(', ')}
                         </Text>
                       )}
@@ -310,7 +318,7 @@ export default function OrderDetail({
           style={{
             marginBottom: 10,
           }}>
-          <Text size={18} bold>
+          <Text color={themeData.textColor} size={18} bold>
             Split Payment
           </Text>
 
@@ -442,7 +450,7 @@ export default function OrderDetail({
                     <FontAwesome5
                       size={20}
                       solid={selected}
-                      color={selected ? theme.colors.secondaryColor : '#222222'}
+                      color={selected ? theme.colors.secondaryColor :themeData.textColor}
                       name={selected ? 'check-circle' : 'circle'}
                     />
                   );
@@ -460,14 +468,14 @@ export default function OrderDetail({
                         flexDirection: 'row',
                       }}>
                       <View>
-                        <Text>{_data.item_name}</Text>
+                        <Text color={themeData.textColor}>{_data.item_name}</Text>
                         {!!variants.length && (
-                          <Text color="#666" size={12}>
+                          <Text color={themeData.textColor} size={12}>
                             {variants.map(r => r.title).join(', ')}
                           </Text>
                         )}
                         {!!add_ons.length && (
-                          <Text color="#666" size={12}>
+                          <Text color={themeData.textColor} size={12}>
                             {add_ons.map(r => r.product_name).join(', ')}
                           </Text>
                         )}
@@ -544,7 +552,10 @@ export default function OrderDetail({
                 });
               toggleAcceptModal();
               //  changeStatus && changeStatus(ORDER_STATUS.restaurant_confirmed.id);
-            }}>
+            }}
+            borderRadius={4}
+            backgroundColor={theme.colors.primaryColor}
+            >
             Accept
           </Button>
           {/* {props.errors.items ? (
@@ -558,6 +569,7 @@ export default function OrderDetail({
   );
 }
 function InfoRow({title, value, style = {}}) {
+  const themeData = useTheme();
   return (
     <View
       style={{
@@ -566,8 +578,8 @@ function InfoRow({title, value, style = {}}) {
 
         ...style,
       }}>
-      <Text bold>{title}</Text>
-      <Text ml={5}>{value}</Text>
+      <Text color={themeData.textColor} bold>{title}</Text>
+      <Text color={themeData.textColor} ml={5}>{value}</Text>
     </View>
   );
 }

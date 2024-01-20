@@ -24,6 +24,9 @@ import usePrevious from '../../hooks/usePrevious';
 import alertAction from '../../redux/actions/alert.action';
 import userAction from '../../redux/actions/user.action';
 import OrderDetail from '../components/OrderDetail';
+import RightMenu from '../../components/app/RightMenu';
+import LeftMenu from '../../components/app/LeftMenu';
+import useTheme from '../../hooks/useTheme';
 export default function Orders({navigation, route}) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
@@ -35,6 +38,7 @@ export default function Orders({navigation, route}) {
   const [refresh, setRefresh] = useState(true);
   let prevCurrentPage = usePrevious(orders.currentPage);
   const [refundModal, setRefundModal] = useState(false);
+  const themeData = useTheme();
   const toggleModal = () => {
     setShowModal(!showModal);
   };
@@ -128,14 +132,14 @@ export default function Orders({navigation, route}) {
               style={{
                 flexDirection: 'row',
               }}>
-              <Text mr={5}>{data.id}</Text>
+              <Text color={themeData.textColor} mr={5}>{data.id}</Text>
               {data.order_void == '1' && (
-                <Badge backgroundColor="#e20b3c" mr={4}>
+                <Badge color={themeData.textColor} backgroundColor="#e20b3c" mr={4}>
                   Void
                 </Badge>
               )}
               {!!data.order_refunds?.length && (
-                <Badge backgroundColor="#e27b0b">Refund</Badge>
+                <Badge color={themeData.textColor} backgroundColor="#e27b0b">Refund</Badge>
               )}
             </View>
           );
@@ -193,6 +197,7 @@ export default function Orders({navigation, route}) {
           <FontAwesome5Icon name="pen" />
         </TouchableOpacity> */}
               <TouchableOpacity
+              
                 onPress={() => {
                   setSelectedOrder(data);
                   toggleModal();
@@ -202,7 +207,7 @@ export default function Orders({navigation, route}) {
                   padding: 4,
                   marginRight: 10,
                 }}>
-                <FontAwesome5Icon name="eye" color={'#212121'} size={22} />
+                <FontAwesome5Icon name="eye" color={themeData.textColor} size={22} />
               </TouchableOpacity>
 
               {/* <TouchableOpacity
@@ -233,14 +238,14 @@ export default function Orders({navigation, route}) {
               </TouchableOpacity> */}
 
               <OptionMenu
-                color="#212121"
+               color={themeData.textColor}
                 menus={[
                   {
                     icon: (
                       <FontAwesome5Icon
                         size={16}
                         name="print"
-                        color="#212121"
+                        color={'#212121'}
                       />
                     ),
                     text: 'Print Receipt',
@@ -270,7 +275,7 @@ export default function Orders({navigation, route}) {
                         <FontAwesome5Icon
                           size={16}
                           name="truck"
-                          color="#212121"
+                          color={'#212121'}
                         />
                       ),
                       text: 'Track',
@@ -290,10 +295,46 @@ export default function Orders({navigation, route}) {
     ];
   }, []);
 
+  // return (
+  //   <>
+  //     <View
+  //       style={{
+  //         flex: 1,
+  //         flexDirection: 'row',
+  //         backgroundColor: themeData.appBg,
+  //       }}>
+  //       <LeftMenu />
+  //       <View
+  //         style={{
+  //           flex: 1,
+  //           marginBottom: 15,
+  //         }}>
+  //         <View
+  //           style={{
+  //             // backgroundColor:'#000',
+  //             height: 40,
+  //           }}></View>
+  //         <View
+  //           style={{
+  //             backgroundColor: themeData.bodyBg,
+  //             borderRadius: 8,
+  //             flex: 1,
+  //             paddingHorizontal: 10,
+  //             paddingVertical: 10,
+  //             flexDirection: 'row',
+  //           }}>
+          
+  //         </View>
+  //       </View>
+  //       <RightMenu />
+  //     </View>
+  //   </>
+  // );
+
   return (
     <>
       <Header title={'Orders'} back />
-      <Container style={{flex: 1}}>
+      <Container style={{flex: 1,backgroundColor:themeData.cardBg}}>
         <Table
           data={orders.data}
           columns={columns}

@@ -17,9 +17,11 @@ import {fcmService} from './firebase/FCMService';
 import {useDispatch} from 'react-redux';
 import userAction from './redux/actions/user.action';
 import { getUniqueId } from 'react-native-device-info';
+import useTheme from './hooks/useTheme';
 
 const App = () => {
   const dispatch = useDispatch();
+  const themeData = useTheme();
   useEffect(() => {
     initApp();
   }, []);
@@ -35,7 +37,7 @@ const App = () => {
   return (
     <>
       <StatusBar
-        backgroundColor={theme.colors.secondaryColor}
+        backgroundColor={themeData.appBg}
         translucent={false}
       />
 
