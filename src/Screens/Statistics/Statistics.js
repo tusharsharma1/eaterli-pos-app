@@ -10,6 +10,7 @@ import useWindowDimensions from '../../hooks/useWindowDimensions';
 import userAction from '../../redux/actions/user.action';
 import Select from '../../components/Controls/Select';
 import moment from 'moment';
+import useTheme from '../../hooks/useTheme';
 let col = 4;
 let hPadding = 2;
 
@@ -51,7 +52,8 @@ export default function Statistics({navigation, route}) {
       title: 'Total Customers',
       value: 0,
     },
-  ]);
+  ]); 
+  const themeData = useTheme();
   const userData = useSelector(s => s.user.userData);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
   useEffect(() => {
@@ -173,7 +175,7 @@ export default function Statistics({navigation, route}) {
     <>
       <Header title={'Statistics'} back />
 
-      <Container style={{flex: 1}}>
+      <Container style={{flex: 1,backgroundColor:themeData.bodyBg}}>
         <View
           style={{
             paddingHorizontal: 10,
@@ -182,6 +184,7 @@ export default function Statistics({navigation, route}) {
             alignItems: 'center',
           }}>
           <Text
+          color={themeData.textColor}
             bold
             size={18}
             style={{
@@ -224,6 +227,7 @@ function _Item({data, onPress}) {
   const dispatch = useDispatch();
   const {categories} = useProducts();
   const {width} = useWindowDimensions();
+  const themeData=useTheme()
   let containerWidth = width;
 
   // let d = menuItems[data];
@@ -241,7 +245,7 @@ function _Item({data, onPress}) {
     // flexDirection: 'row',
     // marginHorizontal: 15,
     // marginVertical: 5,
-    backgroundColor: empty ? 'transparent' : '#bbb',
+    backgroundColor: empty ? 'transparent' :themeData.cardBg,
     width: itemSize,
     // flex: 1,
     // height: 40,
@@ -267,7 +271,7 @@ function _Item({data, onPress}) {
       }}>
       <Text
         numberOfLines={2}
-        color="#111"
+        color={themeData.textColor}
         semibold
         size={getPercentValue(itemSize, 12)}
         // align="center"
@@ -276,7 +280,7 @@ function _Item({data, onPress}) {
       </Text>
       <Text
         numberOfLines={2}
-        color="#444"
+        color={themeData.textColor}
         medium
         size={getPercentValue(itemSize, 7.6)}
         // align="center"

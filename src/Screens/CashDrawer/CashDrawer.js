@@ -12,12 +12,14 @@ import OptionButton from '../components/OptionButton';
 import AddCashDrawerButton from './AddCashDrawerButton';
 import OpenCashDrawerButton from './OpenCashDrawerButton';
 import theme from '../../theme';
+import useTheme from '../../hooks/useTheme';
 let col = 3;
 let hPadding = 2;
 
 export default function CashDrawer({navigation, route}) {
   const dispatch = useDispatch();
   const [balance, setBalance] = useState(0);
+  const themeData = useTheme();
   const userData = useSelector(s => s.user.userData);
   const deviceId = useSelector(s => s.user.deviceId);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
@@ -44,22 +46,37 @@ export default function CashDrawer({navigation, route}) {
   return (
     <>
       <Header title={'Cash Drawer'} back />
-      <View style={{paddingHorizontal: 2, paddingVertical: 4}}>
-        <Text size={18} semibold>
+      <View
+        style={{
+          paddingHorizontal: 2,
+          paddingVertical: 4,
+          backgroundColor: themeData.bodyBg,
+        }}>
+        <Text color={themeData.textColor} size={18} semibold>
           Available Total Amount:{'  '}
           <Text color={theme.colors.secondaryColor} size={18} semibold>
             ${balance.toFixed(2)}
           </Text>
         </Text>
       </View>
-      <Container style={{flex: 1, paddingHorizontal: 2, paddingVertical: 4}}>
+      <Container
+        style={{
+          backgroundColor: themeData.bodyBg,
+          flex: 1,
+          paddingHorizontal: 2,
+          paddingVertical: 4,
+        }}>
         <View
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
-          <AddCashDrawerButton type="1" title="Add Cash" onSuccess={loadData}/>
-          <AddCashDrawerButton type="2" title="Remove Cash" onSuccess={loadData}/>
+          <AddCashDrawerButton type="1" title="Add Cash" onSuccess={loadData} />
+          <AddCashDrawerButton
+            type="2"
+            title="Remove Cash"
+            onSuccess={loadData}
+          />
           <OpenCashDrawerButton />
         </View>
         {/* <Text ml={4} size={18} semibold>
@@ -88,6 +105,7 @@ function _Item({data, onPress}) {
   const dispatch = useDispatch();
   const {categories} = useProducts();
   const {width} = useWindowDimensions();
+  const themeData = useTheme();
   let containerWidth = width;
 
   // let d = menuItems[data];
@@ -105,7 +123,7 @@ function _Item({data, onPress}) {
     // flexDirection: 'row',
     // marginHorizontal: 15,
     // marginVertical: 5,
-    backgroundColor: empty ? 'transparent' : '#bbb',
+    backgroundColor: empty ? 'transparent' : themeData.cardBg,
     width: itemSize,
     // flex: 1,
     // height: 40,
@@ -131,7 +149,7 @@ function _Item({data, onPress}) {
       }}>
       <Text
         numberOfLines={2}
-        color="#444"
+        color={themeData.textColor}
         medium
         size={getPercentValue(itemSize, 7.6)}
         align="center">

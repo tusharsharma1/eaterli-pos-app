@@ -12,6 +12,8 @@ import {showToast} from '../helpers/app.helpers';
 import storageHelper from '../helpers/storage.helper';
 import stringHelper from '../helpers/string.helper';
 import userAction from '../redux/actions/user.action';
+import LockIcon from '../assets/lockIcon';
+import UserIcon from '../assets/userIcon';
 // import {showToast} from '../helpers/app.helpers';
 // import stringHelper from '../helpers/string.helper';
 // import AlertActions from '../redux/actions/alert.action';
@@ -26,7 +28,7 @@ const _initialValues = {
   password: '',
 };
 
-const LoginForm = ({email, password, onSubmitSuccess}) => {
+const LoginForm = ({email, password,formikRef, onSubmitSuccess}) => {
   const [initialValues, setInitialValues] = useState(_initialValues);
   const dispatch = useDispatch();
   useEffect(() => {
@@ -157,7 +159,9 @@ const LoginForm = ({email, password, onSubmitSuccess}) => {
         validationSchema={validationSchema}
         enableReinitialize
         onSubmit={onSubmit}
-        validateOnChange={true}>
+        validateOnChange={true}
+        innerRef={formikRef}
+        >
         {props => {
           // console.log(props.values, props.errors, props.touched);
           return (
@@ -175,12 +179,31 @@ const LoginForm = ({email, password, onSubmitSuccess}) => {
                   //  onSubmitEditing: () => this.passwordInput.focus(),
                   //ref: r => (this.emailInput = r),
                 }}
-                error={
-                  props.errors.email && props.touched.email
-                    ? props.errors.email
-                    : ''
+                // error={
+                //   props.errors.email && props.touched.email
+                //     ? props.errors.email
+                //     : ''
+                // }
+                textStyle={{
+                  color: '#E4E3E8',
+                }}
+                containerStyle={{
+                  backgroundColor: 'transparent',
+                  borderColor:
+                    props.errors.email && props.touched.email
+                      ? 'red'
+                      : '#E4E3E8',
+                  marginBottom: 10,
+                }}
+                rightComponent={
+                  <UserIcon
+                    width={15}
+                    height={15}
+                    style={{
+                      marginTop: 5,
+                    }}
+                  />
                 }
-                round
               />
 
               <TextInput
@@ -194,21 +217,39 @@ const LoginForm = ({email, password, onSubmitSuccess}) => {
                   placeholder: 'Password',
                   onSubmitEditing: props.handleSubmit,
                 }}
-                error={
-                  props.errors.password && props.touched.password
-                    ? props.errors.password
-                    : ''
+                // error={
+                //   props.errors.password && props.touched.password
+                //     ? props.errors.password
+                //     : ''
+                // }
+                textStyle={{
+                  color: '#E4E3E8',
+                }}
+                containerStyle={{
+                  backgroundColor: 'transparent',
+                  borderColor:
+                    props.errors.password && props.touched.password
+                      ? 'red'
+                      : '#E4E3E8',
+                }}
+                rightComponent={
+                  <LockIcon
+                    width={15}
+                    height={15}
+                    style={{
+                      marginTop: 5,
+                    }}
+                  />
                 }
-                round
               />
 
-              <Button
+              {/* <Button
                 width={200}
                 style={{alignSelf: 'center'}}
                 // disabled={props.isSubmitting}
                 onPress={props.handleSubmit}>
                 Login
-              </Button>
+              </Button> */}
             </>
           );
         }}

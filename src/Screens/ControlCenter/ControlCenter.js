@@ -10,12 +10,13 @@ import useWindowDimensions from '../../hooks/useWindowDimensions';
 import userAction from '../../redux/actions/user.action';
 import AddCashDrawerButton from '../CashDrawer/AddCashDrawerButton';
 import OpenCashDrawerButton from '../CashDrawer/OpenCashDrawerButton';
+import useTheme from '../../hooks/useTheme';
 let col = 3;
 let hPadding = 2;
 
 export default function ControlCenter({navigation, route}) {
   const dispatch = useDispatch();
-
+  const themeData = useTheme();
   const userData = useSelector(s => s.user.userData);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
   useEffect(() => {
@@ -28,8 +29,10 @@ export default function ControlCenter({navigation, route}) {
     <>
       <Header title={'Control Center'} back />
 
-      <Container style={{flex: 1, paddingHorizontal: 2, paddingVertical: 4}}>
-        <Text ml={4} size={18} semibold>Quick actions</Text>
+      <Container style={{flex: 1, paddingHorizontal: 2, paddingVertical: 4,backgroundColor:themeData.bodyBg}}>
+        <Text ml={4} color={themeData.textColor} size={18} semibold>
+          Quick actions
+        </Text>
         <View
           style={{
             flexDirection: 'row',
@@ -37,7 +40,7 @@ export default function ControlCenter({navigation, route}) {
           }}>
           <AddCashDrawerButton type="1" title="Add Cash" />
           <AddCashDrawerButton type="2" title="Remove Cash" />
-          <OpenCashDrawerButton/>
+          <OpenCashDrawerButton />
         </View>
       </Container>
     </>

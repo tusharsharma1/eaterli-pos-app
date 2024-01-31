@@ -140,10 +140,10 @@ export function getTipAmount(total = 0) {
   return tip_amount;
 }
 
-export function getGrandTotal() {
+export function getGrandTotal(cart) {
   let {store} = React;
   let state = store.getState();
-  let {cart} = state.order;
+  // let {cart} = state.order;
   let Ids = Object.keys(cart);
 
   let total = Ids.reduce((r, id) => {
@@ -191,11 +191,11 @@ export function getGrandTotal() {
 
   return total;
 }
-export function getCartProducts() {
+export function getCartProducts(cart) {
   let state = React.store.getState();
 
   let {menuItems} = state.user;
-  let {cart} = state.order;
+  // let {cart} = state.order;
 
   let products = Object.keys(cart)
     .map((id, i) => {

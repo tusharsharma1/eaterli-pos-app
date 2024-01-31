@@ -22,7 +22,16 @@ function TextInputUI({
     <ControlContainer
       round={round}
       title={title}
-      containerStyle={containerStyle}>
+      containerStyle={{
+        ...containerStyle,
+
+        ...(rightComponent
+          ? {
+              flexDirection: 'row',
+              justifyContent:'center'
+            }
+          : {}),
+      }}>
       {error && error != '' ? (
         <Text size={12} ml={4} align="center" color={theme.colors.errorColor}>
           {error}
@@ -40,6 +49,11 @@ function TextInputUI({
               textAlign: round ? 'center' : 'left',
               color: themeData.textColor,
               ...textStyle,
+              ...(rightComponent
+                ? {
+                    flex: 1,
+                  }
+                : {}),
             },
           ]}
           type={'custom'}
@@ -58,13 +72,19 @@ function TextInputUI({
               textAlign: round ? 'center' : 'left',
               color: themeData.textColor,
               ...textStyle,
-              // backgroundColor:'yellow'
+              // backgroundColor:'yellow',
+              ...(rightComponent
+                ? {
+                    flex: 1,
+                  }
+                : {}),
             },
           ]}
           placeholderTextColor="#BDBDBD"
           {...textInputProps}
         />
       )}
+      {rightComponent}
     </ControlContainer>
   );
 }

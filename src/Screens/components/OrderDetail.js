@@ -16,6 +16,7 @@ import ModalContainer from '../../components/ModalContainer';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {simpleToast} from '../../helpers/app.helpers';
 import useTheme from '../../hooks/useTheme';
+import {useSelector} from 'react-redux';
 export default function OrderDetail({
   hideRefund,
   showAccept,
@@ -27,6 +28,8 @@ export default function OrderDetail({
   const [acceptModal, setAcceptModal] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const themeData = useTheme();
+  let imageSettings = useSelector(s => s.settings.imageSettings);
+
   const toggleAcceptModal = () => {
     setAcceptModal(!acceptModal);
   };
@@ -59,13 +62,124 @@ export default function OrderDetail({
   if (!data) {
     return null;
   }
+  let productTableCol = [
+    {
+      title: 'Name',
+      align: 'left',
+      renderCell: _data => {
+        let variants = getVariants(_data);
+        let add_ons = getAddons(_data);
+        return (
+          <View
+            style={{
+              flexDirection: 'row',
+            }}>
+            {imageSettings.showOrderItemImage && (
+              <ProgressImage
+                // color={}
+                source={
+                  _data.image
+                    ? {
+                        uri: _data.image,
+                        //+ '?t=' + new Date().getTime()
+                      }
+                    : dummyImage
+                }
+                style={{
+                  width: 50,
+                  height: 50,
+
+                  backgroundColor: '#aaa',
+                  marginRight: 5,
+                  // borderRadius: theme.wp(26) / 2,
+                  // borderWidth: 1,
+                  //borderColor: theme.colors.borderColor,
+                  // _data.item_image
+                  //  backgroundColor:'red'
+                }}
+                imageStyle={{
+                  width: '100%',
+                  height: '100%',
+                  // width: 60,
+                  resizeMode: 'cover',
+                  // height: theme.screenWidth / numColumns - 100,
+                  // height:
+                  //   theme.screenWidth / numColumns -
+                  //   2 * theme.wp(2) * numColumns -
+                  //   theme.hp(5),
+                  // backgroundColor: 'red',
+                  // - (vheight * (10 / 100)), // theme.hp(10),
+                  flex: 1,
+                }}
+              />
+            )}
+            <View>
+              <Text color={themeData.textColor}>{_data.item_name}</Text>
+              {!!variants.length && (
+                <Text color={themeData.textColor} size={12}>
+                  {variants.map(r => r.title).join(', ')}
+                </Text>
+              )}
+              {!!add_ons.length && (
+                <Text color={themeData.textColor} size={12}>
+                  {add_ons.map(r => r.product_name).join(', ')}
+                </Text>
+              )}
+            </View>
+          </View>
+        );
+      },
+    },
+    {
+      title: 'Qty',
+      align: 'right',
+      key: 'quantity',
+    },
+    {
+      title: 'Rate',
+      align: 'right',
+      renderValue: _data => {
+        return _data.rate ? `$${parseFloat(_data.rate).toFixed(2)}` : '';
+      },
+    },
+    {
+      title: 'Dis.',
+      align: 'right',
+      renderValue: _data => {
+        return `${_data.discount_type == '2' ? '$' : ''}${_data.discount ?? 0}${
+          _data.discount_type == '1' ? '%' : ''
+        }`;
+        // return _data.rate
+        //   ? `$${parseFloat(_data.rate).toFixed(2)}`
+        //   : '';
+      },
+    },
+    {
+      title: 'Total',
+      align: 'right',
+      renderValue: _data => {
+        let discount_type = _data.discount_type ?? '1';
+
+        let _discount = parseFloat(_data.discount ?? 0);
+        let totalPrice = _data.total_price;
+        if (_discount) {
+          if (discount_type == '1') {
+            totalPrice = totalPrice - totalPrice * (_discount / 100);
+          } else if (discount_type == '2') {
+            totalPrice = totalPrice - _discount;
+          }
+        }
+        return totalPrice ? `$${parseFloat(totalPrice).toFixed(2)}` : '';
+      },
+    },
+  ];
 
   let remaining_amount =
     parseFloat(data?.order_total) - parseFloat(data?.received_amount);
   if (!isFinite(remaining_amount)) {
     remaining_amount = 0;
   }
-
+  let isSplitByAmount = data.split_type == 'by amount';
   return (
     <>
       {showAccept && data.order_status == ORDER_STATUS.created.id && (
@@ -85,8 +199,7 @@ export default function OrderDetail({
               //  changeStatus && changeStatus(ORDER_STATUS.restaurant_confirmed.id);
             }}
             borderRadius={4}
-            backgroundColor={themeData.btnSecondaryBg}
-            >
+            backgroundColor={themeData.btnSecondaryBg}>
             Accept
           </Button>
 
@@ -96,8 +209,8 @@ export default function OrderDetail({
             ph={30}
             onPress={() => {
               changeStatus && changeStatus(ORDER_STATUS.restaurant_rejected.id);
-            }} borderRadius={4}
-            >
+            }}
+            borderRadius={4}>
             Reject
           </Button>
         </View>
@@ -113,14 +226,22 @@ export default function OrderDetail({
           }}>
           {!(data.order_void == '1' || !!data.order_refunds?.length) && (
             <>
-              <Button borderRadius={4}
-            // backgroundColor={themeData.btnSecondaryBg}
-             pv={8} ph={30} mr={5} onPress={voidPress}>
+              <Button
+                borderRadius={4}
+                // backgroundColor={themeData.btnSecondaryBg}
+                pv={8}
+                ph={30}
+                mr={5}
+                onPress={voidPress}>
                 Void
               </Button>
 
-              <Button borderRadius={4}
-            backgroundColor={themeData.btnSecondaryBg} pv={8} ph={30} onPress={refundPress}>
+              <Button
+                borderRadius={4}
+                backgroundColor={themeData.btnSecondaryBg}
+                pv={8}
+                ph={30}
+                onPress={refundPress}>
                 Refund
               </Button>
             </>
@@ -169,7 +290,7 @@ export default function OrderDetail({
                 style={{
                   marginBottom: 5,
                 }}>
-                <Text  color={themeData.textColor} size={14}>
+                <Text color={themeData.textColor} size={14}>
                   Description:{' '}
                   <Text color={themeData.textColor} size={14} semibold>
                     {d.description}
@@ -187,7 +308,7 @@ export default function OrderDetail({
         </View>
       )}
 
-      <Text color={themeData.textColor} size={18} bold>
+      <Text color={themeData.textColor} mb={10} size={18} bold>
         Products
       </Text>
       <View
@@ -195,122 +316,7 @@ export default function OrderDetail({
           // height:theme.hp(50),
           marginBottom: 20,
         }}>
-        <Table
-          data={data.order_items}
-          columns={[
-            {
-              title: 'Name',
-              align: 'left',
-              renderCell: _data => {
-                let variants = getVariants(_data);
-                let add_ons = getAddons(_data);
-                return (
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                    }}>
-                    <ProgressImage
-                      // color={}
-                      source={
-                        _data.image
-                          ? {
-                              uri: _data.image,
-                              //+ '?t=' + new Date().getTime()
-                            }
-                          : dummyImage
-                      }
-                      style={{
-                        width: 50,
-                        height: 50,
-
-                        backgroundColor: '#aaa',
-                        marginRight: 5,
-                        // borderRadius: theme.wp(26) / 2,
-                        // borderWidth: 1,
-                        //borderColor: theme.colors.borderColor,
-                        // _data.item_image
-                        //  backgroundColor:'red'
-                      }}
-                      imageStyle={{
-                        width: '100%',
-                        height: '100%',
-                        // width: 60,
-                        resizeMode: 'cover',
-                        // height: theme.screenWidth / numColumns - 100,
-                        // height:
-                        //   theme.screenWidth / numColumns -
-                        //   2 * theme.wp(2) * numColumns -
-                        //   theme.hp(5),
-                        // backgroundColor: 'red',
-                        // - (vheight * (10 / 100)), // theme.hp(10),
-                        flex: 1,
-                      }}
-                    />
-                    <View>
-                      <Text color={themeData.textColor} >{_data.item_name}</Text>
-                      {!!variants.length && (
-                        <Text color={themeData.textColor} size={12}>
-                          {variants.map(r => r.title).join(', ')}
-                        </Text>
-                      )}
-                      {!!add_ons.length && (
-                        <Text color={themeData.textColor} size={12}>
-                          {add_ons.map(r => r.product_name).join(', ')}
-                        </Text>
-                      )}
-                    </View>
-                  </View>
-                );
-              },
-            },
-            {
-              title: 'Qty',
-              align: 'right',
-              key: 'quantity',
-            },
-            {
-              title: 'Rate',
-              align: 'right',
-              renderValue: _data => {
-                return _data.rate
-                  ? `$${parseFloat(_data.rate).toFixed(2)}`
-                  : '';
-              },
-            },
-            {
-              title: 'Dis.',
-              align: 'right',
-              renderValue: _data => {
-                return `${_data.discount_type == '2' ? '$' : ''}${
-                  _data.discount ?? 0
-                }${_data.discount_type == '1' ? '%' : ''}`;
-                // return _data.rate
-                //   ? `$${parseFloat(_data.rate).toFixed(2)}`
-                //   : '';
-              },
-            },
-            {
-              title: 'Total',
-              align: 'right',
-              renderValue: _data => {
-                let discount_type = _data.discount_type ?? '1';
-
-                let _discount = parseFloat(_data.discount ?? 0);
-                let totalPrice = _data.total_price;
-                if (_discount) {
-                  if (discount_type == '1') {
-                    totalPrice = totalPrice - totalPrice * (_discount / 100);
-                  } else if (discount_type == '2') {
-                    totalPrice = totalPrice - _discount;
-                  }
-                }
-                return totalPrice
-                  ? `$${parseFloat(totalPrice).toFixed(2)}`
-                  : '';
-              },
-            },
-          ]}
-        />
+        <Table data={data.order_items} columns={productTableCol} />
       </View>
 
       {[PAYMENT_METHOD.split_payment.id].includes(data.payment_method) && (
@@ -318,39 +324,134 @@ export default function OrderDetail({
           style={{
             marginBottom: 10,
           }}>
-          <Text color={themeData.textColor} size={18} bold>
-            Split Payment
+          <Text mb={10} color={themeData.textColor} size={18} bold>
+            Split Payment - {isSplitByAmount ? 'By Amount' : 'By Item'}
           </Text>
 
-          <Table
-            data={data.order_split_payments || []}
-            columns={[
-              {
-                title: 'Type',
-                align: 'left',
-                key: 'type',
-              },
+          {isSplitByAmount ? (
+            <Table
+              data={data.order_split_payments || []}
+              columns={[
+                {
+                  title: 'Split',
+                  align: 'left',
+                  key: 'id',
+                  renderValue: (data, index) => {
+                    return `Split ${index + 1}`;
+                  },
+                },
+                {
+                  title: 'Type',
+                  align: 'left',
+                  key: 'type',
+                },
 
-              {
-                title: 'Amount',
-                align: 'right',
-                renderValue: data => {
-                  return data.amount
-                    ? `$${parseFloat(data.amount).toFixed(2)}`
-                    : '';
+                {
+                  title: 'Amount',
+                  // align: 'right',
+                  renderValue: data => {
+                    return data.amount
+                      ? `$${parseFloat(data.amount).toFixed(2)}`
+                      : '';
+                  },
                 },
-              },
-              {
-                title: 'Received Amount',
-                align: 'right',
-                renderValue: data => {
-                  return data.received_amount
-                    ? `$${parseFloat(data.received_amount).toFixed(2)}`
-                    : '';
+                {
+                  title: 'Received Amount',
+                  align: 'right',
+                  renderValue: data => {
+                    return data.received_amount
+                      ? `$${parseFloat(data.received_amount).toFixed(2)}`
+                      : '';
+                  },
                 },
-              },
-            ]}
-          />
+              ]}
+            />
+          ) : (
+            <>
+              {(data.order_split_payments || []).map((s, i) => {
+                let split_items = s.items.map(d => {
+                  let item=data.order_items.find(m => m.menu_item_id == d.id)
+                  return {
+                    ...item,
+                    quantity:d.qty,
+                    total_price:d.price
+                  };
+                });
+                return (
+                  <View key={i} style={{
+                    backgroundColor:themeData.bodyBg,
+                    borderRadius:4,
+                    paddingHorizontal:5,
+                    paddingVertical:5,
+                    marginBottom:10
+                  }}>
+                    <Table
+                   
+                      hideHeader
+                      data={[s]}
+                      columns={[
+                        {
+                          title: 'Split',
+                          align: 'left',
+                          key: 'id',
+                          renderValue: (data, index) => {
+                            return `Split ${i + 1}`;
+                          },
+                          textProps:{
+                            size:16,
+                            bold:true,
+                            medium:false
+                          }
+                        },
+                        {
+                          title: 'Type',
+                          align: 'left',
+                          key: 'type',
+                          textProps:{
+                            size:16,
+                            bold:true,
+                            medium:false
+                          }
+                        },
+
+                        {
+                          title: 'Amount',
+                          // align: 'right',
+                          renderValue: data => {
+                            return data.amount
+                              ? `$${parseFloat(data.amount).toFixed(2)}`
+                              : '';
+                          },
+                          textProps:{
+                            size:16,
+                            bold:true,
+                            medium:false
+                          }
+                        },
+                        {
+                          title: 'Received Amount',
+                          align: 'right',
+                          textProps:{
+                            size:16,
+                            bold:true,
+                            medium:false
+                          },
+                          renderValue: data => {
+                            return data.received_amount
+                              ? `$${parseFloat(data.received_amount).toFixed(
+                                  2,
+                                )}`
+                              : '';
+                          },
+                        },
+                      ]}
+                    />
+                    <Table data={split_items} columns={productTableCol} />
+                  </View>
+                );
+              })}
+            </>
+          )}
 
           {/* {(data.order_split_payments || []).map(sp => {
                   return <View key={sp.id}></View>;
@@ -450,7 +551,11 @@ export default function OrderDetail({
                     <FontAwesome5
                       size={20}
                       solid={selected}
-                      color={selected ? theme.colors.secondaryColor :themeData.textColor}
+                      color={
+                        selected
+                          ? theme.colors.secondaryColor
+                          : themeData.textColor
+                      }
                       name={selected ? 'check-circle' : 'circle'}
                     />
                   );
@@ -468,7 +573,9 @@ export default function OrderDetail({
                         flexDirection: 'row',
                       }}>
                       <View>
-                        <Text color={themeData.textColor}>{_data.item_name}</Text>
+                        <Text color={themeData.textColor}>
+                          {_data.item_name}
+                        </Text>
                         {!!variants.length && (
                           <Text color={themeData.textColor} size={12}>
                             {variants.map(r => r.title).join(', ')}
@@ -554,8 +661,7 @@ export default function OrderDetail({
               //  changeStatus && changeStatus(ORDER_STATUS.restaurant_confirmed.id);
             }}
             borderRadius={4}
-            backgroundColor={theme.colors.primaryColor}
-            >
+            backgroundColor={theme.colors.primaryColor}>
             Accept
           </Button>
           {/* {props.errors.items ? (
@@ -578,8 +684,12 @@ function InfoRow({title, value, style = {}}) {
 
         ...style,
       }}>
-      <Text color={themeData.textColor} bold>{title}</Text>
-      <Text color={themeData.textColor} ml={5}>{value}</Text>
+      <Text color={themeData.textColor} bold>
+        {title}
+      </Text>
+      <Text color={themeData.textColor} ml={5}>
+        {value}
+      </Text>
     </View>
   );
 }

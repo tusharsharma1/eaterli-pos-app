@@ -209,6 +209,10 @@ function Navigator() {
           name="HoldOrders"
           getComponent={() => require('../Screens/Orders/HoldOrders').default}
         />
+         <Stack.Screen
+          name="Settings"
+          getComponent={() => require('../Screens/Settings/Settings').default}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

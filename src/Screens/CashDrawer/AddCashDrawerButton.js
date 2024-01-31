@@ -9,6 +9,8 @@ import ModalContainer from '../../components/ModalContainer';
 import {simpleToast} from '../../helpers/app.helpers';
 import userAction from '../../redux/actions/user.action';
 import OptionButton from '../components/OptionButton';
+import useTheme from '../../hooks/useTheme';
+import theme from '../../theme';
 const validationSchema = yup.object({
   amount: yup.number().min(0.1).required('Required'),
   reason: yup.string(),
@@ -17,12 +19,17 @@ const _initialValues = {
   amount: '',
   reason: '',
 };
-export default function AddCashDrawerButton({type = '1', title = 'Add Cash',onSuccess}) {
+export default function AddCashDrawerButton({
+  type = '1',
+  title = 'Add Cash',
+  onSuccess,
+}) {
   const [initialValues, setInitialValues] = useState(_initialValues);
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const userData = useSelector(s => s.user.userData);
   const deviceId = useSelector(s => s.user.deviceId);
+  const themeData = useTheme();
   const selectedLocation = useSelector(s => s.user.selectedLocation);
   //  console.log(route.params)
   const toggleModal = () => {
@@ -45,13 +52,18 @@ export default function AddCashDrawerButton({type = '1', title = 'Add Cash',onSu
     if (r && r.status) {
       simpleToast(r.message);
       toggleModal();
-      onSuccess && onSuccess()
+      onSuccess && onSuccess();
     }
   };
 
   return (
     <>
-      <OptionButton title={title} onPress={toggleModal} />
+      <OptionButton
+        title={title}
+        backgroundColor={themeData.cardBg}
+        color={themeData.textColor}
+        onPress={toggleModal}
+      />
       <ModalContainer
         // hideTitle
         center
@@ -123,7 +135,10 @@ export default function AddCashDrawerButton({type = '1', title = 'Add Cash',onSu
                       : ''
                   }
                 />
-                <Button onPress={props.handleSubmit}>
+                <Button
+                  borderRadius={4}
+                  backgroundColor={theme.colors.primaryColor}
+                  onPress={props.handleSubmit}>
                   {type == '1' ? 'Add' : 'Remove'}
                 </Button>
               </>

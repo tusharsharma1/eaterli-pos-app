@@ -14,7 +14,7 @@ const initialState = {
     selectedPrinter: '',
     printerModal: false,
     pendingOrderPrint: null,
-    darkMode: true,
+    searchModal:false,
     themeConfig: {
       light: {
         appBg: '#71717B',
@@ -29,6 +29,8 @@ const initialState = {
 
         tabBg: '#F4F4F6',
         tabBorderColor: '#A1A1AA',
+
+        loginBg:'#E4E3E8eb'
       },
       dark: {
         appBg: '#414147',
@@ -44,9 +46,12 @@ const initialState = {
 
         tabBg: '#27262B',
         tabBorderColor: '#E4E3E8',
+
+        loginBg:'#18171Dcc'
       },
     },
   },
+
   alert: {
     show: false,
 
@@ -135,6 +140,17 @@ const initialState = {
     payModal: {show: false, ref: ''},
     customerDetail: CUSTOMER_DETAIL,
     splitBills: [],
+  },
+  settings: {
+    generalSettings: {
+      darkMode: true,
+     
+    },
+    imageSettings: {
+      showCatImage:true,
+      showProductImage:true,
+      showOrderItemImage:true
+    }
   },
 };
 export default initialState;

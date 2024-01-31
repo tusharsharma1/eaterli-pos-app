@@ -12,12 +12,14 @@ import {FlatList, TouchableOpacity, View} from 'react-native';
 import {formatGridData, getPercentValue} from '../../helpers/app.helpers';
 import theme from '../../theme';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
+import useTheme from '../../hooks/useTheme';
 let col = 4;
 let hPadding = 2;
 
 export default function MenuCategories({navigation, route}) {
   const dispatch = useDispatch();
   let {selectedMenuTitleCategories} = useProducts();
+  const themeData = useTheme();
   useEffect(() => {
     loadData();
   }, []);
@@ -60,7 +62,7 @@ export default function MenuCategories({navigation, route}) {
     <>
       <Header title={'Select Category'} back />
       {/* <CategoryNav /> */}
-      <Container style={{flex: 1}}>
+      <Container style={{flex: 1, backgroundColor: themeData.bodyBg}}>
         <FlatList
           // horizontal
           numColumns={col}
@@ -84,6 +86,7 @@ function _Item({data, onPress}) {
   const dispatch = useDispatch();
   const {categories} = useProducts();
   const {width} = useWindowDimensions();
+  const themeData = useTheme();
   let containerWidth = width;
   const _data = categories[data];
   if (!_data) {
@@ -104,7 +107,7 @@ function _Item({data, onPress}) {
     // flexDirection: 'row',
     // marginHorizontal: 15,
     // marginVertical: 5,
-    backgroundColor: empty ? 'transparent' : '#bbb',
+    backgroundColor: empty ? 'transparent' : themeData.cardBg,
     width: itemSize,
     // flex: 1,
     // height: 40,
@@ -129,8 +132,9 @@ function _Item({data, onPress}) {
         ..._itemStyle,
       }}>
       <Text
+
         numberOfLines={2}
-        color="#111"
+        color={themeData.textColor}
         medium
         size={getPercentValue(itemSize, 7.6)}
         align="center">

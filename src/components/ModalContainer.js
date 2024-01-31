@@ -35,6 +35,7 @@ function _ModalContainer({
   landscapeWidth,
   width,
   widthPerc = 92,
+  containerStyle={}
 }) {
   let themeData=useTheme();
   let {width: sw, height: sh, isPortrait} = useWindowDimensions();
@@ -174,6 +175,7 @@ function _ModalContainer({
               // paddingVertical: 10,
               //  backgroundColor: 'blue',
               // flex: 1,
+              ...containerStyle
             }}
             contentContainerStyle={{
               paddingVertical: 10,

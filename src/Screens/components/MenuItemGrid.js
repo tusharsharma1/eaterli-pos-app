@@ -1,9 +1,10 @@
-import _ from 'lodash';
-import React, {memo, useEffect, useState} from 'react';
+import _, {mean} from 'lodash';
+import React, {memo, useCallback, useEffect, useMemo, useState} from 'react';
 import {FlatList, TouchableOpacity, View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import Text from '../../components/Text';
 import {
+  debounce,
   formatGridData,
   getPercentValue,
   showToast,
@@ -35,6 +36,8 @@ import {
 import useTheme from '../../hooks/useTheme';
 import ProgressImage from '../../components/react-native-image-progress';
 import {dummyImage} from '../../assets';
+import appAction from '../../redux/actions/app.action';
+import TextInput from '../../components/Controls/TextInput';
 let col = 2;
 
 let hPadding = 2;
@@ -44,13 +47,13 @@ export default function MenuItemGrid(props) {
   const [leftContainerWidth, setLeftContainerWidth] = useState(theme.wp(70));
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
-  const themeData=useTheme()
+  const themeData = useTheme();
   const [selectedItem, setSelectedItem] = useState(null);
   let {selectedCategory, categories} = useProducts();
   const diningOption = useSelector(s => s.order.diningOption);
-  useEffect(() => {
-    setShowModal(false);
-  }, [selectedCategory]);
+  // useEffect(() => {
+  // setShowModal(false);
+  // }, [selectedCategory]);
   useEffect(() => {
     if (!showModal) {
       setSelectedItem(null);
@@ -136,6 +139,24 @@ export default function MenuItemGrid(props) {
         flex: 1,
         // height: catListH,
       }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginBottom: 10,
+        }}>
+        <Text size={20} semibold color={bgcolor}>
+          {cat.category_name}
+        </Text>
+        <View
+          style={{
+            backgroundColor: bgcolor,
+            height: 8,
+            borderRadius: 20,
+            flex: 1,
+            marginLeft: 10,
+          }}></View>
+      </View>
       {showModal ? (
         <ItemModal
           toggleModal={toggleModal}
@@ -145,22 +166,6 @@ export default function MenuItemGrid(props) {
         />
       ) : (
         <>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom:10
-            }}>
-            <Text size={20} semibold color={bgcolor}>{cat.category_name}</Text>
-            <View
-              style={{
-                backgroundColor: bgcolor,
-                height: 6,
-                borderRadius: 20,
-                flex: 1,
-                marginLeft:10
-              }}></View>
-          </View>
           <FlatList
             // horizontal
             numColumns={col}
@@ -181,6 +186,7 @@ export default function MenuItemGrid(props) {
           />
         </>
       )}
+      <SearchModal onItemPress={onItemPress} />
     </View>
   );
 }
@@ -188,6 +194,7 @@ function _Item({data, index, onPress, containerWidth}) {
   const dispatch = useDispatch();
   let {categories, menuItems, selectedCategory} = useProducts();
   const themeData = useTheme();
+  let imageSettings = useSelector(s => s.settings.imageSettings);
   let d = menuItems[data];
   let {price, cutPrice} = getPrice(data, '', false);
   if (!d) {
@@ -232,7 +239,7 @@ function _Item({data, index, onPress, containerWidth}) {
       style={{
         ..._itemStyle,
       }}>
-      {!!d.item_image && (
+      {imageSettings.showProductImage && !!d.item_image && (
         <ProgressImage
           color={'#F4F4F6'}
           source={
@@ -301,6 +308,7 @@ const Item = memo(_Item);
 
 function ItemModal({toggleModal, showModal, data, containerWidth}) {
   const dispatch = useDispatch();
+  const themeData = useTheme();
   const [selectedVar, setSelectedVar] = useState({});
   const [selectedAddons, setSelectedAddons] = useState([]);
   let addonProductsById = useSelector(s => s.user.addonProductsById);
@@ -446,24 +454,24 @@ function ItemModal({toggleModal, showModal, data, containerWidth}) {
       <View
         style={{
           flex: 1,
-          backgroundColor: '#fff',
+          // backgroundColor: '#fff',
           // paddingTop: 10,
         }}>
         <TouchableOpacity
           onPress={toggleModal}
           style={{
-            backgroundColor: '#eee',
+            backgroundColor: themeData.btnSecondaryBg,
             width: 40,
             height: 40,
-            borderRadius: 40,
+            borderRadius: 4,
             alignItems: 'center',
             justifyContent: 'center',
             marginTop: 5,
-            marginHorizontal: theme.paddingHorizontal,
+            marginHorizontal: 0,
             // paddingLeft: 25,
           }}>
           {/* <BackIcon /> */}
-          <MaterialIcons name="arrow-back" color={'#222'} size={25} />
+          <MaterialIcons name="arrow-back" color={'#fff'} size={25} />
         </TouchableOpacity>
         <Container
           scroll
@@ -473,7 +481,7 @@ function ItemModal({toggleModal, showModal, data, containerWidth}) {
           }}
           contentContainerStyle={{
             paddingTop: 10,
-            paddingHorizontal: theme.paddingHorizontal,
+            // paddingHorizontal: theme.paddingHorizontal,
           }}>
           {variants.map((m, i) => {
             return (
@@ -517,6 +525,7 @@ function ItemModal({toggleModal, showModal, data, containerWidth}) {
 }
 function Variants({data, selectedItems = [], onItemPress, containerWidth}) {
   const options = useSelector(s => s.user.options);
+  const themeData = useTheme();
   let items = (data.items ?? []).filter(m => {
     let pos_status = m.pos_status ?? true;
     return pos_status;
@@ -545,15 +554,15 @@ function Variants({data, selectedItems = [], onItemPress, containerWidth}) {
         style={{
           flexDirection: 'row',
         }}>
-        <Text bold size={18} style={{flex: 1}}>
+        <Text bold size={18} color={themeData.textColor} style={{flex: 1}}>
           {op.variation_name}
         </Text>
-        <Text size={16} color="#aaa">
+        <Text size={16} color={themeData.textColor}>
           {data.required ? '(Required)' : '(Optional)'}
         </Text>
       </View>
       {!!upto && data.multiselect && (
-        <Text size={14} color="#aaa">
+        <Text size={14} color={themeData.textColor}>
           Select up to {data.upto}{' '}
         </Text>
       )}
@@ -569,7 +578,7 @@ function Variants({data, selectedItems = [], onItemPress, containerWidth}) {
           let opdata = op.variation_options.find(o => o.id == m.id);
           let price = m.price;
           let empty = m.empty === true;
-          let size = (containerWidth - 52) / modalCol - 2.5;
+          let size = (containerWidth - 5) / modalCol - 2.5;
           let selected = selectedItems.includes(m.id);
           let multiselect = data.multiselect;
           let _style = {
@@ -577,10 +586,10 @@ function Variants({data, selectedItems = [], onItemPress, containerWidth}) {
             width: size,
             height: getPercentValue(size, 25),
             marginBottom: 5,
-            backgroundColor: empty ? '#00000000' : '#ccc00000',
+            backgroundColor: empty ? '#00000000' : themeData.cardBg,
 
-            borderWidth: 1,
-            borderColor: empty ? 'transparent' : '#ccc',
+            // borderWidth: 0,
+            // borderColor: empty ? 'transparent' : '#ccc',
 
             paddingHorizontal: 8,
             paddingVertical: 5,
@@ -607,14 +616,18 @@ function Variants({data, selectedItems = [], onItemPress, containerWidth}) {
               {multiselect ? (
                 <FontAwesome5Icon
                   size={16}
-                  color={selected ? theme.colors.successColor : '#aaa'}
+                  color={
+                    selected ? theme.colors.successColor : themeData.textColor
+                  }
                   name={selected ? 'check-circle' : ''}
                   solid={selected}
                 />
               ) : (
                 <FontAwesome5Icon
                   size={16}
-                  color={selected ? theme.colors.successColor : '#aaa'}
+                  color={
+                    selected ? theme.colors.successColor : themeData.textColor
+                  }
                   name={selected ? 'check-circle' : ''}
                   solid={selected}
                 />
@@ -625,10 +638,11 @@ function Variants({data, selectedItems = [], onItemPress, containerWidth}) {
                 size={12}
                 style={{
                   flex: 1,
-                }}>
+                }}
+                color={themeData.textColor}>
                 {m.title}
               </Text>
-              <Text size={12} semibold>
+              <Text size={12} semibold color={themeData.textColor}>
                 $ {parseFloat(price || 0).toFixed(2)}
               </Text>
             </TouchableOpacity>
@@ -640,7 +654,7 @@ function Variants({data, selectedItems = [], onItemPress, containerWidth}) {
 }
 function AddOns({data, selectedItems = [], onItemPress, containerWidth}) {
   let addonProductsById = useSelector(s => s.user.addonProductsById);
-
+  let themeData = useTheme();
   let items = (data.items ?? []).filter(m => {
     let pos_status = data.conf?.[m]?.pos_status ?? true;
     return pos_status;
@@ -655,11 +669,11 @@ function AddOns({data, selectedItems = [], onItemPress, containerWidth}) {
         style={{
           flexDirection: 'row',
         }}>
-        <Text bold size={18} style={{flex: 1}}>
+        <Text bold color={themeData.textColor} size={18} style={{flex: 1}}>
           {data.title}
         </Text>
       </View>
-      <Text size={14} color="#aaa">
+      <Text size={14} color={themeData.textColor}>
         {data.subtitle}
       </Text>
 
@@ -675,7 +689,7 @@ function AddOns({data, selectedItems = [], onItemPress, containerWidth}) {
           // let opdata = op.variation_options.find(o => o.id == m.id);
           // let price = m.price;
           let empty = m.empty === true;
-          let size = (containerWidth - 52) / modalCol - 2.5;
+          let size = (containerWidth - 5) / modalCol - 2.5;
           let selected = selectedItems.includes(m);
           // let multiselect = data.multiselect;
           let _style = {
@@ -683,10 +697,10 @@ function AddOns({data, selectedItems = [], onItemPress, containerWidth}) {
             width: size,
             height: getPercentValue(size, 25),
             marginBottom: 5,
-            backgroundColor: empty ? 'transparent' : '#ccc00000',
+            backgroundColor: empty ? 'transparent' : themeData.cardBg,
 
-            borderWidth: 1,
-            borderColor: empty ? 'transparent' : '#ccc',
+            // borderWidth: 1,
+            // borderColor: empty ? 'transparent' : '#ccc',
 
             paddingHorizontal: 8,
             paddingVertical: 5,
@@ -714,7 +728,9 @@ function AddOns({data, selectedItems = [], onItemPress, containerWidth}) {
               style={_style}>
               <FontAwesome5Icon
                 size={16}
-                color={selected ? theme.colors.successColor : '#aaa'}
+                color={
+                  selected ? theme.colors.successColor : themeData.textColor
+                }
                 name={selected ? 'check-circle' : ''}
                 solid={selected}
               />
@@ -725,10 +741,11 @@ function AddOns({data, selectedItems = [], onItemPress, containerWidth}) {
                 size={12}
                 style={{
                   flex: 1,
-                }}>
+                }}
+                color={themeData.textColor}>
                 {item.product_name}
               </Text>
-              <Text size={12} semibold>
+              <Text size={12} semibold color={themeData.textColor}>
                 + $ {parseFloat(item.product_price || 0).toFixed(2)}
               </Text>
             </TouchableOpacity>
@@ -738,3 +755,238 @@ function AddOns({data, selectedItems = [], onItemPress, containerWidth}) {
     </View>
   );
 }
+
+function SearchModal({onItemPress}) {
+  const dispatch = useDispatch();
+  const [text, setText] = useState('');
+  const [data, setData] = useState([]);
+  const searchModal = useSelector(s => s.app.searchModal);
+  let {menuItems} = useProducts();
+  const themeData = useTheme();
+  let menus = useMemo(() => {
+    return Object.values(menuItems);
+  }, [menuItems]);
+  const toggleModal = () => {
+    dispatch(
+      appAction.set({
+        searchModal: !searchModal,
+      }),
+    );
+  };
+  const onChangeText = val => {
+    setText(val);
+    onChangeSuccess(val);
+  };
+  const onChangeSuccess = useCallback(
+    debounce(async value => {
+      if (!value.trim()) {
+        setData([]);
+        return;
+      }
+
+      console.log('cal', value);
+      let seData = menus.filter(d => {
+        return (d.item_name || '').toLowerCase().includes(value.toLowerCase());
+      });
+      setData(seData);
+    }, 500),
+    [menus],
+  );
+  const ListEmptyComponent = () => {
+    // if (!loaded) {
+    //   return null;
+    // }
+    return (
+      <View
+        style={{
+          // backgroundColor: 'red',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: 100,
+        }}>
+        <Text size={20} color={themeData.textColor} medium>
+          No records
+        </Text>
+      </View>
+    );
+  };
+
+  const renderItem = ({item, index}) => {
+    return (
+      <SearchItem
+        data={item}
+        onPress={data => {
+          toggleModal();
+          dispatch(
+            userAction.set({
+              selectedCategory: data.menu_category_id,
+            }),
+          );
+          onItemPress && onItemPress(data);
+        }}
+        // containerWidth={leftContainerWidth}
+        // index={index}
+      />
+    );
+  };
+  return (
+    <ModalContainer
+      // hideTitle
+      center
+      noscroll
+      onRequestClose={toggleModal}
+      visible={searchModal}
+      title={`Search Product`}
+      minHeight={'80%'}
+      landscapeWidth={550}
+      containerStyle={{
+        flex: 1,
+      }}>
+      <View
+        style={{
+          // marginBottom: 10,
+          // backgroundColor:'red',
+          flex: 1,
+          // height:200
+        }}>
+        <TextInput
+          textInputProps={{
+            onChangeText: onChangeText,
+
+            value: text,
+            // keyboardType: 'email-address',
+            // autoCompleteType: 'email',
+            // autoCapitalize: 'none',
+            // returnKeyType: 'next',
+            placeholder: 'Search',
+            //  onSubmitEditing: () => this.passwordInput.focus(),
+            //ref: r => (this.emailInput = r),
+          }}
+        />
+        <View
+          style={{
+            flex: 1,
+          }}>
+          <FlatList
+            // horizontal
+            // numColumns={col}
+            contentContainerStyle={
+              {
+                // paddingVertical: 2,
+                // paddingHorizontal: hPadding,
+                // justifyContent: 'space-between',
+              }
+            }
+            data={data}
+            keyExtractor={(item, index) => {
+              return item.id;
+            }}
+            renderItem={renderItem}
+            // refreshing={!loaded}
+            // onRefresh={loadData}
+            // progressViewOffset={0}
+            ListEmptyComponent={ListEmptyComponent}
+          />
+        </View>
+      </View>
+    </ModalContainer>
+  );
+}
+function _SearchItem({data, onPress}) {
+  const themeData = useTheme();
+  let imageSettings = useSelector(s => s.settings.imageSettings);
+
+  let {price, cutPrice} = getPrice(data.id, '', false);
+  if (!data) {
+    return null;
+  }
+  if (data.pos_status == 0) {
+    return null;
+  }
+  let _itemStyle = {
+    // flexDirection: 'row',
+    // marginHorizontal: 15,
+    // marginVertical: 5,
+    backgroundColor: themeData.cardBg,
+    // width: itemSize,
+    // flex: 1,
+    // height: 40,
+    // margin: marginOffset,
+    // alignItems: 'center',
+    // justifyContent: 'space-between',
+    paddingVertical: 10, //theme.hp(5),
+    paddingHorizontal: 10,
+    // height: getPercentValue(itemSize, 45),
+    borderRadius: 5,
+    marginBottom: 10,
+    // marginRight: index % 2 ? 0 : 10,
+    flexDirection: 'row',
+  };
+
+  return (
+    <TouchableOpacity
+      onPress={() => {
+        onPress && onPress(data);
+      }}
+      activeOpacity={0.7}
+      style={{
+        ..._itemStyle,
+      }}>
+      {imageSettings.showProductImage && !!data.item_image && (
+        <ProgressImage
+          color={'#F4F4F6'}
+          source={
+            data.item_image
+              ? {
+                  uri: data.item_image,
+                  //+ '?t=' + new Date().getTime()
+                }
+              : dummyImage
+          }
+          style={{
+            width: 50,
+            height: 50,
+            marginRight: 10,
+            // backgroundColor: Color(product_bg).darken(0.2).toString(),
+
+            // borderWidth: 1,
+            //borderColor: theme.colors.borderColor,
+            // data.item_image
+            //  backgroundColor:'red'
+          }}
+          imageStyle={{
+            width: '100%',
+            height: '100%',
+            resizeMode: 'cover',
+            borderRadius: 5,
+          }}
+        />
+      )}
+      <View
+        style={{
+          flex: 1,
+        }}>
+        <View
+          style={{
+            flex: 1,
+          }}>
+          <Text
+            numberOfLines={1}
+            color={themeData.textColor}
+            medium
+            size={16}
+            align="left">
+            {data.item_name}
+          </Text>
+          <Text numberOfLines={2} mb={5} color={themeData.textColor} size={14}>
+            {data.item_description}
+          </Text>
+        </View>
+        <Text color={themeData.textColor} bold size={16} align="right">
+          $ {parseFloat(price || 0).toFixed(2)}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
+const SearchItem = memo(_SearchItem);

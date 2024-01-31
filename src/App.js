@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {
   KeyboardAvoidingView,
@@ -16,30 +16,36 @@ import PrintersModal from './Screens/components/PrintersModal';
 import {fcmService} from './firebase/FCMService';
 import {useDispatch} from 'react-redux';
 import userAction from './redux/actions/user.action';
-import { getUniqueId } from 'react-native-device-info';
+import {getUniqueId} from 'react-native-device-info';
 import useTheme from './hooks/useTheme';
+import {loadSettings} from './helpers/settings.helper';
+import SplashView from './components/SplashView';
 
 const App = () => {
   const dispatch = useDispatch();
   const themeData = useTheme();
+  const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     initApp();
   }, []);
   const initApp = async () => {
     let deviceId = await getUniqueId();
-    dispatch(userAction.set({deviceId:`${deviceId}`}));
+    dispatch(userAction.set({deviceId: `${deviceId}`}));
+
+    await loadSettings();
 
     fcmService.getToken(token => {
       console.log('[FCMService]  device token', token);
       dispatch(userAction.set({deviceToken: token}));
     });
+    setLoaded(true);
   };
+  if (!loaded) {
+    return <SplashView />;
+  }
   return (
     <>
-      <StatusBar
-        backgroundColor={themeData.appBg}
-        translucent={false}
-      />
+      <StatusBar backgroundColor={themeData.appBg} translucent={false} />
 
       <KeyboardAvoidingView
         behavior={Platform.OS == 'ios' ? 'padding' : null}

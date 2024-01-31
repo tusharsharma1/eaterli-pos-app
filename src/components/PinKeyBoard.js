@@ -6,10 +6,10 @@ import Text from './Text';
 import BSIcon from '../assets/BSIcon';
 import CloseIcon from '../assets/CloseIcon';
 
-function _PinKeyBoard({length = 4,scale=1, onCompleted,getRef}) {
+function _PinKeyBoard({length = 4, scale = 1,style={}, onCompleted, getRef}) {
   const [pin, setPin] = useState([]);
   useEffect(() => {
-    getRef && getRef({setPin})
+    getRef && getRef({setPin});
   }, []);
   useEffect(() => {
     if (pin.length >= length) {
@@ -49,12 +49,13 @@ function _PinKeyBoard({length = 4,scale=1, onCompleted,getRef}) {
           {scale: scale},
           // {translateY: (bH - contentH) / 2},
         ],
+        ...style,
       }}>
       <View
         style={{
           flexDirection: 'row',
           justifyContent: 'center',
-          marginBottom: 20,
+          marginBottom: 15,
         }}>
         {Array.from(Array(length), (r, i) => {
           return <Dot key={i} selected={pin.length >= i + 1}></Dot>;
@@ -99,14 +100,18 @@ function _PinKeyBoard({length = 4,scale=1, onCompleted,getRef}) {
         }}>
         <NumButton
           onPress={resetPress}
-          renderComp={<CloseIcon width={33} height={33} />}
-          backgroundColor="#ffff0000"
+          // renderComp={<CloseIcon width={33} height={33} />}
+          // backgroundColor="#ffff0000"
+          text='Clear'
+          fontSize={16}
         />
         <NumButton text="0" onPress={onPress} />
         <NumButton
           onPress={removePress}
-          renderComp={<BSIcon width={33} height={33} />}
-          backgroundColor="#ffff0000"
+          // renderComp={<BSIcon width={33} height={33} />}
+          // backgroundColor="#ffff0000"
+          text='Back'
+          fontSize={16}
         />
       </View>
     </View>
@@ -120,15 +125,15 @@ function Dot({selected = false}) {
     <View
       style={{
         backgroundColor: selected ? theme.colors.secondaryColor : '#ffffff77',
-        width: 15,
-        height: 15,
+        width: 10,
+        height: 10,
         borderRadius: 20,
         marginHorizontal: 10,
       }}></View>
   );
 }
 
-function NumButton({text = '', renderComp, backgroundColor = '#fff', onPress}) {
+function NumButton({text = '',fontSize=22, renderComp, backgroundColor = '#fff', onPress}) {
   return (
     <TouchableOpacity
       onPress={() => {
@@ -136,15 +141,15 @@ function NumButton({text = '', renderComp, backgroundColor = '#fff', onPress}) {
       }}
       style={{
         backgroundColor: backgroundColor,
-        width: 55,
-        height: 55,
-        borderRadius: 70,
-        marginHorizontal: 20,
+        width: 70,
+        height: 60,
+        borderRadius: 4,
+        marginHorizontal: 7.5,
         alignItems: 'center',
         justifyContent: 'center',
       }}>
       {!renderComp ? (
-        <Text bold size={22} color={theme.colors.primaryColor}>
+        <Text  size={fontSize} color={'#18171D'}>
           {text}
         </Text>
       ) : (

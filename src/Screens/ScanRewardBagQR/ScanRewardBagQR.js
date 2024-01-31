@@ -14,10 +14,12 @@ import AppLoader from '../../components/AppLoader';
 import theme from '../../theme';
 import Button from '../../components/Button';
 import {getTotalRewardBagPoints} from '../../helpers/order.helper';
+import useTheme from '../../hooks/useTheme';
 const Buffer = require('buffer').Buffer;
+const TEST_ORDATA = '';//Buffer.from('["reward",6,275,7]').toString('base64')
 export default function ScanRewardBagQR({navigation, route}) {
   const dispatch = useDispatch();
-  const [QRData, setQRData] = useState(''); //WzYsMjc1LDdd
+  const [QRData, setQRData] = useState(TEST_ORDATA); //WzYsMjc1LDdd
   const userData = useSelector(s => s.user.userData);
   const rewards = useSelector(s => s.user.rewards);
   const selectedLocation = useSelector(s => s.user.selectedLocation);
@@ -26,6 +28,7 @@ export default function ScanRewardBagQR({navigation, route}) {
   const [loaded, setLoaded] = useState(false);
   const [view, setView] = useState(0);
   const [scanData, setScanData] = useState(null);
+  const themeData = useTheme();
   // const [customerData, setCustomerData] = useState(null);
   useEffect(() => {
     loadData();
@@ -47,9 +50,16 @@ export default function ScanRewardBagQR({navigation, route}) {
         jsonob = null;
       }
       jsonob = jsonob || [];
-      let [type,id, uid, rid] = jsonob;
-      // console.log(id, rid);
-      if (jsonob && type=='reward'&& id && uid && rid && rid == userData.restaurant.id) {
+      let [type, id, uid, rid] = jsonob;
+      console.log(jsonob);
+      if (
+        jsonob &&
+        type == 'reward' &&
+        id &&
+        uid &&
+        rid &&
+        rid == userData.restaurant.id
+      ) {
         // console.log(jsonob);
         //   let u = await dispatch(userAction.getCustomerDetail(rid, uid));
         //  if(u && u.status){
@@ -57,13 +67,13 @@ export default function ScanRewardBagQR({navigation, route}) {
         //  }
         let r = await dispatch(userAction.getRewardBag(rid, id));
         if (r && r.status) {
-          if(r.data){
+          if (r.data) {
             setScanData(r.data);
             setView(1);
-          }else{
+          } else {
             simpleToast('Reward Bag not found.');
           }
-         
+
           // dispatch(
           //   orderAction.set({
           //     customerDetail: {
@@ -120,12 +130,12 @@ export default function ScanRewardBagQR({navigation, route}) {
               zIndex: 1,
             }}>
             <ActivityIndicator size={'large'} />
-            <Text>Scanning...</Text>
+            <Text color={themeData.textColor}>Scanning...</Text>
           </View>
           <_TextInput
             style={{
               backgroundColor: '#000000',
-              color: '#00000000',
+              color: '#ff000000',
               opacity: 0.1,
               width: '100%',
               height: '100%',
@@ -133,9 +143,9 @@ export default function ScanRewardBagQR({navigation, route}) {
               textAlignVertical: 'top',
             }}
             caretHidden
-            selectionColor={'#00000000'}
+            selectionColor={'#ff000000'}
             autoFocus
-            showSoftInputOnFocus={false}
+            showSoftInputOnFocus={!!TEST_ORDATA}
             returnKeyType="next"
             value={QRData}
             onChangeText={t => {
@@ -170,16 +180,16 @@ export default function ScanRewardBagQR({navigation, route}) {
                     key={r.id}
                     style={{
                       paddingHorizontal: 10,
-                      backgroundColor: '#fff',
+                      backgroundColor: themeData.cardBg,
                       paddingVertical: 5,
                       borderRadius: 8,
                       marginBottom: 10,
                     }}>
-                    <Text bold>{menuItem?.item_name || reward.title}</Text>
-                    <Text medium>Qty- {r.qty}</Text>
+                    <Text color={themeData.textColor} bold>{menuItem?.item_name || reward.title}</Text>
+                    <Text color={themeData.textColor} medium>Qty- {r.qty}</Text>
 
-                    <Text medium>Points- {reward.points}</Text>
-                    <Text medium>
+                    <Text color={themeData.textColor} medium>Points- {reward.points}</Text>
+                    <Text color={themeData.textColor} medium>
                       Total Points- {parseInt(reward.points) * parseInt(r.qty)}
                     </Text>
                   </View>
@@ -191,9 +201,14 @@ export default function ScanRewardBagQR({navigation, route}) {
                 paddingVertical: 10,
                 paddingHorizontal: theme.paddingHorizontal,
               }}>
-              <Button ph={30} style={{
-                alignSelf:'center'
-              }} onPress={redeemPoint}>
+              <Button
+              borderRadius={4}
+              backgroundColor={theme.colors.primaryColor}
+                ph={30}
+                style={{
+                  alignSelf: 'center',
+                }}
+                onPress={redeemPoint}>
                 Redeem Points - {totalPoints}
               </Button>
             </View>
@@ -215,7 +230,7 @@ export default function ScanRewardBagQR({navigation, route}) {
         style={{
           flex: 1,
           // flexDirection: 'row',
-
+          backgroundColor: themeData.bodyBg,
           // padding: 20,
         }}
         contentContainerStyle={{

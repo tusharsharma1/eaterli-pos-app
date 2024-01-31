@@ -1,37 +1,22 @@
 import moment from 'moment';
-import React, {useEffect, useMemo, useState} from 'react';
-import {TouchableOpacity, View} from 'react-native';
-import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
+import React, {useMemo, useState} from 'react';
+import {View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
-import Badge from '../../components/Badge';
+import Button from '../../components/Button';
 import Container from '../../components/Container';
 import Header from '../../components/Header';
-import ModalContainer from '../../components/ModalContainer';
-import OptionMenu from '../../components/OptionMenu';
 import Table from '../../components/Table';
-import Text from '../../components/Text';
 import {ALERT_ICON_TYPE, ALERT_TYPE} from '../../constants/alert.constant';
-import {DELIVERY_TYPE} from '../../constants/order.constant';
-import OrderRefundForm from '../../forms/OrderRefundForm';
-import {simpleToast} from '../../helpers/app.helpers';
-import {
-  checkPrinterConnection,
-  createOrderReceiptPrintData,
-  doPrintUSBPrinter,
-} from '../../helpers/printer.helper';
-import {useNonInitialEffect} from '../../hooks/useNonInitialEffect';
-import usePrevious from '../../hooks/usePrevious';
+import useTheme from '../../hooks/useTheme';
 import alertAction from '../../redux/actions/alert.action';
-import userAction from '../../redux/actions/user.action';
-import OrderDetail from '../components/OrderDetail';
-import Button from '../../components/Button';
 import orderAction from '../../redux/actions/order.action';
+import theme from '../../theme';
 export default function HoldOrders({navigation, route}) {
   const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-
+  const themeData = useTheme();
   const holdCarts = useSelector(s => s.order.holdCarts);
 
   const columns = useMemo(() => {
@@ -81,7 +66,9 @@ export default function HoldOrders({navigation, route}) {
                   );
                 }}
                 size={12}
-                pv={4}>
+                pv={4}
+                borderRadius={4}
+                backgroundColor={theme.colors.primaryColor}>
                 Continue
               </Button>
             </View>
@@ -95,7 +82,7 @@ export default function HoldOrders({navigation, route}) {
   return (
     <>
       <Header title={'Hold Orders'} back />
-      <Container style={{flex: 1}}>
+      <Container style={{flex: 1,backgroundColor:themeData.cardBg}}>
         <Table data={holdCarts} columns={columns} />
       </Container>
     </>

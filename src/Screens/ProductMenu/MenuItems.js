@@ -21,6 +21,7 @@ import {getAddons, getVariants} from '../../helpers/order.helper';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import Button from '../../components/Button';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
+import useTheme from '../../hooks/useTheme';
 let col = 4;
 let hPadding = 2;
 
@@ -29,8 +30,9 @@ export default function MenuItems({navigation, route}) {
   const [showModal, setShowModal] = useState(false);
   const userData = useSelector(s => s.user.userData);
   const [selectedItem, setSelectedItem] = useState(null);
-  const selectedLocation=useSelector(s=>s.user.selectedLocation)
+  const selectedLocation = useSelector(s => s.user.selectedLocation);
   let {categories} = useProducts();
+  const themeData = useTheme();
   let category_id = route.params?.id;
   useEffect(() => {
     loadData();
@@ -105,6 +107,7 @@ export default function MenuItems({navigation, route}) {
       add_ons: selectedItem.add_ons, //values.addons.map((r) => r.id).join(","),
 
       variants: selectedItem.variants,
+      restaurant_id: userData.restaurant.id
     };
     let r = await dispatch(
       userAction.updateSubCategory(body, selectedItem.id, {
@@ -113,7 +116,9 @@ export default function MenuItems({navigation, route}) {
     );
     if (r && r.status) {
       simpleToast(r.message);
-      await dispatch(userAction.getMenus(selectedLocation,userData.restaurant.id ));
+      await dispatch(
+        userAction.getMenus(selectedLocation, userData.restaurant.id),
+      );
       toggleModal();
     }
   };
@@ -135,6 +140,7 @@ export default function MenuItems({navigation, route}) {
             marginBottom: 10,
           }}>
           <Text
+          color={themeData.textColor}
             style={{
               flex: 1,
             }}>
@@ -147,9 +153,11 @@ export default function MenuItems({navigation, route}) {
             }}
           />
         </View>
-        {!!variants.length && <Text bold size={18} mb={5}>
-          Modifiers
-        </Text>}
+        {!!variants.length && (
+          <Text color={themeData.textColor} bold size={18} mb={5}>
+            Modifiers
+          </Text>
+        )}
         {variants.map((m, i) => {
           return (
             <Variants
@@ -162,9 +170,11 @@ export default function MenuItems({navigation, route}) {
             />
           );
         })}
-       {!!addons.length && <Text mt={10} bold size={18} mb={5}>
-          Add-ons
-        </Text>}
+        {!!addons.length && (
+          <Text color={themeData.textColor} mt={10} bold size={18} mb={5}>
+            Add-ons
+          </Text>
+        )}
         {addons.map((m, i) => {
           return (
             <AddOns
@@ -185,7 +195,12 @@ export default function MenuItems({navigation, route}) {
     <>
       <Header title={'Menu Items'} back />
       {/* <CategoryNav /> */}
-      <Container style={{flex: 1}}>
+      <Container
+        style={{
+          flex: 1,
+
+          backgroundColor: themeData.bodyBg,
+        }}>
         <FlatList
           // horizontal
           numColumns={col}
@@ -209,7 +224,7 @@ export default function MenuItems({navigation, route}) {
         onRequestClose={toggleModal}
         visible={showModal}
         title={'Edit'}
-         landscapeWidth={350}
+        landscapeWidth={350}
         // height={'98%'}
         // borderRadius={25}
         renderFooter={() => {
@@ -218,7 +233,12 @@ export default function MenuItems({navigation, route}) {
               style={{
                 alignItems: 'flex-end',
               }}>
-              <Button ph={30} size={14} onPress={onSave}>
+              <Button
+                borderRadius={4}
+                backgroundColor={theme.colors.primaryColor}
+                ph={30}
+                size={14}
+                onPress={onSave}>
                 Save
               </Button>
             </View>
@@ -229,11 +249,12 @@ export default function MenuItems({navigation, route}) {
     </>
   );
 }
-function _Item({data, onPress,}) {
+function _Item({data, onPress}) {
   const dispatch = useDispatch();
   const {width} = useWindowDimensions();
   let containerWidth = width;
   const {menuItems} = useProducts();
+  const themeData = useTheme();
   const _data = menuItems[data];
   if (!_data) {
     return null;
@@ -253,7 +274,7 @@ function _Item({data, onPress,}) {
     // flexDirection: 'row',
     // marginHorizontal: 15,
     // marginVertical: 5,
-    backgroundColor: empty ? 'transparent' : '#bbb',
+    backgroundColor: empty ? 'transparent' : themeData.cardBg,
     width: itemSize,
     // flex: 1,
     // height: 40,
@@ -279,7 +300,7 @@ function _Item({data, onPress,}) {
       }}>
       <Text
         numberOfLines={2}
-        color="#111"
+        color={themeData.textColor}
         medium
         size={getPercentValue(itemSize, 6.6)}
         align="center">
@@ -291,7 +312,7 @@ function _Item({data, onPress,}) {
 const Item = memo(_Item);
 function Variants({data, onPosStatusChange}) {
   const options = useSelector(s => s.user.options);
-
+const themeData=useTheme()
   if (!data.items && !data.items.length) {
     return null;
   }
@@ -310,7 +331,7 @@ function Variants({data, onPosStatusChange}) {
 
   return (
     <View>
-      <Text bold size={16} mb={5}>
+      <Text bold color={themeData.textColor} size={16} mb={5}>
         {op.variation_name}
       </Text>
 
@@ -323,8 +344,7 @@ function Variants({data, onPosStatusChange}) {
           marginBottom: 5,
           // backgroundColor: empty ? '#00000000' : '#ccc00000',
 
-          borderWidth: 1,
-          borderColor: '#ccc',
+          backgroundColor:themeData.cardBg,
 
           paddingHorizontal: 8,
           paddingVertical: 5,
@@ -339,6 +359,7 @@ function Variants({data, onPosStatusChange}) {
               numberOfLines={2}
               size={12}
               medium
+              color={themeData.textColor}
               style={{
                 flex: 1,
               }}>
@@ -357,6 +378,7 @@ function Variants({data, onPosStatusChange}) {
   );
 }
 function AddOns({data, onPosStatusChange}) {
+  const themeData=useTheme();
   let addonProductsById = useSelector(s => s.user.addonProductsById);
   if (!data.items && !data.items.length) {
     return null;
@@ -364,7 +386,7 @@ function AddOns({data, onPosStatusChange}) {
 
   return (
     <View>
-      <Text bold size={16} mb={5}>
+      <Text color={themeData.textColor} bold size={16} mb={5}>
         {data.title}
       </Text>
 
@@ -377,9 +399,9 @@ function AddOns({data, onPosStatusChange}) {
           // height: getPercentValue(size, 25),
           marginBottom: 5,
           // backgroundColor: empty ? '#00000000' : '#ccc00000',
-
-          borderWidth: 1,
-          borderColor: '#ccc',
+backgroundColor:themeData.cardBg,
+          // borderWidth: 1,
+          // borderColor: '#ccc',
 
           paddingHorizontal: 8,
           paddingVertical: 5,
@@ -390,6 +412,7 @@ function AddOns({data, onPosStatusChange}) {
         return (
           <View key={m.id} style={_style}>
             <Text
+            color={themeData.textColor}
               ml={5}
               numberOfLines={2}
               size={12}

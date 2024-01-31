@@ -17,18 +17,21 @@ import {useDispatch, useSelector} from 'react-redux';
 import appAction from '../../redux/actions/app.action';
 import {useNonInitialEffect} from '../../hooks/useNonInitialEffect';
 import storageHelper from '../../helpers/storage.helper';
+import useTheme from '../../hooks/useTheme';
 
 export default function PrinterSettings({navigation, route}) {
   const pageWidthLength = useSelector(s => s.app.pageWidthLength);
   const dispatch = useDispatch();
-
+const themeData=useTheme();
   useNonInitialEffect(() => {
     storageHelper.storeData('pageWidthLength', pageWidthLength);
   }, [pageWidthLength]);
   return (
     <>
       <Header title={'Printer Settings'} back />
-      <Container scroll>
+      <Container scroll style={{
+        backgroundColor:themeData.bodyBg
+      }}>
         <Container
           style={{
             // flex: 1,
@@ -38,6 +41,7 @@ export default function PrinterSettings({navigation, route}) {
             flexWrap: 'wrap',
           }}>
           <Button
+          borderRadius={4}
             mr={10}
             mb={10}
             onPress={async () => {
@@ -47,6 +51,7 @@ export default function PrinterSettings({navigation, route}) {
             Connect USB Printer
           </Button>
           <Button
+           borderRadius={4}
             backgroundColor={theme.colors.primaryColor}
             mr={10}
             mb={10}
@@ -64,7 +69,7 @@ export default function PrinterSettings({navigation, route}) {
               flexDirection: 'row',
               alignItems: 'center',
             }}>
-            <Text mr={10}>Page Width:</Text>
+            <Text color={themeData.textColor} mr={10}>Page Width:</Text>
             <NumberInput
               value={pageWidthLength}
               onChange={v => {

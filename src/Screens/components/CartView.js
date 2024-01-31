@@ -2,6 +2,7 @@ import React, {memo, useEffect, useMemo, useState} from 'react';
 import {
   ActivityIndicator,
   Keyboard,
+  StyleSheet,
   TouchableOpacity,
   View,
   TextInput as _TextInput,
@@ -59,7 +60,7 @@ import TagIcon from '../../assets/TagIcon';
 import DeleteIcon from '../../assets/DeleteIcon';
 import {useNonInitialEffect} from '../../hooks/useNonInitialEffect';
 import storageHelper from '../../helpers/storage.helper';
-
+import SelectDropdown from 'react-native-select-dropdown';
 const Buffer = require('buffer').Buffer;
 function _CartView({}) {
   const themeData = useTheme();
@@ -565,6 +566,8 @@ function Footer({}) {
   const deviceId = useSelector(s => s.user.deviceId);
   const diningOption = useSelector(s => s.order.diningOption);
   const customerDetail = useSelector(s => s.order.customerDetail);
+  const [closeModal, setCloseModal] = useState(false);
+
   const payModal = useSelector(s => s.order.payModal);
   const [QRDataScaning, setQRDataScaning] = useState(false); //
   const [QRData, setQRData] = useState(TEST_ORDATA); //WzI3NSw3XQ==
@@ -575,11 +578,13 @@ function Footer({}) {
   const [splitPayment, setSplitPayment] = useState(false);
   const [splitPaymentBy, setSplitPaymentBy] = useState(1);
   const [totalSplitBills, setTotalSplitBills] = useState(2);
+  const [activeBillPaymentMethod, setActiveBillPaymentMethod] = useState('');
+
   const themeData = useTheme();
   const [giftCardID, setGiftCardId] = useState(0);
   const [giftCardBalance, setGiftCardBalance] = useState(0);
   const [showDiscountModal, setShowDiscountModal] = useState(false);
-
+  const [selectedBill, setSelectedBill] = useState(null);
   const [discountValues, setDiscountValues] = useState({
     discount: 0,
     discount_type: '1',
@@ -608,7 +613,7 @@ function Footer({}) {
 
   let tax_per = location?.tax ? parseFloat(location.tax) : 0;
 
-  let sub_total = getGrandTotal();
+  let sub_total = getGrandTotal(cart);
   let tax_amt = (sub_total * tax_per) / 100;
   let tax_total = tax_amt + sub_total;
   let total = tax_total;
@@ -623,7 +628,7 @@ function Footer({}) {
     if (discount_type == '1') {
       total = total - total * (_discount / 100);
     } else if (discount_type == '2') {
-      total = total - _discount;
+      total = Math.max( total - _discount);
     }
   }
 
@@ -637,7 +642,7 @@ function Footer({}) {
     if (offer_discount_type == '1') {
       total = total - total * (_offer_discount / 100);
     } else if (offer_discount_type == '2') {
-      total = total - _offer_discount;
+      total = Math.max( total - _offer_discount);
     }
   }
 
@@ -681,6 +686,20 @@ function Footer({}) {
       onCashSubmitSuccess({received_amount: received_amount});
     }
   }, [splitPayments, splitPaymentBy, modalView]);
+
+  useEffect(() => {
+    let allPaid = splitBills.every(d => d.paid);
+    // console.log('call',allPaid);
+    if (
+      modalView == CART_MODAL_VIEW.split_payment.id &&
+      splitPaymentBy == 2 &&
+      allPaid
+    ) {
+      // console.log('call', splitPayments);
+      let received_amount = getSptilReceivedAmt(splitBills);
+      onCashSubmitSuccess({received_amount: received_amount});
+    }
+  }, [splitBills, splitPaymentBy, modalView]);
 
   useEffect(() => {
     genarateSplitPaymentsBill(totalSplitBills);
@@ -767,6 +786,22 @@ function Footer({}) {
       }),
     );
   };
+  const onRequestClose = () => {
+    setCloseModal(true);
+    // dispatch(
+    //   alertAction.showAlert({
+    //     type: ALERT_TYPE.CONFIRM,
+    //     icon: ALERT_ICON_TYPE.CONFIRM,
+    //     text: '',
+    //     heading: 'Confirmation',
+    //     positiveText: 'Cancel Order',
+    //     negativeText: 'Hold Order',
+    //     onPositivePress: async () => {
+    //       toggleModal();
+    //     },
+    //   }),
+    // );
+  };
   const validateCutomerDetail = () => {
     return new Promise(async res => {
       const validationSchema = yup.object({
@@ -808,7 +843,7 @@ function Footer({}) {
     });
   };
   const onPayPress = () => {
-    let products = getCartProducts();
+    let products = getCartProducts(cart);
     if (!products.length) {
       simpleToast('Add Products first.');
       return;
@@ -825,7 +860,7 @@ function Footer({}) {
   };
 
   const onDeletePress = () => {
-    let products = getCartProducts();
+    let products = getCartProducts(cart);
     if (!products.length) {
       return;
     }
@@ -844,13 +879,13 @@ function Footer({}) {
   };
 
   const onCashSubmitSuccess = async values => {
-    let products = getCartProducts();
+    let products = getCartProducts(cart);
     if (!products.length) {
       simpleToast('No Product Added.');
       return;
     }
-
-    if (parseFloat(total) > parseFloat(values.received_amount)) {
+    console.log(parseFloat(total.toFixed(2)), values.received_amount,splitPayment);
+    if (parseFloat(total.toFixed(2)) > parseFloat(values.received_amount)) {
       // console.log('success no');
 
       simpleToast('Received amount is not valid.');
@@ -880,8 +915,20 @@ function Footer({}) {
       loyalityProgram,
       diningOption,
       delivery_type: diningOption,
-      split_payments: splitPayment ? JSON.stringify(splitPayments) : '[]',
+      split_payments:
+        splitPaymentBy == 1
+          ? splitPayments
+          : splitBills.map(d => {
+              return {
+                type: d.type,
+                amount: d.total,
+                tax: d.tax_amt,
+                received_amount: d.received_amount,
+                items: getCartProducts(d.cart),
+              };
+            }),
       gift_card_id: giftCardID,
+      split_type: splitPaymentBy == 2 ? 'by item' : 'by amount',
       // paymentMethod:PAYMENT_METHOD.gift_card.id,
       ...customerDetail,
       ...discountValues,
@@ -1123,6 +1170,7 @@ function Footer({}) {
     return remaining_amount;
   };
   const renderView = () => {
+    console.log('splitBills', splitBills, selectedBill);
     switch (modalView) {
       case CART_MODAL_VIEW.reward_question.id:
         return (
@@ -1871,7 +1919,7 @@ function Footer({}) {
 
       case CART_MODAL_VIEW.split_payment.id:
         let remaining_amount = getSplitRemainingAmt(splitPayments);
-        // console.log('remaining_amount', remaining_amount);
+
         return (
           <>
             <View
@@ -2043,9 +2091,10 @@ function Footer({}) {
                     </View>
                   </Row>
 
-                  <Container style={{
-                    marginTop:15
-                  }}>
+                  <Container
+                    style={{
+                      marginTop: 15,
+                    }}>
                     {splitPayments.map((r, i) => {
                       // let _rem_amount =
                       //   parseFloat(r.received_amount) - parseFloat(r.amount);
@@ -2061,25 +2110,29 @@ function Footer({}) {
                             // backgroundColor: 'red',
                             alignItems: 'center',
                             // marginBottom: 10,
-                            paddingHorizontal:15,
-                            marginBottom:10
+                            paddingHorizontal: 15,
+                            marginBottom: 10,
                           }}>
-                          <Text size={18} style={{
-                            minWidth:25
-                          }} color={themeData.textColor} mr={15}>{i + 1}</Text>
+                          <Text
+                            size={18}
+                            style={{
+                              minWidth: 25,
+                            }}
+                            color={themeData.textColor}
+                            mr={15}>
+                            {i + 1}
+                          </Text>
 
                           <Select
-                            containerStyle={
-                              {
-                                marginBottom: 0,
-                                // flex: 1,
-                                 width: getPercentValue(width, 20),
-                                // paddingVertical: 5,
-                                // paddingHorizontal: 15,
-                                // backgroundColor: 'red',
-                                marginRight: 10,
-                              }
-                            }
+                            containerStyle={{
+                              marginBottom: 0,
+                              // flex: 1,
+                              width: getPercentValue(width, 20),
+                              // paddingVertical: 5,
+                              // paddingHorizontal: 15,
+                              // backgroundColor: 'red',
+                              marginRight: 10,
+                            }}
                             onValueChange={item => {
                               if (r.paid) {
                                 return;
@@ -2118,17 +2171,15 @@ function Footer({}) {
                             // containerStyle={{marginBottom: 20}}
                           />
 
-                         <TextInput
-                            containerStyle={
-                              {
-                                marginBottom: 0,
-                                // flex: 2,
-                                width: getPercentValue(width, 30),
-                                // paddingVertical: 5,
-                                // paddingHorizontal: 15,
-                                // backgroundColor: 'red',
-                              }
-                            }
+                          <TextInput
+                            containerStyle={{
+                              marginBottom: 0,
+                              // flex: 2,
+                              width: getPercentValue(width, 30),
+                              // paddingVertical: 5,
+                              // paddingHorizontal: 15,
+                              // backgroundColor: 'red',
+                            }}
                             // title="Customer Phone No."
                             textInputProps={{
                               onChangeText: d => {
@@ -2232,8 +2283,8 @@ function Footer({}) {
                               </View>
                             ) : (
                               <Button
-                              width={'100%'}
-                              borderRadius={4}
+                                width={'100%'}
+                                borderRadius={4}
                                 onPress={() => {
                                   console.log(remaining_amount);
                                   if (remaining_amount != 0) {
@@ -2263,8 +2314,7 @@ function Footer({}) {
                                 ml={10}
                                 ph={20}
                                 pv={13}
-                                noShadow
-                                >
+                                noShadow>
                                 Charge
                               </Button>
                             )}
@@ -2289,55 +2339,90 @@ function Footer({}) {
                       // backgroundColor: 'red',
                     }
                   }>
-                  <View
+                  <Row
                     style={{
-                      flexDirection: 'row',
-                      // justifyContent: 'center',
-                      alignItems: 'center',
-                      marginBottom: 10,
-                    }}>
-                    {/* <Text semibold>
-                      Total Amount: <Text>{total}</Text>
-                    </Text> */}
+                      marginBottom: 5,
+                    }}
+                    title={'No. of persons'}>
                     <View
                       style={{
-                        flex: 1,
                         flexDirection: 'row',
-                        justifyContent: 'center',
                         alignItems: 'center',
+                        backgroundColor: '#E4E3E8',
+                        borderRadius: 50,
+                        paddingHorizontal: 2,
+                        paddingVertical: 2,
+                        // flex: 1,
                       }}>
                       <Button
+                        backgroundColor={'#F4F4F6'}
                         onPress={() => {
                           if (totalSplitBills > 1) {
                             setTotalSplitBills(s => {
                               return s - 1;
                             });
                           }
-                        }}>
+                        }}
+                        noShadow
+                        width={26}
+                        height={26}
+                        borderRadius={30}
+                        lineHeight={24}
+                        size={22}
+                        medium
+                        ph={0}
+                        pv={0}
+                        color="#18171D">
                         -
                       </Button>
                       <Text
-                        color={themeData.textColor}
+                        ml={5}
+                        style={{minWidth: 25}}
+                        color="#18171D"
                         align="center"
-                        style={{
-                          minWidth: 50,
-                        }}>
+                        medium
+                        size={14}
+                        mr={5}>
                         {totalSplitBills}
                       </Text>
                       <Button
+                        backgroundColor={theme.colors.primaryColor}
                         onPress={() => {
                           setTotalSplitBills(s => {
                             return s + 1;
                           });
-                        }}>
+                        }}
+                        noShadow
+                        width={26}
+                        height={26}
+                        borderRadius={30}
+                        lineHeight={24}
+                        size={22}
+                        medium
+                        ph={0}
+                        pv={0}>
                         +
                       </Button>
                     </View>
-                  </View>
+                  </Row>
 
                   <Container scroll horizontal>
                     {splitBills.map((r, i) => {
-                      return <SplitByItemProduct key={i} index={i} data={r} />;
+                      return (
+                        <SplitByItemProduct
+                          key={i}
+                          onPayPress={_data => {
+                            console.log(_data);
+                            setSelectedBill(_data);
+                            setModalView(
+                              CART_MODAL_VIEW.split_payment_method.id,
+                            );
+                          }}
+                          index={i}
+                          data={r}
+                          discountValues={discountValues}
+                        />
+                      );
                     })}
                   </Container>
                 </View>
@@ -2417,6 +2502,119 @@ function Footer({}) {
             </View>
           </>
         );
+
+      case CART_MODAL_VIEW.price_calc_split_item.id:
+        return (
+          <>
+            <View
+              style={{
+                flexDirection: 'row',
+              }}>
+              <View
+                style={{
+                  flex: 1,
+                }}>
+                <BackButton
+                  onPress={() => {
+                    // if (splitPayment) {
+                    //   setModalView(CART_MODAL_VIEW.split_payment.id);
+                    //   return;
+                    // }
+                    setModalView(CART_MODAL_VIEW.split_payment.id);
+                  }}
+                />
+              </View>
+            </View>
+            <View
+              style={{
+                // width: '80%',
+                alignSelf: 'center',
+                paddingVertical: 10,
+                // backgroundColor: 'red',
+                alignItems: 'center',
+              }}>
+              <View
+                style={
+                  {
+                    // flex:1
+                    // width: '100%',
+                    // backgroundColor: 'red',
+                  }
+                }>
+                <CashPaymentForm
+                  // phoneNo={phoneNo}
+                  total={selectedBill?.total || 0}
+                  onSubmitSuccess={values => {
+                    let _splitBills = [...splitBills];
+
+                    _splitBills.splice(selectedBill.index, 1, {
+                      ..._splitBills[selectedBill.index],
+                      ...selectedBill,
+                      type: activeBillPaymentMethod,
+                      received_amount: values.received_amount,
+                      paid: true,
+                    });
+                    dispatch(orderAction.set({splitBills: _splitBills}));
+
+                    setModalView(CART_MODAL_VIEW.split_payment.id);
+                  }}
+                />
+              </View>
+            </View>
+          </>
+        );
+
+      case CART_MODAL_VIEW.split_payment_method.id:
+        return (
+          <>
+            <BackButton
+              onPress={() => {
+                setModalView(CART_MODAL_VIEW.split_payment.id);
+              }}
+            />
+
+            <View
+              style={{
+                width: '70%',
+                alignSelf: 'center',
+                paddingVertical: 40,
+                // backgroundColor: 'red',
+              }}>
+              <Text color={themeData.textColor} mb={10} bold size={22}>
+                Select Payment Method
+              </Text>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                }}>
+                <PayMethodButton
+                  text="Cash"
+                  onPress={() => {
+                    setActiveBillPaymentMethod(PAYMENT_METHOD.cash.id);
+                    setModalView(CART_MODAL_VIEW.price_calc_split_item.id);
+                  }}
+                />
+                <PayMethodButton
+                  text="Gift Card"
+                  onPress={() => {
+                    // setGiftCardId(0);
+                    // setGiftCardBalance(0);
+                    // setQRData(TEST_ORDATA);
+                    // setPaymentMethod(PAYMENT_METHOD.gift_card.id);
+                    // setModalView(CART_MODAL_VIEW.scan_gift_card.id);
+                  }}
+                />
+                <PayMethodButton
+                  text="Card"
+                  onPress={() => {
+                    setPaymentMethod(PAYMENT_METHOD.card.id);
+                  }}
+                />
+              </View>
+            </View>
+          </>
+        );
     }
   };
   const toggleDiscountModal = () => {
@@ -2428,13 +2626,14 @@ function Footer({}) {
     toggleDiscountModal();
   };
   const onHoldPress = () => {
-    let products = getCartProducts();
+    let state = React.store.getState();
+    let {holdCarts, cart} = state.order;
+    let products = getCartProducts(cart);
     if (!products.length) {
       simpleToast('Add Products first.');
       return;
     }
-    let state = React.store.getState();
-    let {holdCarts, cart} = state.order;
+
     let ob = {
       id: new Date().getTime(),
       cart,
@@ -2684,7 +2883,7 @@ function Footer({}) {
         // hideTitle
         center
         // noscroll
-        onRequestClose={toggleModal}
+        onRequestClose={onRequestClose}
         visible={payModal.show}
         title={'Pay'}
         // widthPerc={60}
@@ -2692,6 +2891,54 @@ function Footer({}) {
           modalView == CART_MODAL_VIEW.split_payment.id ? 720 : 720
         }>
         {renderView()}
+      </ModalContainer>
+
+      <ModalContainer
+        // hideTitle
+        center
+        // noscroll
+        onRequestClose={() => {
+          setCloseModal(!closeModal);
+        }}
+        visible={closeModal}
+        title={'Confirmation'}
+        // widthPerc={60}
+        landscapeWidth={450}>
+        {/* <Text color={themeData.textColor}></Text> */}
+        <View
+          style={{
+            flexDirection: 'row',
+            marginTop: 10,
+          }}>
+          <Button
+            onPress={() => {
+              setCloseModal(false);
+              toggleModal();
+              onHoldPress();
+            }}
+            pv={50}
+            mr={10}
+            style={{
+              flex: 1,
+            }}
+            backgroundColor={theme.colors.primaryColor}>
+            Hold
+          </Button>
+          <Button
+            onPress={() => {
+              setCloseModal(false);
+              toggleModal();
+            }}
+            style={{
+              flex: 1,
+            }}
+            pv={50}
+            backgroundColor={themeData.btnSecondaryBg}>
+            Continue
+          </Button>
+        </View>
+
+        {/* {renderView()} */}
       </ModalContainer>
 
       <DiscountModal
@@ -2732,32 +2979,37 @@ function HoldCartSaver() {
   };
   return null;
 }
-const SplitByItemProduct = memo(function ({index, data}) {
+const SplitByItemProduct = memo(function ({index, onPayPress,discountValues, data}) {
   const dispatch = useDispatch();
   const [selectedItem, setSelectedItem] = useState('');
   const {height} = useWindowDimensions();
+  const themeData = useTheme();
   const cart = useSelector(s => s.order.cart);
+  const userData = useSelector(s => s.user.userData);
+  const selectedLocation = useSelector(s => s.user.selectedLocation);
   const splitBills = useSelector(s => s.order.splitBills);
+  const location = userData.locations.find(s => s.id == selectedLocation);
   const addPress = () => {
     if (!selectedItem) {
       return;
     }
-    let c = cart[selectedItem];
+    let c = cart[selectedItem.value];
     let _splitBills = [...splitBills];
 
     _splitBills.splice(index, 1, {
       ..._splitBills[index],
       cart: {
         ..._splitBills[index].cart,
-        [selectedItem]: {...c, qty: 1},
+        [selectedItem.value]: {...c, qty: 1},
       },
     });
     dispatch(orderAction.set({splitBills: _splitBills}));
+    setSelectedItem('');
   };
   const options = useMemo(() => {
-    let products = getCartProducts();
-    console.log('wwwww', products);
-    let options = products.map(r => {
+    let products = getCartProducts(cart);
+    // console.log('wwwww', products);
+    let _options = products.map(r => {
       let {add_ons, variants} = r;
       // let add_ons = data.add_ons || [];
 
@@ -2773,7 +3025,7 @@ const SplitByItemProduct = memo(function ({index, data}) {
       };
     });
 
-    options = options.filter(o => {
+    _options = _options.filter(o => {
       if (Object.keys(data.cart).includes(o.value)) {
         return false;
       }
@@ -2789,17 +3041,69 @@ const SplitByItemProduct = memo(function ({index, data}) {
       return currentQty < totalQty;
     });
     setSelectedItem('');
-    return options;
+    return _options;
   }, [cart, data, splitBills]);
-
+  console.log('[[options]]', selectedItem, index, options);
   let Ids = getCartItem(data.cart);
+
+  let tax_title = location?.tax_title || DEFAULT_TAX_TITLE;
+
+  let tax_per = location?.tax ? parseFloat(location.tax) : 0;
+
+  let sub_total = getGrandTotal(data.cart);
+  let tax_amt = (sub_total * tax_per) / 100;
+  let tax_total = tax_amt + sub_total;
+  let total = tax_total;
+
+  let discount_type = discountValues.discount_type ?? '1';
+  let _discount = parseFloat(discountValues.discount ?? 0);
+  if (isNaN(_discount)) {
+    _discount = 0;
+  }
+
+  if (_discount) {
+    if (discount_type == '1') {
+      total = total - total * (_discount / 100);
+    } else if (discount_type == '2') {
+      _discount = parseFloat((_discount/splitBills.length).toFixed(2));
+      total = Math.max(0, total - _discount);
+    }
+  }
+
+
+  const payPress = () => {
+    if (data.paid) {
+      return;
+    }
+
+    let cartTotalQty = Object.values(cart).reduce((s, r) => {
+      return s + parseInt(r.qty);
+    }, 0);
+
+    let billsTotalQty = Object.values(splitBills).reduce((sp, rp) => {
+      let sum = Object.values(rp.cart).reduce((s, r) => {
+        return s + parseInt(r.qty);
+      }, 0);
+      return sp + sum;
+    }, 0);
+
+    if (billsTotalQty < cartTotalQty) {
+      simpleToast('First, You need to split all Items');
+      return;
+    }
+
+    // console.log(cart, splitBills,billsTotalQty, cartTotalQty);
+    // return;
+
+    onPayPress && onPayPress({...data, tax_amt, total, index});
+  };
   return (
     <View
       style={{
-        backgroundColor: '#eee',
+        backgroundColor: themeData.bodyBg,
         width: 350,
         marginHorizontal: 5,
-        height: getPercentValue(height, 80) - 180,
+        height: getPercentValue(height, 100) - 180,
 
         paddingHorizontal: 5,
         paddingVertical: 5,
@@ -2810,12 +3114,12 @@ const SplitByItemProduct = memo(function ({index, data}) {
           alignItems: 'center',
           marginBottom: 5,
         }}>
-        <Select
+        {/* <Select
           containerStyle={{
             marginBottom: 0,
             flex: 1,
-            paddingVertical: 5,
-            paddingHorizontal: 15,
+            // paddingVertical: 5,
+            // paddingHorizontal: 15,
             // backgroundColor: 'red',
             marginRight: 5,
           }}
@@ -2834,18 +3138,72 @@ const SplitByItemProduct = memo(function ({index, data}) {
           //   />
           // }
           onValueChange={v => {
+            console.log(v)
             setSelectedItem(v);
           }}
           data={options}
           value={selectedItem}
           // error={props.errors.mode?.value ? props.errors.mode?.value : ''}
           // containerStyle={{marginBottom: 20}}
-        />
-        <Button pv={5} onPress={addPress}>
+        /> */}
+        <View
+          style={{
+            flex: 1,
+          }}>
+          <SelectDropdown
+            key={selectedItem}
+            defaultValue={selectedItem}
+            dropdownStyle={
+              {
+                // width: 30,
+                // backgroundColor: 'yellow',
+              }
+            }
+            defaultButtonText="Select Item"
+            buttonStyle={{
+              backgroundColor: themeData.inputBg,
+              width: '100%',
+              borderWidth: 1,
+              borderColor: themeData.inputBorderColor,
+              borderRadius: 4,
+            }}
+            buttonTextStyle={{
+              color: themeData.textColor,
+              fontFamily: theme.fonts.regular,
+              fontSize: 15,
+            }}
+            data={options}
+            onSelect={(v, index) => {
+              console.log(v, index);
+              setSelectedItem(v);
+            }}
+            buttonTextAfterSelection={(item, index) => {
+              // text represented after item is selected
+              // if data array is an array of objects then return selectedItem.property to render after item is selected
+              return item.label;
+            }}
+            rowTextForSelection={(item, index) => {
+              // text represented for each item in dropdown
+              // if data array is an array of objects then return item.property to represent item in dropdown
+              return item.label;
+            }}
+          />
+        </View>
+
+        {/* <RNPickerSelect
+          onValueChange={value => console.log(value)}
+          items={[
+            {label: 'Football', value: 'football'},
+            {label: 'Baseball', value: 'baseball'},
+            {label: 'Hockey', value: 'hockey'},
+          ]}
+        /> */}
+        <Button pv={14} ml={5} onPress={addPress}>
           Add
         </Button>
       </View>
       <Container
+        nestedScrollEnabled
         scroll
         style={{
           flex: 1,
@@ -2855,6 +3213,133 @@ const SplitByItemProduct = memo(function ({index, data}) {
           return <SplitCartItem key={id} index={index} id={id} data={cdata} />;
         })}
       </Container>
+      <View
+        style={{
+          // backgroundColor: '#fff',
+          // height: 50,
+          paddingHorizontal: 10,
+          justifyContent: 'center',
+          paddingVertical: 10,
+        }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            marginBottom: 2,
+          }}>
+          <Text
+            style={{
+              flex: 1,
+            }}
+            color={themeData.textColor}
+            medium
+            size={14}>
+            Sub Total
+          </Text>
+          <Text medium color={themeData.textColor} size={14}>
+            ${parseFloat(sub_total).toFixed(2)}
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            marginBottom: 2,
+          }}>
+          <Text
+            style={{
+              flex: 1,
+            }}
+            color={themeData.textColor}
+            medium
+            size={14}>
+            {tax_title} ({tax_per}%)
+          </Text>
+          <Text medium color={themeData.textColor} size={14}>
+            ${parseFloat(tax_amt).toFixed(2)}
+          </Text>
+        </View>
+        {!!_discount && (
+          <View
+            style={{
+              flexDirection: 'row',
+              marginBottom: 2,
+            }}>
+            <Text
+              color={themeData.textColor}
+              style={{
+                flex: 1,
+              }}
+              medium
+              size={14}>
+              Discount
+            </Text>
+            <Text medium color={themeData.textColor} size={14}>
+              {discount_type == '2' && '$'}
+              {_discount}
+              {discount_type == '1' && '%'}
+            </Text>
+          </View>
+        )}
+        <View
+          style={{
+            flexDirection: 'row',
+            marginBottom: 4,
+            borderTopColor: '#52525C',
+            borderTopWidth: 1,
+            borderStyle: 'dashed',
+            marginTop: 8,
+            paddingTop: 8,
+          }}>
+          <Text
+            style={{
+              flex: 1,
+            }}
+            color={themeData.textColor}
+            medium
+            size={14}>
+            Total
+          </Text>
+          {!!_discount && (
+            <Text
+              medium
+              color={themeData.textColor}
+              size={14}
+              mr={5}
+              style={{
+                textDecorationLine: 'line-through',
+                textDecorationStyle: 'solid',
+              }}>
+              ${parseFloat(tax_total).toFixed(2)}
+            </Text>
+          )}
+          <Text medium color={themeData.textColor} size={14}>
+            ${parseFloat(total).toFixed(2)}
+          </Text>
+        </View>
+
+        <Button
+          onPress={payPress}
+          backgroundColor={
+            data.paid ? theme.colors.successColor : theme.colors.primaryColor
+          }
+          noShadow
+          height={40}
+          pv={0}
+          // style={{flex: 1, flexDirection: 'row'}}
+        >
+          {data.paid ? (
+            <>
+              <FontAwesome5Icon
+                size={16}
+                color={'#efefef'}
+                name="check-circle"
+              />{' '}
+              Paid
+            </>
+          ) : (
+            'Pay'
+          )}
+        </Button>
+      </View>
     </View>
   );
 });
@@ -2864,6 +3349,7 @@ function SplitCartItem({id, index, data}) {
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [note, setNote] = useState('');
   const [showDiscountModal, setShowDiscountModal] = useState(false);
+  const themeData = useTheme();
   const [discount, setDiscount] = useState('');
   const [discountReason, setDiscountReason] = useState('');
   const [discountType, setDiscountType] = useState('1');
@@ -2942,13 +3428,14 @@ function SplitCartItem({id, index, data}) {
       dispatch(orderAction.set({splitBills: _splitBills}));
     }
   };
-  const onAddPress = () => {
-    let totalQty = cart[id].qty;
-    let currentQty = splitBills.reduce((s, r) => {
-      let qty = r.cart[id]?.qty ?? 0;
+  let totalQty = cart[id].qty;
+  let currentQty = splitBills.reduce((s, r) => {
+    let qty = r.cart[id]?.qty ?? 0;
 
-      return s + qty;
-    }, 0);
+    return s + qty;
+  }, 0);
+  const onAddPress = () => {
+   
 
     if (currentQty < totalQty) {
       let _splitBills = [...splitBills];
@@ -3012,20 +3499,20 @@ function SplitCartItem({id, index, data}) {
     <>
       <View
         style={{
-          backgroundColor: selected ? '#e5acb5' : '#ccc',
+          backgroundColor: themeData.cardBg,
           paddingHorizontal: 10,
           paddingVertical: 5,
           borderBottomColor: '#aaa',
-          borderBottomWidth: 1,
+          borderBottomWidth: StyleSheet.hairlineWidth,
         }}>
-        <TouchableOpacity
-          onPress={() => {
-            dispatch(
-              orderAction.set({
-                selectedCartItem: selected ? '' : id,
-              }),
-            );
-          }}
+        <View
+          // onPress={() => {
+          //   dispatch(
+          //     orderAction.set({
+          //       selectedCartItem: selected ? '' : id,
+          //     }),
+          //   );
+          // }}
           style={{
             flexDirection: 'row',
             // backgroundColor: selected?'#e5acb5':'#ccc',
@@ -3038,24 +3525,29 @@ function SplitCartItem({id, index, data}) {
             style={{
               flex: 2,
             }}>
-            <Text medium>{itemData.item_name}</Text>
+            <Text color={themeData.textColor} medium>
+              {itemData.item_name}
+            </Text>
             {!!sizeData.length && (
-              <Text color="#666" size={12}>
+              <Text color={themeData.textColor} size={12}>
                 {sizeData.map(r => r.title).join(', ')}
               </Text>
             )}
             {!!add_ons.length && (
-              <Text color="#666" size={12}>
+              <Text color={themeData.textColor} size={12}>
                 {add_ons.map(r => r.product_name).join(', ')}
               </Text>
             )}
+            {currentQty < totalQty && <Text  color={theme.colors.errorColor} size={12}>
+              Add more +
+              </Text>}
           </View>
           <View
             style={{
               flex: 1,
               alignItems: 'flex-end',
             }}>
-            <Text size={size} medium>
+            <Text color={themeData.textColor} size={size} medium>
               {data.qty}
             </Text>
           </View>
@@ -3064,7 +3556,7 @@ function SplitCartItem({id, index, data}) {
               flex: 1,
               alignItems: 'flex-end',
             }}>
-            <Text size={size} medium>
+            <Text color={themeData.textColor} size={size} medium>
               ${parseFloat(rate).toFixed(2)}
             </Text>
           </View>
@@ -3073,7 +3565,7 @@ function SplitCartItem({id, index, data}) {
               flex: 1,
               alignItems: 'flex-end',
             }}>
-            <Text size={size} medium>
+            <Text color={themeData.textColor} size={size} medium>
               {discount_type == '2' && '$'}
               {_discount}
               {discount_type == '1' && '%'}
@@ -3086,6 +3578,7 @@ function SplitCartItem({id, index, data}) {
             }}>
             {!!_discount && (
               <Text
+                color={themeData.textColor}
                 size={size}
                 medium
                 style={{
@@ -3096,11 +3589,11 @@ function SplitCartItem({id, index, data}) {
               </Text>
             )}
 
-            <Text size={size} medium>
+            <Text color={themeData.textColor} size={size} medium>
               ${parseFloat(totalPrice).toFixed(2)}
             </Text>
           </View>
-        </TouchableOpacity>
+        </View>
         {selected && (
           <View
             style={{
@@ -3110,95 +3603,65 @@ function SplitCartItem({id, index, data}) {
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
+                // backgroundColor:'red'
+                // justifyContent:'center'
               }}>
               <View
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
                   flex: 1,
                 }}>
-                <Button
-                  onPress={onMinusPress}
-                  noShadow
-                  width={30}
-                  height={30}
-                  borderRadius={30}
-                  lineHeight={28}
-                  size={24}
-                  bold
-                  ph={0}
-                  pv={0}>
-                  -
-                </Button>
-                <Text
-                  ml={5}
-                  style={{minWidth: 45}}
-                  backgroundColor={'#eeeeee67'}
-                  align="center"
-                  semibold
-                  size={18}
-                  mr={5}>
-                  {data.qty}
-                </Text>
-                <Button
-                  onPress={onAddPress}
-                  noShadow
-                  width={30}
-                  height={30}
-                  borderRadius={30}
-                  lineHeight={28}
-                  size={24}
-                  bold
-                  ph={0}
-                  pv={0}>
-                  +
-                </Button>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#E4E3E8',
+                    borderRadius: 50,
+                    paddingHorizontal: 2,
+                    paddingVertical: 2,
+                    alignSelf: 'flex-start',
+                  }}>
+                  <Button
+                    backgroundColor={'#F4F4F6'}
+                    onPress={onMinusPress}
+                    noShadow
+                    width={26}
+                    height={26}
+                    borderRadius={30}
+                    lineHeight={24}
+                    size={22}
+                    medium
+                    ph={0}
+                    pv={0}
+                    color="#18171D">
+                    -
+                  </Button>
+                  <Text
+                    ml={5}
+                    style={{minWidth: 25}}
+                    color="#18171D"
+                    align="center"
+                    medium
+                    size={14}
+                    mr={5}>
+                    {data.qty}
+                  </Text>
+                  <Button
+                    backgroundColor={theme.colors.primaryColor}
+                    onPress={onAddPress}
+                    noShadow
+                    width={26}
+                    height={26}
+                    borderRadius={30}
+                    lineHeight={24}
+                    size={22}
+                    medium
+                    ph={0}
+                    pv={0}>
+                    +
+                  </Button>
+                </View>
               </View>
-              {/* <View
-                style={{
-                  alignItems: 'center',
-                  marginRight: 5,
-                }}>
-                <Button
-                  onPress={toggleNoteModal}
-                  noShadow
-                  width={30}
-                  height={30}
-                  borderRadius={30}
-                  lineHeight={28}
-                  // size={24}
-                  bold
-                  // mr={5}
-                  ph={0}
-                  pv={0}>
-                  <FontAwesome5Icon name="pencil-alt" size={18} />
-                </Button>
-                <Text medium size={9}>
-                  NOTE
-                </Text>
-              </View>
-              <View
-                style={{
-                  alignItems: 'center',
-                  marginRight: 5,
-                }}>
-                <Button
-                  onPress={toggleDiscountModal}
-                  noShadow
-                  width={30}
-                  height={30}
-                  borderRadius={30}
-                  lineHeight={28}
-                  // size={24}
-                  bold
-                  ph={0}
-                  pv={0}>
-                  <FontAwesome5Icon name="tag" size={18} />
-                </Button>
-                <Text medium size={9}>
-                  DISCOUNT
-                </Text>
-              </View> */}
+
               <View
                 style={{
                   alignItems: 'center',
@@ -3213,13 +3676,14 @@ function SplitCartItem({id, index, data}) {
                   lineHeight={28}
                   // size={24}
                   bold
+                  mb={0}
                   ph={0}
                   pv={0}>
                   <FontAwesome5Icon name="trash" size={18} />
                 </Button>
-                <Text medium size={9}>
+                {/* <Text medium size={9}>
                   DELETE
-                </Text>
+                </Text> */}
               </View>
             </View>
           </View>
@@ -3347,7 +3811,7 @@ function BackButton(props) {
     </Button>
   );
 }
-function Row({title, children}) {
+function Row({title, style = {}, children}) {
   let themeData = useTheme();
   return (
     <View
@@ -3360,6 +3824,7 @@ function Row({title, children}) {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        ...style,
       }}>
       <View style={{}}>
         <Text color={themeData.textColor} semibold>

@@ -26,7 +26,7 @@ function ButtonUI({
   mr = 0,
   width = null,
   height,
-  borderRadius = 25,
+  borderRadius = 4,
   ...props
 }) {
   return (

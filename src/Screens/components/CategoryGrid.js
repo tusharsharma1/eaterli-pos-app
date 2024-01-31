@@ -18,6 +18,7 @@ let chunk = 2;
 export default function CategoryGrid(props) {
   const dispatch = useDispatch();
   const [leftContainerWidth, setLeftContainerWidth] = useState(theme.wp(70));
+  const [scrollIndex, setScrollIndex] = useState(0);
   const themeData = useTheme();
   let {categoriesSortable} = useProducts();
   useEffect(() => {
@@ -55,7 +56,7 @@ export default function CategoryGrid(props) {
 
   // let arr = Array.from(Array(100)).map((e, i) => i);
   let arr = categoriesSortable;
-  // arr = [...arr, ...arr, ...arr, ...arr];
+  // arr = [...arr, ...arr];
   // let data = _.chunk(arr, chunk);
   let chunks = _.chunk(arr, 6);
   console.log('hommmm', categoriesSortable, chunks);
@@ -68,6 +69,7 @@ export default function CategoryGrid(props) {
         setLeftContainerWidth(e.nativeEvent.layout.width);
       }}>
       <FlatList
+        showsHorizontalScrollIndicator={false}
         pagingEnabled
         horizontal
         //  numColumns={4}
@@ -84,7 +86,44 @@ export default function CategoryGrid(props) {
         // onRefresh={loadData}
         progressViewOffset={0}
         ListEmptyComponent={ListEmptyComponent}
+        onScroll={e => {
+          let lWidth = e.nativeEvent.layoutMeasurement.width;
+          let totalWidth = e.nativeEvent.contentSize.width;
+          let offsetWidth = e.nativeEvent.contentOffset.x + lWidth;
+          let index = chunks.length / (totalWidth / offsetWidth);
+          index = parseInt(index - 1);
+          setScrollIndex(index);
+        }}
       />
+      {chunks.length > 1 && (
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginBottom: 10,
+            marginTop: 5,
+          }}>
+          {Array.from(Array(chunks.length)).map((r, i) => {
+            let active = scrollIndex == i;
+            let width = leftContainerWidth / chunks.length;
+            return (
+              <View
+                key={i}
+                style={{
+                  width: getPercentValue(width, 65),
+                  height: 6,
+                  borderRadius: 10,
+                  marginHorizontal: getPercentValue(width, 4),
+                  backgroundColor: active
+                    ? '#71717B'
+                    : themeData.darkMode
+                    ? '#27262B'
+                    : '#E4E3E8',
+                }}></View>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 }
@@ -93,6 +132,8 @@ let col = 3;
 function _Item({data, onPress, containerWidth}) {
   const dispatch = useDispatch();
   let {categories, selectedCategory} = useProducts();
+
+  let imageSettings = useSelector(s => s.settings.imageSettings);
 
   if (!data) {
     return null;
@@ -169,7 +210,7 @@ function _Item({data, onPress, containerWidth}) {
                 flexDirection: 'row',
               },
             ]}>
-            {!!c.category_image && (
+            {imageSettings.showCatImage && !!c.category_image && (
               <ProgressImage
                 color={textcolor}
                 source={

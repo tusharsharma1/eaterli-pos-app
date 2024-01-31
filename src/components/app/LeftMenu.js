@@ -43,20 +43,22 @@ export default function LeftMenu() {
         }}></View>
       <MenuButton
         onPress={() => {
-          dispatch(appAction.set({darkMode: !themeData.darkMode}));
+          dispatch(appAction.set({searchModal: true}));
         }}
         Icon={SearchIcon}
       />
-      <MenuButton Icon={SettingIcon} />
-      <MenuButton Icon={HelpIcon} />
+      <MenuButton Icon={SettingIcon} onPress={()=>{
+         navigation.navigate('Settings');
+      }} />
+      <MenuButton Icon={HelpIcon} mb={10} />
     </View>
   );
 }
 
-function MenuButton({Icon, ...props}) {
+function MenuButton({Icon,mb=35, ...props}) {
   const themeData = useTheme();
   return (
-    <TouchableOpacity style={{marginBottom: 15}} {...props}>
+    <TouchableOpacity style={{marginBottom: mb}} {...props}>
       <Icon
         color={themeData.darkMode ? '#A1A1AA' : '#E4E3E8'}
         width={30}

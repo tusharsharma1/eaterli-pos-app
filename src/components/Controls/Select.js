@@ -62,7 +62,7 @@ export default function Select({
                     // backgroundColor:'yellow'
                   },
                 ]}>
-                {_value && _value.label ? _value.label : placeholder.label}
+                {_value && _value.label ? _value.label : placeholder.label}{' '}
               </Text>
               <FontAwesome5 color={themeData.textColor} name="caret-down" size={theme.hp(2.2)} />
             </View>

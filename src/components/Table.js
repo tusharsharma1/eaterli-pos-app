@@ -10,7 +10,9 @@ export default function Table({
     return index;
   },
   columns = [],
+  hideHeader,
   rowPress,
+
   ...props
 }) {
   const themeData = useTheme();
@@ -58,6 +60,7 @@ export default function Table({
               columns={columns}
               data={item}
               index={index}
+             
             />
           );
         }}
@@ -73,7 +76,7 @@ export default function Table({
       style={{
         flex: 1,
       }}>
-      {renderHeader()}
+      {!hideHeader && renderHeader()}
       {renderRows()}
     </View>
   );
@@ -86,7 +89,7 @@ function _RowItem({columns, data, index, onPress}) {
       return h.renderCell(data, index);
     }
     return (
-      <Text size={12} color={themeData.textColor} medium>
+      <Text size={12} color={themeData.textColor} medium  {...h.textProps}>
         {h.renderValue ? h.renderValue(data, index) : data[h.key]}
       </Text>
     );

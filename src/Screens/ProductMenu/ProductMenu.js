@@ -12,12 +12,14 @@ import {FlatList, TouchableOpacity, View} from 'react-native';
 import {formatGridData, getPercentValue} from '../../helpers/app.helpers';
 import theme from '../../theme';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
+import useTheme from '../../hooks/useTheme';
 let col = 4;
 let hPadding = 2;
 
 export default function ProductMenu({navigation, route}) {
   const dispatch = useDispatch();
   let {menuTitlesIds} = useProducts();
+  const themeData = useTheme();
   useEffect(() => {
     loadData();
   }, []);
@@ -65,7 +67,7 @@ export default function ProductMenu({navigation, route}) {
     <>
       <Header title={'Select Menu'} back />
       {/* <CategoryNav /> */}
-      <Container style={{flex: 1}}>
+      <Container style={{flex: 1, backgroundColor: themeData.bodyBg}}>
         <FlatList
           // horizontal
           numColumns={col}
@@ -87,6 +89,7 @@ export default function ProductMenu({navigation, route}) {
 }
 function _Item({data, onPress}) {
   const dispatch = useDispatch();
+  const themeData = useTheme();
   const {width} = useWindowDimensions();
   let containerWidth = width;
   const _data = useSelector(s => s.user.menuTitles.find(t => t.id == data));
@@ -109,7 +112,7 @@ function _Item({data, onPress}) {
     // flexDirection: 'row',
     // marginHorizontal: 15,
     // marginVertical: 5,
-    backgroundColor: empty ? 'transparent' : '#bbb',
+    backgroundColor: empty ? 'transparent' : themeData.cardBg,
     width: itemSize,
     // flex: 1,
     // height: 40,
@@ -135,7 +138,7 @@ function _Item({data, onPress}) {
       }}>
       <Text
         numberOfLines={2}
-        color="#111"
+        color={themeData.textColor}
         medium
         size={getPercentValue(itemSize, 7.6)}
         align="center">

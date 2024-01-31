@@ -35,7 +35,9 @@ export const CART_MODAL_VIEW = {
   payment_method: {id: 'payment_method'},
   price_calc: {id: 'price_calc'},
   price_calc_split: {id: 'price_calc_split'},
+  price_calc_split_item: {id: 'price_calc_split_item'},
   scan_gift_card: {id: 'scan_gift_card'},
+  split_payment_method: {id: 'split_payment_method'},
 };
 
 export const CUSTOMER_DETAIL = {

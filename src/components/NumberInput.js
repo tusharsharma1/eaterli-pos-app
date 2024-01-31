@@ -24,7 +24,7 @@ const NumberInput = ({value = 0, onChange}) => {
           noShadow
           width={35}
           height={35}
-          borderRadius={30}
+          borderRadius={4}
           lineHeight={28}
           size={24}
           bold
@@ -47,7 +47,7 @@ const NumberInput = ({value = 0, onChange}) => {
           noShadow
           width={35}
           height={35}
-          borderRadius={30}
+          borderRadius={4}
           lineHeight={28}
           size={24}
           bold
