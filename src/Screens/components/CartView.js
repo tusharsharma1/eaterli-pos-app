@@ -552,9 +552,7 @@ const TEST_ORDATA = ''; //WzI3NSw3XQ== customer QR
 
 function Footer({}) {
   const dispatch = useDispatch();
-  const [modalView, setModalView] = useState(
-    CART_MODAL_VIEW.reward_question.id,
-  );
+  const [modalView, setModalView] = useState(CART_MODAL_VIEW.ticket_name.id);
   const [paymentMethod, setPaymentMethod] = useState('');
 
   const [existCustomer, setExistCustomer] = useState(false);
@@ -566,6 +564,7 @@ function Footer({}) {
   const deviceId = useSelector(s => s.user.deviceId);
   const diningOption = useSelector(s => s.order.diningOption);
   const customerDetail = useSelector(s => s.order.customerDetail);
+  const ticketName = useSelector(s => s.order.ticketName);
   const [closeModal, setCloseModal] = useState(false);
 
   const payModal = useSelector(s => s.order.payModal);
@@ -628,7 +627,7 @@ function Footer({}) {
     if (discount_type == '1') {
       total = total - total * (_discount / 100);
     } else if (discount_type == '2') {
-      total = Math.max( total - _discount);
+      total = Math.max(total - _discount);
     }
   }
 
@@ -642,7 +641,7 @@ function Footer({}) {
     if (offer_discount_type == '1') {
       total = total - total * (_offer_discount / 100);
     } else if (offer_discount_type == '2') {
-      total = Math.max( total - _offer_discount);
+      total = Math.max(total - _offer_discount);
     }
   }
 
@@ -650,7 +649,7 @@ function Footer({}) {
     if (!payModal.show) {
       setPaymentMethod('');
       dispatch(orderAction.set({customerDetail: CUSTOMER_DETAIL}));
-      setModalView(CART_MODAL_VIEW.reward_question.id);
+      setModalView(CART_MODAL_VIEW.ticket_name.id);
 
       setSplitNo(2);
       genarateSplitPayments(2, true);
@@ -688,7 +687,13 @@ function Footer({}) {
   }, [splitPayments, splitPaymentBy, modalView]);
 
   useEffect(() => {
-    let allPaid = splitBills.every(d => d.paid);
+    let sb = splitBills.filter(r => {
+      return Object.keys(r.cart).length;
+    });
+    if (!sb.length) {
+      return;
+    }
+    let allPaid = sb.every(d => d.paid);
     // console.log('call',allPaid);
     if (
       modalView == CART_MODAL_VIEW.split_payment.id &&
@@ -884,7 +889,11 @@ function Footer({}) {
       simpleToast('No Product Added.');
       return;
     }
-    console.log(parseFloat(total.toFixed(2)), values.received_amount,splitPayment);
+    console.log(
+      parseFloat(total.toFixed(2)),
+      values.received_amount,
+      splitPayment,
+    );
     if (parseFloat(total.toFixed(2)) > parseFloat(values.received_amount)) {
       // console.log('success no');
 
@@ -893,6 +902,7 @@ function Footer({}) {
     }
 
     let body = {
+      ticket_name:ticketName,
       products: products,
       restaurant_location_id: selectedLocation,
       restaurant_id: userData.restaurant.id,
@@ -918,20 +928,23 @@ function Footer({}) {
       split_payments:
         splitPaymentBy == 1
           ? splitPayments
-          : splitBills.map(d => {
-              return {
-                type: d.type,
-                amount: d.total,
-                tax: d.tax_amt,
-                received_amount: d.received_amount,
-                items: getCartProducts(d.cart),
-              };
-            }),
+          : splitBills
+              .filter(d => Object.keys(d.cart).length)
+              .map(d => {
+                return {
+                  type: d.type,
+                  amount: d.total,
+                  tax: d.tax_amt,
+                  received_amount: d.received_amount,
+                  items: getCartProducts(d.cart),
+                };
+              }),
       gift_card_id: giftCardID,
       split_type: splitPaymentBy == 2 ? 'by item' : 'by amount',
       // paymentMethod:PAYMENT_METHOD.gift_card.id,
       ...customerDetail,
       ...discountValues,
+
     };
 
     console.log(body);
@@ -980,7 +993,11 @@ function Footer({}) {
           },
         }),
       );
-
+      dispatch(
+        orderAction.set({
+          ticketName: '',
+        }),
+      );
       // return;
       //__DEV__ && doWebViewPrint(printData);
     }
@@ -1172,41 +1189,118 @@ function Footer({}) {
   const renderView = () => {
     console.log('splitBills', splitBills, selectedBill);
     switch (modalView) {
-      case CART_MODAL_VIEW.reward_question.id:
+      case CART_MODAL_VIEW.ticket_name.id:
         return (
-          <View
-            style={{
-              width: '60%',
-              alignSelf: 'center',
-              paddingVertical: 40,
-              // backgroundColor: 'red',
-            }}>
-            <Text mb={10} color={themeData.textColor} bold size={22}>
-              Existing Rewards Customer?
-            </Text>
-
+          <>
             <View
               style={{
-                flexDirection: 'row',
+                width: '60%',
+                alignSelf: 'center',
+                paddingVertical: 10,
+                // backgroundColor: 'red',
               }}>
-              <PayMethodButton
-                text="Yes"
-                onPress={() => {
-                  setExistCustomer(true);
-                  setModalView(CART_MODAL_VIEW.customer_phone.id);
+              <Text mb={10} color={themeData.textColor} bold size={22}>
+                Name on Ticket (Enter Name for Order)
+              </Text>
+              <TextInput
+                // title="Customer Phone No."
+                textInputProps={{
+                  onChangeText: d => {
+                    dispatch(
+                      orderAction.set({
+                        ticketName: d,
+                      }),
+                    );
+                  },
+                  // onBlur: props.handleBlur('email'),
+                  value: ticketName,
+                  // keyboardType: 'email-address',
+                  // autoCompleteType: 'email',
+                  // autoCapitalize: 'none',
+                  // returnKeyType: 'next',
+                  placeholder: 'Name',
+                  //  onSubmitEditing: () => this.passwordInput.focus(),
+                  //ref: r => (this.emailInput = r),
                 }}
+                // error={
+                //   props.errors.email && props.touched.email
+                //     ? props.errors.email
+                //     : ''
+                // }
+                // round
               />
-              <PayMethodButton
-                text="No"
-                onPress={() => {
-                  setExistCustomer(false);
-                  setModalView(CART_MODAL_VIEW.loyality.id);
 
-                  // setPaymentMethod(PAYMENT_METHOD.card.id);
-                }}
-              />
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignSelf: 'center',
+                }}>
+                <Button
+                  backgroundColor={theme.colors.primaryColor}
+                  borderRadius={4}
+                  onPress={() => {
+                    if (!ticketName.trim()) {
+                      simpleToast('Enter Name');
+                      return;
+                    }
+
+                    setModalView(CART_MODAL_VIEW.reward_question.id);
+                  }}
+                  ph={40}
+                  ml={10}
+                  style={
+                    {
+                      // alignSelf: 'center',
+                    }
+                  }>
+                  Next
+                </Button>
+              </View>
             </View>
-          </View>
+          </>
+        );
+      case CART_MODAL_VIEW.reward_question.id:
+        return (
+          <>
+            <BackButton
+              onPress={() => {
+                setModalView(CART_MODAL_VIEW.ticket_name.id);
+              }}
+            />
+            <View
+              style={{
+                width: '60%',
+                alignSelf: 'center',
+                paddingVertical: 40,
+                // backgroundColor: 'red',
+              }}>
+              <Text mb={10} color={themeData.textColor} bold size={22}>
+                Existing Rewards Customer?
+              </Text>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                }}>
+                <PayMethodButton
+                  text="Yes"
+                  onPress={() => {
+                    setExistCustomer(true);
+                    setModalView(CART_MODAL_VIEW.customer_phone.id);
+                  }}
+                />
+                <PayMethodButton
+                  text="No"
+                  onPress={() => {
+                    setExistCustomer(false);
+                    setModalView(CART_MODAL_VIEW.loyality.id);
+
+                    // setPaymentMethod(PAYMENT_METHOD.card.id);
+                  }}
+                />
+              </View>
+            </View>
+          </>
         );
       case CART_MODAL_VIEW.customer_phone.id:
         return (
@@ -2916,7 +3010,7 @@ function Footer({}) {
               toggleModal();
               onHoldPress();
             }}
-            pv={50}
+            pv={40}
             mr={10}
             style={{
               flex: 1,
@@ -2927,14 +3021,27 @@ function Footer({}) {
           <Button
             onPress={() => {
               setCloseModal(false);
+              // toggleModal();
+            }}
+            style={{
+              flex: 1,
+            }}
+            pv={40}
+            mr={10}
+            backgroundColor={themeData.btnSecondaryBg}>
+            Continue
+          </Button>
+          <Button
+            onPress={() => {
+              setCloseModal(false);
               toggleModal();
             }}
             style={{
               flex: 1,
             }}
-            pv={50}
-            backgroundColor={themeData.btnSecondaryBg}>
-            Continue
+            pv={40}
+            backgroundColor={theme.colors.secondaryColor}>
+            Close
           </Button>
         </View>
 
@@ -2979,7 +3086,12 @@ function HoldCartSaver() {
   };
   return null;
 }
-const SplitByItemProduct = memo(function ({index, onPayPress,discountValues, data}) {
+const SplitByItemProduct = memo(function ({
+  index,
+  onPayPress,
+  discountValues,
+  data,
+}) {
   const dispatch = useDispatch();
   const [selectedItem, setSelectedItem] = useState('');
   const {height} = useWindowDimensions();
@@ -3065,17 +3177,19 @@ const SplitByItemProduct = memo(function ({index, onPayPress,discountValues, dat
     if (discount_type == '1') {
       total = total - total * (_discount / 100);
     } else if (discount_type == '2') {
-      _discount = parseFloat((_discount/splitBills.length).toFixed(2));
+      _discount = parseFloat((_discount / splitBills.length).toFixed(2));
       total = Math.max(0, total - _discount);
     }
   }
-
 
   const payPress = () => {
     if (data.paid) {
       return;
     }
-
+    if (!Object.keys(data.cart).length) {
+      simpleToast('Add Item');
+      return;
+    }
     let cartTotalQty = Object.values(cart).reduce((s, r) => {
       return s + parseInt(r.qty);
     }, 0);
@@ -3435,8 +3549,6 @@ function SplitCartItem({id, index, data}) {
     return s + qty;
   }, 0);
   const onAddPress = () => {
-   
-
     if (currentQty < totalQty) {
       let _splitBills = [...splitBills];
 
@@ -3538,9 +3650,11 @@ function SplitCartItem({id, index, data}) {
                 {add_ons.map(r => r.product_name).join(', ')}
               </Text>
             )}
-            {currentQty < totalQty && <Text  color={theme.colors.errorColor} size={12}>
-              Add more +
-              </Text>}
+            {currentQty < totalQty && (
+              <Text color={theme.colors.errorColor} size={12}>
+                Add more +
+              </Text>
+            )}
           </View>
           <View
             style={{

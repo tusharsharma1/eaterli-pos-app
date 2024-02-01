@@ -197,7 +197,7 @@ if(SDK==null){
             tags.put("foo", "bar");
 
 
-            TransactionDetails td=new TransactionDetails(new BigDecimal("100"),new BigDecimal("50"),new BigDecimal("20"),new BigDecimal("10"), SupportedTransactionType.CARD_PRESENT_DEBIT,tags);
+            TransactionDetails td=new TransactionDetails(new BigDecimal("4"),new BigDecimal("3"),new BigDecimal("2"),new BigDecimal("1"), SupportedTransactionType.CARD_PRESENT_DEBIT,tags);
             SDK.createFinixTransfer(td, new DeviceInteractionListener() {
                 @Override
                 public void onAmountConfirmation(AmountConfirmationType amountConfirmationType, BigDecimal bigDecimal, ConfirmAmountListener confirmAmountListener) {
@@ -289,10 +289,10 @@ if(SDK==null){
 
                 @Override
                 public void onTransferError(FinixTransferError finixTransferError) {
-                    Log.d("createFinixSDKTransaction", " onTransferError "+finixTransferError);
+                    Log.d("createFinixSDKTransaction", " onTransferError "+finixTransferError.toString());
 
                     WritableMap dataParams =  new WritableNativeMap();
-                    dataParams.putString("message","");
+                    dataParams.putString("message",finixTransferError.toString());
                     WritableMap params = createEventMessage("onTransferError",dataParams);
                     sendEvent( POS_MESSAGE_EVENT, params);
 

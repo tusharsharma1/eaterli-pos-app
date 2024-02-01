@@ -139,6 +139,7 @@ const initialState = {
     diningOptionModal: {show: false, ref: ''},
     payModal: {show: false, ref: ''},
     customerDetail: CUSTOMER_DETAIL,
+    ticketName:'',
     splitBills: [],
   },
   settings: {

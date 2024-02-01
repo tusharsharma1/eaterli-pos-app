@@ -26,6 +26,7 @@ export const DELIVERY_TYPE = {
 };
 
 export const CART_MODAL_VIEW = {
+  ticket_name: {id: 'ticket_name'},
   reward_question: {id: 'reward_question'},
   customer_phone: {id: 'customer_phone'},
   scan_qr: {id: 'scan_qr'},
