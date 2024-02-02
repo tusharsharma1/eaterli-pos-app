@@ -116,7 +116,7 @@ function HomeNavigator() {
           options={{
             unmountOnBlur: false,
           }}
-          getComponent={() => require('../ScreensNew/Home/Home').default}
+          getComponent={() => require('../Screens/Home/Home').default}
         />
       </Drawer.Navigator>
     </>

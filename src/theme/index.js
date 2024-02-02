@@ -74,6 +74,8 @@ export function textAlignToFlexAlign(align) {
       return 'center';
     case 'right':
       return 'flex-end';
+      case 'auto':
+        return undefined;
     default:
       return 'center';
   }

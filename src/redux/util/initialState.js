@@ -15,6 +15,7 @@ const initialState = {
     printerModal: false,
     pendingOrderPrint: null,
     searchModal:false,
+    startModal:false,
     themeConfig: {
       light: {
         appBg: '#71717B',

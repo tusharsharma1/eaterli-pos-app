@@ -123,6 +123,7 @@ function _RowItem({columns, data, index, onPress}) {
               style={{
                 ...vstyle,
                 alignItems: textAlignToFlexAlign(h.align),
+                backgroundColor:h.backgroundColor
               }}>
               {renderCell(h)}
             </View>
